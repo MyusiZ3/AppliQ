@@ -1,4 +1,4 @@
-package com.appliq.appliq
+package com.arch.appliq
 
 import io.flutter.embedding.android.FlutterActivity
 

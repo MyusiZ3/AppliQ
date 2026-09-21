@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/ui_helper.dart';
 
 class ApplicationFormScreen extends StatefulWidget {
   final JobRepository repository;
@@ -114,19 +116,15 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
       if (isEditing) {
         await widget.repository.updateApplication(application);
+        if (mounted) UIHelper.showSuccessSnackBar(context, 'Lamaran berhasil diperbarui');
       } else {
         await widget.repository.createApplication(application);
+        if (mounted) UIHelper.showSuccessSnackBar(context, 'Lamaran berhasil dicatat');
       }
 
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
+      if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan: $e')),
-        );
-      }
+      if (mounted) UIHelper.handleError(context, e);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -138,16 +136,17 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     final isEditing = widget.applicationToEdit != null;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
         elevation: 0,
         title: Text(
-          isEditing ? 'Edit Lamaran' : 'Catat Lamaran Baru',
+          isEditing ? 'Edit Lamaran' : 'Catat Lamaran',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            letterSpacing: -0.4,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
       ),
@@ -161,7 +160,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               controller: _companyController,
               label: 'Nama Perusahaan *',
               hint: 'e.g. PT Maju Bersama',
-              icon: Icons.business_outlined,
+              icon: CupertinoIcons.building_2_fill,
               isDark: isDark,
               validator: (v) => v == null || v.trim().isEmpty ? 'Nama perusahaan wajib diisi' : null,
             ),
@@ -172,7 +171,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               controller: _positionController,
               label: 'Posisi / Role *',
               hint: 'e.g. Software Engineer, Finance Staff',
-              icon: Icons.badge_outlined,
+              icon: CupertinoIcons.person_badge_plus_fill,
               isDark: isDark,
               validator: (v) => v == null || v.trim().isEmpty ? 'Posisi pekerjaan wajib diisi' : null,
             ),
@@ -183,7 +182,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               controller: _locationController,
               label: 'Lokasi Perusahaan',
               hint: 'e.g. Jakarta Selatan, Remote',
-              icon: Icons.location_on_outlined,
+              icon: CupertinoIcons.location_solid,
               isDark: isDark,
             ),
             const SizedBox(height: 14),
@@ -221,7 +220,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 controller: _portalCustomController,
                 label: 'Nama Portal Lainnya *',
                 hint: 'e.g. Kalibrr, TechInAsia, Telegram',
-                icon: Icons.link,
+                icon: CupertinoIcons.link,
                 isDark: isDark,
                 validator: (v) => _jobPortal == JobPortal.lainnya && (v == null || v.trim().isEmpty)
                     ? 'Sebutkan nama portal'
@@ -248,13 +247,15 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 Expanded(
                   child: InkWell(
                     onTap: _pickDate,
+                    borderRadius: BorderRadius.circular(14),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                        borderRadius: BorderRadius.circular(10),
+                        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                          width: 0.8,
                         ),
                       ),
                       child: Column(
@@ -264,7 +265,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                             'Tanggal Melamar',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                              color: isDark ? AppColors.textHintDark : AppColors.textHint,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -276,13 +277,13 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                                 ),
                               ),
                               Icon(
-                                Icons.calendar_today,
+                                CupertinoIcons.calendar,
                                 size: 16,
-                                color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                                color: isDark ? AppColors.textHintDark : AppColors.textHint,
                               ),
                             ],
                           ),
@@ -301,7 +302,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               controller: _urlController,
               label: 'Link Lowongan (Opsional)',
               hint: 'https://...',
-              icon: Icons.open_in_new,
+              icon: CupertinoIcons.globe,
               isDark: isDark,
             ),
             const SizedBox(height: 14),
@@ -314,7 +315,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                     controller: _salaryExpectationController,
                     label: 'Ekspektasi Gaji (Rp)',
                     hint: '8000000',
-                    icon: Icons.payments_outlined,
+                    icon: CupertinoIcons.money_dollar_circle,
                     keyboardType: TextInputType.number,
                     isDark: isDark,
                   ),
@@ -325,7 +326,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                     controller: _salaryOfferedController,
                     label: 'Penawaran Gaji (Rp)',
                     hint: '8500000',
-                    icon: Icons.attach_money,
+                    icon: CupertinoIcons.money_dollar,
                     keyboardType: TextInputType.number,
                     isDark: isDark,
                   ),
@@ -339,8 +340,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
             _buildTextField(
               controller: _notesController,
               label: 'Catatan Pribadi',
-              hint: 'e.g. Menggunakan CV ATS versi 2, kontak HR: Bpk. Dani',
-              icon: Icons.notes_outlined,
+              hint: 'e.g. CV ATS versi 2, kontak HR: Bpk. Dani',
+              icon: CupertinoIcons.doc_text,
               maxLines: 3,
               isDark: isDark,
             ),
@@ -353,8 +354,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
               child: _isLoading
@@ -365,7 +366,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                     )
                   : Text(
                       isEditing ? 'Simpan Perubahan' : 'Simpan Lamaran',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: -0.3),
                     ),
             ),
           ],
@@ -392,7 +393,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+            letterSpacing: -0.2,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
           ),
         ),
         const SizedBox(height: 6),
@@ -402,33 +404,41 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
           keyboardType: keyboardType,
           maxLines: maxLines,
           style: TextStyle(
-            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
             fontSize: 14,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
-              color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+              color: isDark ? AppColors.textHintDark : AppColors.textHint,
               fontSize: 14,
             ),
             prefixIcon: maxLines == 1
                 ? Icon(
                     icon,
                     size: 18,
-                    color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
                   )
                 : null,
             filled: true,
-            fillColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+            fillColor: isDark ? AppColors.surfaceDark : AppColors.surface,
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                width: 0.8,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                width: 0.8,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
             ),
           ),
@@ -453,28 +463,30 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+            letterSpacing: -0.2,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
           ),
         ),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-            borderRadius: BorderRadius.circular(10),
+            color: isDark ? AppColors.surfaceDark : AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              width: 0.8,
             ),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
               value: value,
               isExpanded: true,
-              dropdownColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+              dropdownColor: isDark ? AppColors.surfaceDark : AppColors.surface,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
               ),
               items: items.map((item) {
                 return DropdownMenuItem<T>(

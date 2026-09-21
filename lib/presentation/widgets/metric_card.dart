@@ -22,11 +22,11 @@ class MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 1,
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          width: 0.8,
         ),
       ),
       child: Column(
@@ -41,21 +41,20 @@ class MetricCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isDark
-                      ? AppColors.textDarkSecondary
-                      : AppColors.textLightSecondary,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                  letterSpacing: -0.2,
                 ),
               ),
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
-                  size: 16,
-                  color: accentColor,
+                  size: 15,
+                  color: isDark ? Colors.white : const Color(0xFF18181B),
                 ),
               ),
             ],
@@ -64,11 +63,10 @@ class MetricCard extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 26,
               fontWeight: FontWeight.w800,
-              color: isDark
-                  ? AppColors.textDarkPrimary
-                  : AppColors.textLightPrimary,
+              letterSpacing: -0.8,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
             ),
           ),
         ],

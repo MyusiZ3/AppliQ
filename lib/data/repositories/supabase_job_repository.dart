@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/config/app_config.dart';
 import '../models/application_log.dart';
@@ -7,11 +9,32 @@ import 'job_repository.dart';
 
 class SupabaseJobRepository implements JobRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final _dataChangeController = StreamController<void>.broadcast();
+
+  // In-Memory Cache
+  List<JobApplication>? _cachedApplications;
+  UserProfile? _cachedProfile;
+  final Map<String, List<ApplicationLog>> _cachedLogs = {};
+  Map<String, dynamic>? _cachedStats;
 
   @override
-  Future<UserProfile?> getCurrentUserProfile() async {
+  Stream<void> get dataChanges => _dataChangeController.stream;
+
+  @override
+  void notifyDataChanged() {
+    if (!_dataChangeController.isClosed) {
+      _dataChangeController.add(null);
+    }
+  }
+
+  @override
+  Future<UserProfile?> getCurrentUserProfile({bool forceRefresh = false}) async {
     final user = _supabase.auth.currentUser;
     if (user == null) return null;
+
+    if (!forceRefresh && _cachedProfile != null) {
+      return _cachedProfile;
+    }
 
     try {
       final data = await _supabase
@@ -21,37 +44,74 @@ class SupabaseJobRepository implements JobRepository {
           .maybeSingle();
 
       if (data != null) {
-        return UserProfile.fromJson(data);
+        _cachedProfile = UserProfile.fromJson(data);
+        return _cachedProfile;
       }
       
-      return UserProfile(
+      _cachedProfile = UserProfile(
         id: user.id,
         email: user.email ?? '',
-        fullName: user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? '',
+        fullName: user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? 'Pengguna AppliQ',
         avatarUrl: user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'] ?? '',
       );
+      return _cachedProfile;
     } catch (_) {
-      return UserProfile(
+      _cachedProfile = UserProfile(
         id: user.id,
         email: user.email ?? '',
-        fullName: user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? '',
+        fullName: user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? 'Pengguna AppliQ',
         avatarUrl: user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'] ?? '',
       );
+      return _cachedProfile;
     }
   }
 
   @override
   Future<void> signInWithGoogle() async {
-    await _supabase.auth.signInWithOAuth(
-      OAuthProvider.google,
-      redirectTo: AppConfig.isSupabaseConfigured
-          ? '${AppConfig.supabaseUrl}/auth/v1/callback'
-          : null,
+    final webClientId = AppConfig.googleWebClientId;
+    final googleSignIn = GoogleSignIn(
+      serverClientId: webClientId.isNotEmpty ? webClientId : null,
+      scopes: ['email', 'profile', 'openid'],
+    );
+
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) {
+      // Pengguna membatalkan dialog login
+      return;
+    }
+
+    final googleAuth = await googleUser.authentication;
+    final idToken = googleAuth.idToken;
+    final accessToken = googleAuth.accessToken;
+
+    if (idToken == null) {
+      // Jika idToken null (karena webClientId belum dikonfigurasi), fallback ke OAuth web
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: AppConfig.isSupabaseConfigured
+            ? '${AppConfig.supabaseUrl}/auth/v1/callback'
+            : null,
+      );
+      return;
+    }
+
+    await _supabase.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: accessToken,
     );
   }
 
   @override
   Future<void> signOut() async {
+    _cachedApplications = null;
+    _cachedProfile = null;
+    _cachedLogs.clear();
+    _cachedStats = null;
+    try {
+      final googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
+    } catch (_) {}
     await _supabase.auth.signOut();
   }
 
@@ -59,15 +119,25 @@ class SupabaseJobRepository implements JobRepository {
   Stream<UserProfile?> get authStateChanges {
     return _supabase.auth.onAuthStateChange.asyncMap((event) async {
       final user = event.session?.user;
-      if (user == null) return null;
-      return getCurrentUserProfile();
+      if (user == null) {
+        _cachedProfile = null;
+        _cachedApplications = null;
+        _cachedStats = null;
+        _cachedLogs.clear();
+        return null;
+      }
+      return getCurrentUserProfile(forceRefresh: true);
     });
   }
 
   @override
-  Future<List<JobApplication>> getApplications() async {
+  Future<List<JobApplication>> getApplications({bool forceRefresh = false}) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return [];
+
+    if (!forceRefresh && _cachedApplications != null) {
+      return _cachedApplications!;
+    }
 
     final response = await _supabase
         .from('job_applications')
@@ -75,16 +145,17 @@ class SupabaseJobRepository implements JobRepository {
         .eq('user_id', userId)
         .order('applied_date', ascending: false);
 
-    return (response as List).map((json) => JobApplication.fromJson(json)).toList();
+    _cachedApplications = (response as List).map((json) => JobApplication.fromJson(json)).toList();
+    return _cachedApplications!;
   }
 
   @override
   Future<JobApplication> createApplication(JobApplication application) async {
     final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) throw Exception('User not authenticated');
+    if (userId == null) throw Exception('Pengguna belum terautentikasi');
 
     final json = application.toJson()..['user_id'] = userId;
-    json.remove('id'); // Biarkan Supabase generate UUID jika baru
+    json.remove('id');
 
     final response = await _supabase
         .from('job_applications')
@@ -92,7 +163,16 @@ class SupabaseJobRepository implements JobRepository {
         .select()
         .single();
 
-    return JobApplication.fromJson(response);
+    final result = JobApplication.fromJson(response);
+    
+    // Update local cache directly
+    if (_cachedApplications != null) {
+      _cachedApplications!.removeWhere((a) => a.id == result.id);
+      _cachedApplications!.insert(0, result);
+    }
+    _cachedStats = null;
+    notifyDataChanged();
+    return result;
   }
 
   @override
@@ -104,12 +184,27 @@ class SupabaseJobRepository implements JobRepository {
         .select()
         .single();
 
-    return JobApplication.fromJson(response);
+    final result = JobApplication.fromJson(response);
+    
+    // Update local cache directly
+    if (_cachedApplications != null) {
+      final index = _cachedApplications!.indexWhere((a) => a.id == result.id);
+      if (index != -1) {
+        _cachedApplications![index] = result;
+      }
+    }
+    _cachedStats = null;
+    notifyDataChanged();
+    return result;
   }
 
   @override
   Future<void> deleteApplication(String id) async {
     await _supabase.from('job_applications').delete().eq('id', id);
+    _cachedApplications?.removeWhere((a) => a.id == id);
+    _cachedLogs.remove(id);
+    _cachedStats = null;
+    notifyDataChanged();
   }
 
   @override
@@ -124,23 +219,39 @@ class SupabaseJobRepository implements JobRepository {
         .from('job_applications')
         .update({'is_favorite': !current})
         .eq('id', id);
+
+    // Update in local cache
+    if (_cachedApplications != null) {
+      final index = _cachedApplications!.indexWhere((a) => a.id == id);
+      if (index != -1) {
+        final existing = _cachedApplications![index];
+        _cachedApplications![index] = existing.copyWith(isFavorite: !current);
+      }
+    }
+    notifyDataChanged();
   }
 
   @override
-  Future<List<ApplicationLog>> getApplicationLogs(String applicationId) async {
+  Future<List<ApplicationLog>> getApplicationLogs(String applicationId, {bool forceRefresh = false}) async {
+    if (!forceRefresh && _cachedLogs.containsKey(applicationId)) {
+      return _cachedLogs[applicationId]!;
+    }
+
     final response = await _supabase
         .from('application_logs')
         .select()
         .eq('application_id', applicationId)
         .order('created_at', ascending: true);
 
-    return (response as List).map((json) => ApplicationLog.fromJson(json)).toList();
+    final list = (response as List).map((json) => ApplicationLog.fromJson(json)).toList();
+    _cachedLogs[applicationId] = list;
+    return list;
   }
 
   @override
   Future<ApplicationLog> createApplicationLog(ApplicationLog log) async {
     final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) throw Exception('User not authenticated');
+    if (userId == null) throw Exception('Pengguna belum terautentikasi');
 
     final json = log.toJson()..['user_id'] = userId;
     json.remove('id');
@@ -151,33 +262,31 @@ class SupabaseJobRepository implements JobRepository {
         .select()
         .single();
 
-    return ApplicationLog.fromJson(response);
+    final result = ApplicationLog.fromJson(response);
+    _cachedLogs[log.applicationId]?.add(result);
+    notifyDataChanged();
+    return result;
   }
 
   @override
   Future<void> deleteApplicationLog(String id) async {
     await _supabase.from('application_logs').delete().eq('id', id);
+    for (var list in _cachedLogs.values) {
+      list.removeWhere((l) => l.id == id);
+    }
+    notifyDataChanged();
   }
 
   @override
-  Future<Map<String, dynamic>> getDashboardStats() async {
+  Future<Map<String, dynamic>> getDashboardStats({bool forceRefresh = false}) async {
+    if (!forceRefresh && _cachedStats != null) {
+      return _cachedStats!;
+    }
+
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return {};
 
-    try {
-      final response = await _supabase.rpc(
-        'get_job_tracker_stats',
-        params: {'p_user_id': userId},
-      );
-      if (response != null) {
-        return Map<String, dynamic>.from(response as Map);
-      }
-    } catch (_) {
-      // Fallback jika RPC belum dibuat di Supabase
-    }
-
-    // Client-side fallback aggregation
-    final apps = await getApplications();
+    final apps = await getApplications(forceRefresh: forceRefresh);
     final total = apps.length;
     final applied = apps.where((a) => a.status.name == 'applied').length;
     final interview = apps.where((a) => a.status.name == 'interview').length;
@@ -199,7 +308,7 @@ class SupabaseJobRepository implements JobRepository {
       byPortal[portalName] = (byPortal[portalName] ?? 0) + 1;
     }
 
-    return {
+    _cachedStats = {
       'total_applications': total,
       'applied_count': applied,
       'interview_count': interview,
@@ -210,5 +319,7 @@ class SupabaseJobRepository implements JobRepository {
       'by_work_system': byWorkSystem,
       'by_portal': byPortal,
     };
+
+    return _cachedStats!;
   }
 }

@@ -23,19 +23,19 @@ class StatusBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(100),
         border: Border.all(
-          color: color.withValues(alpha: 0.35),
-          width: 1,
+          color: color.withValues(alpha: 0.28),
+          width: 0.8,
         ),
       ),
       child: Text(
-        status.label.toUpperCase(),
+        status.label,
         style: TextStyle(
           color: color,
-          fontSize: isCompact ? 10 : 11,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
+          fontSize: isCompact ? 11 : 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.2,
         ),
       ),
     );

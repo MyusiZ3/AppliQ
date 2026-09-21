@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/repositories/job_repository.dart';
 import 'applications/applications_list_screen.dart';
@@ -42,10 +43,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surface,
           border: Border(
             top: BorderSide(
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-              width: 1,
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              width: 0.8,
             ),
           ),
         ),
@@ -53,33 +55,33 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           type: BottomNavigationBarType.fixed,
-          backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
           selectedItemColor: AppColors.primary,
-          unselectedItemColor: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+          unselectedItemColor: isDark ? AppColors.textHintDark : AppColors.textHint,
+          selectedFontSize: 11,
+          unselectedFontSize: 11,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.2),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, letterSpacing: -0.2),
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.list_alt_outlined),
-              activeIcon: Icon(Icons.list_alt),
+              icon: Icon(CupertinoIcons.doc_text, size: 22),
+              activeIcon: Icon(CupertinoIcons.doc_text_fill, size: 22),
               label: 'Lamaran',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.pie_chart_outline),
-              activeIcon: Icon(Icons.pie_chart),
+              icon: Icon(CupertinoIcons.chart_pie, size: 22),
+              activeIcon: Icon(CupertinoIcons.chart_pie_fill, size: 22),
               label: 'Dashboard',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
+              icon: Icon(CupertinoIcons.calendar, size: 22),
+              activeIcon: Icon(CupertinoIcons.calendar_today, size: 22),
               label: 'Jadwal',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
+              icon: Icon(CupertinoIcons.person, size: 22),
+              activeIcon: Icon(CupertinoIcons.person_fill, size: 22),
               label: 'Profil',
             ),
           ],

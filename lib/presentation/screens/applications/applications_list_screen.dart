@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/ui_helper.dart';
 import '../../widgets/application_card.dart';
+import '../../widgets/empty_state_view.dart';
+import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
 import 'application_detail_screen.dart';
 import 'application_form_screen.dart';
@@ -23,35 +28,48 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
   String _searchQuery = '';
   ApplicationStatus? _selectedStatusFilter;
   bool _isKanbanView = false;
-  String _sortBy = 'newest'; // newest, oldest, name
+  String _sortBy = 'newest';
+  StreamSubscription? _dataSub;
 
   @override
   void initState() {
     super.initState();
     _loadApplications();
+    _dataSub = widget.repository.dataChanges.listen((_) {
+      if (mounted) _loadApplications(isSilent: true);
+    });
   }
 
-  Future<void> _loadApplications() async {
-    setState(() => _isLoading = true);
+  @override
+  void dispose() {
+    _dataSub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadApplications({bool isSilent = false, bool forceRefresh = false}) async {
+    if (!isSilent) setState(() => _isLoading = true);
     try {
-      final data = await widget.repository.getApplications();
-      setState(() {
-        _applications = data;
-        _isLoading = false;
-      });
+      final data = await widget.repository.getApplications(forceRefresh: forceRefresh);
+      if (mounted) {
+        setState(() {
+          _applications = data;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat lamaran: $e')),
-        );
+        if (!isSilent) UIHelper.handleError(context, e);
       }
     }
   }
 
   Future<void> _toggleFavorite(JobApplication app) async {
-    await widget.repository.toggleFavorite(app.id);
-    _loadApplications();
+    try {
+      await widget.repository.toggleFavorite(app.id);
+    } catch (e) {
+      if (mounted) UIHelper.handleError(context, e);
+    }
   }
 
   List<JobApplication> get _filteredApplications {
@@ -82,46 +100,42 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     final filtered = _filteredApplications;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pelacak Lamaran',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
-              ),
-            ),
-            Text(
-              '${_applications.length} Total Lamaran Tercatat',
-              style: TextStyle(
-                fontSize: 12,
-                color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
-              ),
-            ),
-          ],
+        title: Text(
+          'Pelacak Lamaran',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            letterSpacing: -0.4,
+          ),
         ),
         actions: [
           IconButton(
             icon: Icon(
-              _isKanbanView ? Icons.view_list_outlined : Icons.view_column_outlined,
-              color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+              CupertinoIcons.plus,
+              color: isDark ? Colors.white : const Color(0xFF18181B),
+              size: 22,
             ),
-            tooltip: _isKanbanView ? 'Tampilan Daftar' : 'Tampilan Kanban',
-            onPressed: () {
-              setState(() => _isKanbanView = !_isKanbanView);
+            tooltip: 'Catat Lamaran',
+            onPressed: () async {
+              final added = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ApplicationFormScreen(repository: widget.repository),
+                ),
+              );
+              if (added == true) _loadApplications();
             },
           ),
           PopupMenuButton<String>(
             icon: Icon(
-              Icons.sort,
-              color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+              CupertinoIcons.sort_down,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+              size: 20,
             ),
             tooltip: 'Urutkan',
             initialValue: _sortBy,
@@ -132,37 +146,71 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
               const PopupMenuItem(value: 'name', child: Text('Nama Perusahaan (A-Z)')),
             ],
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: Column(
         children: [
+          // Notched Pill View Switcher
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: NotchedPillCard<bool>(
+              items: const [
+                NotchedPillItem(
+                  value: false,
+                  label: 'Tampilan List',
+                  icon: CupertinoIcons.list_bullet,
+                ),
+                NotchedPillItem(
+                  value: true,
+                  label: 'Papan Kanban',
+                  icon: CupertinoIcons.square_grid_2x2,
+                ),
+              ],
+              selectedValue: _isKanbanView,
+              onValueChanged: (val) => setState(() => _isKanbanView = val),
+            ),
+          ),
+
           // Search Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: TextField(
               onChanged: (val) => setState(() => _searchQuery = val),
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+              ),
               decoration: InputDecoration(
-                hintText: 'Cari perusahaan atau posisi...',
+                hintText: 'Cari perusahaan, posisi, atau kota...',
                 hintStyle: TextStyle(
-                  color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
                   fontSize: 14,
                 ),
                 prefixIcon: Icon(
-                  Icons.search,
-                  color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
-                  size: 20,
+                  CupertinoIcons.search,
+                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                  size: 18,
                 ),
                 filled: true,
-                fillColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                fillColor: isDark ? AppColors.surfaceDark : AppColors.surface,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    width: 0.8,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    width: 0.8,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
                   borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
               ),
@@ -172,7 +220,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
           // Horizontal Status Filter Chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
             child: Row(
               children: [
                 _buildFilterChip('Semua', null, isDark),
@@ -189,7 +237,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
 
           const SizedBox(height: 6),
 
-          // Application Content (List or Kanban)
+          // Content
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -198,9 +246,9 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                     : _isKanbanView
                         ? _buildKanbanView(isDark)
                         : RefreshIndicator(
-                            onRefresh: _loadApplications,
+                            onRefresh: () => _loadApplications(forceRefresh: true),
                             child: ListView.builder(
-                              padding: const EdgeInsets.only(bottom: 80, top: 4),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
                               itemCount: filtered.length,
                               itemBuilder: (context, index) {
                                 final app = filtered[index];
@@ -225,24 +273,6 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        icon: const Icon(Icons.add, size: 20),
-        label: const Text(
-          'Tambah Lamaran',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
-        onPressed: () async {
-          final added = await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ApplicationFormScreen(repository: widget.repository),
-            ),
-          );
-          if (added == true) _loadApplications();
-        },
-      ),
     );
   }
 
@@ -252,25 +282,25 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
       label: Text(
         label,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 12.5,
           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          letterSpacing: -0.2,
           color: isSelected
               ? Colors.white
-              : (isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary),
+              : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
         ),
       ),
       selected: isSelected,
       selectedColor: AppColors.primary,
-      backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
       side: BorderSide(
         color: isSelected
             ? AppColors.primary
-            : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+            : (isDark ? AppColors.borderDark : AppColors.borderLight),
+        width: 0.8,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      onSelected: (_) {
-        setState(() => _selectedStatusFilter = status);
-      },
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+      onSelected: (_) => setState(() => _selectedStatusFilter = status),
     );
   }
 
@@ -284,10 +314,11 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
           width: 280,
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurfaceSubtle.withValues(alpha: 0.3) : AppColors.lightSurfaceSubtle,
-            borderRadius: BorderRadius.circular(12),
+            color: isDark ? AppColors.surfaceDark.withValues(alpha: 0.5) : AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              width: 0.8,
             ),
           ),
           child: Column(
@@ -304,13 +335,13 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+              Divider(height: 1, color: isDark ? AppColors.borderDark : AppColors.borderLight),
               Expanded(
                 child: appsInStatus.isEmpty
                     ? Center(
@@ -318,7 +349,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                           'Kosong',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
                           ),
                         ),
                       )
@@ -353,33 +384,25 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
   }
 
   Widget _buildEmptyState(bool isDark) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inbox_outlined,
-            size: 48,
-            color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Tidak ada lamaran ditemukan',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+    return EmptyStateView(
+      icon: CupertinoIcons.tray,
+      title: 'Belum Ada Lamaran',
+      message: 'Mulai catat lowongan dan tahapan lamaran kerjamu dengan rapi.',
+      action: ElevatedButton.icon(
+        onPressed: () async {
+          final added = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ApplicationFormScreen(repository: widget.repository),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Coba ubah kata kunci pencarian atau filter status.',
-            style: TextStyle(
-              fontSize: 13,
-              color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
-            ),
-          ),
-        ],
+          );
+          if (added == true) _loadApplications();
+        },
+        icon: const Icon(CupertinoIcons.plus, size: 16),
+        label: const Text('Catat Lamaran Baru'),
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
       ),
     );
   }

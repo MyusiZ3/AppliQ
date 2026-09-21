@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
-import 'core/constants/app_colors.dart';
+import 'core/constants/app_theme.dart';
 import 'data/repositories/job_repository.dart';
-import 'data/repositories/mock_job_repository.dart';
 import 'data/repositories/supabase_job_repository.dart';
 import 'presentation/screens/auth/login_screen.dart';
-import 'presentation/screens/main_navigation_screen.dart';
+import 'presentation/screens/main_nav.dart';
+import 'presentation/screens/onboarding_screen.dart';
+import 'utils/navigator_key.dart';
+import 'utils/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,22 +17,20 @@ void main() async {
   // Load environment & configuration
   await AppConfig.initialize();
 
+  // Initialize ThemeManager from SharedPreferences
+  await ThemeManager.init();
+
   // Initialize Supabase if configured
-  if (AppConfig.isSupabaseConfigured && !AppConfig.useMockData) {
+  if (AppConfig.isSupabaseConfigured) {
     try {
       await Supabase.initialize(
         url: AppConfig.supabaseUrl,
         anonKey: AppConfig.supabaseAnonKey,
       );
-    } catch (_) {
-      // Fallback ke mock jika inisialisasi jaringan gagal
-    }
+    } catch (_) {}
   }
 
-  // Repository selection
-  final JobRepository repository = (AppConfig.isSupabaseConfigured && !AppConfig.useMockData)
-      ? SupabaseJobRepository()
-      : MockJobRepository();
+  final JobRepository repository = SupabaseJobRepository();
 
   runApp(AppliQApp(repository: repository));
 }
@@ -42,74 +42,81 @@ class AppliQApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'AppliQ',
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
-      theme: _buildLightTheme(),
-      darkTheme: _buildDarkTheme(),
-      home: FutureBuilder(
-        future: repository.getCurrentUserProfile(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          if (snapshot.hasData && snapshot.data != null) {
-            return MainNavigationScreen(repository: repository);
-          }
-
-          return LoginScreen(repository: repository);
-        },
-      ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeManager.notifier,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          title: 'AppliQ',
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          themeMode: themeMode,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: AuthGate(repository: repository),
+        );
+      },
     );
   }
+}
 
-  ThemeData _buildLightTheme() {
-    final base = ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        brightness: Brightness.light,
-        surface: AppColors.lightSurface,
-      ),
-      scaffoldBackgroundColor: AppColors.lightBackground,
-    );
+/// AuthGate memastikan Onboarding -> Login -> Main Navigation berjalan teratur
+class AuthGate extends StatefulWidget {
+  final JobRepository repository;
 
-    return base.copyWith(
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.lightSurface,
-        foregroundColor: AppColors.textLightPrimary,
-        elevation: 0,
-        centerTitle: false,
-      ),
-    );
+  const AuthGate({super.key, required this.repository});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  bool _hasSeenOnboarding = false;
+  bool _isCheckingOnboarding = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOnboarding();
   }
 
-  ThemeData _buildDarkTheme() {
-    final base = ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        brightness: Brightness.dark,
-        surface: AppColors.darkSurface,
-      ),
-      scaffoldBackgroundColor: AppColors.darkBackground,
-    );
+  Future<void> _checkOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    final seen = prefs.getBool('has_seen_onboarding') ?? false;
+    setState(() {
+      _hasSeenOnboarding = seen;
+      _isCheckingOnboarding = false;
+    });
+  }
 
-    return base.copyWith(
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.darkSurface,
-        foregroundColor: AppColors.textDarkPrimary,
-        elevation: 0,
-        centerTitle: false,
-      ),
+  @override
+  Widget build(BuildContext context) {
+    if (_isCheckingOnboarding) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!_hasSeenOnboarding) {
+      return OnboardingScreen(repository: widget.repository);
+    }
+
+    if (!AppConfig.isSupabaseConfigured) {
+      return LoginScreen(repository: widget.repository);
+    }
+
+    return StreamBuilder<AuthState>(
+      stream: Supabase.instance.client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final session = Supabase.instance.client.auth.currentSession;
+
+        if (session != null) {
+          // User terautentikasi -> Masuk ke MainNav
+          return MainNav(repository: widget.repository);
+        }
+
+        // Belum login -> Login Screen
+        return LoginScreen(repository: widget.repository);
+      },
     );
   }
 }

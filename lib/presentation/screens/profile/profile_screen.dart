@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/config/app_config.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/theme_manager.dart';
+import '../../../utils/ui_helper.dart';
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -26,22 +29,144 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadProfile() async {
     setState(() => _isLoading = true);
-    final user = await widget.repository.getCurrentUserProfile();
-    setState(() {
-      _profile = user;
-      _isLoading = false;
-    });
+    try {
+      final user = await widget.repository.getCurrentUserProfile();
+      setState(() {
+        _profile = user;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        UIHelper.handleError(context, e);
+      }
+    }
+  }
+
+  void _showThemeSelector() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    UIHelper.showPremiumBottomSheet(
+      context: context,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Pilihan Tema Tampilan',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
+                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildThemeOption('Ikuti Sistem Perangkat', ThemeMode.system, CupertinoIcons.device_phone_portrait, isDark),
+            const Divider(height: 16),
+            _buildThemeOption('Mode Terang (Light Mode)', ThemeMode.light, CupertinoIcons.sun_max_fill, isDark),
+            const Divider(height: 16),
+            _buildThemeOption('Mode Gelap (Dark Mode)', ThemeMode.dark, CupertinoIcons.moon_stars_fill, isDark),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(String label, ThemeMode mode, IconData icon, bool isDark) {
+    final isSelected = ThemeManager.notifier.value == mode;
+
+    return InkWell(
+      onTap: () async {
+        HapticFeedback.selectionClick();
+        await ThemeManager.setThemeMode(mode);
+        if (mounted) Navigator.pop(context);
+      },
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected ? AppColors.primary : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  letterSpacing: -0.2,
+                  color: isSelected
+                      ? AppColors.primary
+                      : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary),
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                CupertinoIcons.checkmark_alt,
+                color: AppColors.primary,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _handleSignOut() async {
-    await widget.repository.signOut();
-    if (mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => LoginScreen(repository: widget.repository),
-        ),
-        (route) => false,
-      );
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Keluar dari Akun?'),
+        content: const Text('Kamu perlu masuk kembali untuk mengakses riwayat lamaran kerjamu.'),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Batal'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Keluar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await widget.repository.signOut();
+        if (mounted) {
+          UIHelper.showSuccessSnackBar(context, 'Berhasil keluar');
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => LoginScreen(repository: widget.repository),
+            ),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (mounted) UIHelper.handleError(context, e);
+      }
     }
   }
 
@@ -50,53 +175,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
         elevation: 0,
         title: Text(
-          'Profil Akun',
+          'Profil & Pengaturan',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            letterSpacing: -0.4,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               children: [
                 // User Header Card
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                    borderRadius: BorderRadius.circular(16),
+                    color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                      width: 0.8,
                     ),
                   ),
                   child: Column(
                     children: [
                       CircleAvatar(
-                        radius: 36,
-                        backgroundColor: AppColors.primaryLight,
+                        radius: 38,
+                        backgroundColor: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant,
                         backgroundImage: _profile?.avatarUrl.isNotEmpty == true
                             ? NetworkImage(_profile!.avatarUrl)
                             : null,
                         child: _profile?.avatarUrl.isEmpty == true
-                            ? const Icon(Icons.person, size: 36, color: AppColors.primary)
+                            ? Icon(
+                                CupertinoIcons.person_fill,
+                                size: 36,
+                                color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                              )
                             : null,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
                       Text(
                         _profile?.fullName.isNotEmpty == true ? _profile!.fullName : 'Pengguna AppliQ',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                          letterSpacing: -0.3,
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -104,109 +236,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _profile?.email ?? '',
                         style: TextStyle(
                           fontSize: 13,
-                          color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                         ),
                       ),
-                      if (_profile?.targetRole != null) ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            _profile!.targetRole!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 16),
 
-                // Backend Connectivity Status Card
+                // Settings Group Card
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                    borderRadius: BorderRadius.circular(16),
+                    color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                    borderRadius: BorderRadius.circular(22),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                      width: 0.8,
                     ),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Status Layanan Backend',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                      // Theme Switcher Tile
+                      ListTile(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(CupertinoIcons.moon_stars, color: AppColors.primary, size: 20),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.cloud_done_outlined,
-                                size: 18,
-                                color: AppConfig.useMockData
-                                    ? AppColors.statusInterview
-                                    : AppColors.statusOffering,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                AppConfig.useMockData
-                                    ? 'Mode Demo (Mock Local)'
-                                    : 'Terhubung ke Supabase',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
-                                ),
-                              ),
-                            ],
+                        title: Text(
+                          'Tema Tampilan',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.2,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: (AppConfig.useMockData ? AppColors.statusInterview : AppColors.statusOffering)
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              AppConfig.useMockData ? 'LOCAL' : 'ONLINE',
+                        ),
+                        subtitle: ValueListenableBuilder<ThemeMode>(
+                          valueListenable: ThemeManager.notifier,
+                          builder: (context, mode, _) {
+                            String modeName = 'Sistem Default';
+                            if (mode == ThemeMode.light) modeName = 'Mode Terang';
+                            if (mode == ThemeMode.dark) modeName = 'Mode Gelap';
+                            return Text(
+                              modeName,
                               style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: AppConfig.useMockData
-                                    ? AppColors.statusInterview
-                                    : AppColors.statusOffering,
+                                fontSize: 12.5,
+                                color: isDark ? AppColors.textHintDark : AppColors.textHint,
                               ),
-                            ),
-                          ),
-                        ],
+                            );
+                          },
+                        ),
+                        trailing: Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 16,
+                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        ),
+                        onTap: _showThemeSelector,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppConfig.useMockData
-                            ? 'Aplikasi sedang berjalan dalam mode demo dengan data contoh. Tambahkan kredensial pada file .env untuk beralih ke Supabase Cloud.'
-                            : 'Sinkronisasi real-time dan isolasi Row Level Security aktif.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
-                          height: 1.4,
+                      Divider(height: 1, indent: 60, color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                      // Cloud Storage & Security Tile
+                      ListTile(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.income.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(CupertinoIcons.shield_lefthalf_fill, color: AppColors.income, size: 20),
+                        ),
+                        title: Text(
+                          'Privasi & Keamanan Data',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.2,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Enkripsi akun aktif & terlindungi',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                          ),
                         ),
                       ),
                     ],
@@ -218,18 +338,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Sign Out Button
                 OutlinedButton.icon(
                   onPressed: _handleSignOut,
-                  icon: const Icon(Icons.logout, color: AppColors.statusRejected, size: 18),
+                  icon: const Icon(CupertinoIcons.square_arrow_right, color: AppColors.expense, size: 18),
                   label: const Text(
                     'Keluar dari Akun',
                     style: TextStyle(
-                      color: AppColors.statusRejected,
+                      color: AppColors.expense,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: const BorderSide(color: AppColors.statusRejected),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: AppColors.expense, width: 1.2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ],

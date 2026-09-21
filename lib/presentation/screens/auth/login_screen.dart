@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/repositories/job_repository.dart';
-import '../main_navigation_screen.dart';
+import '../../../utils/ui_helper.dart';
+import '../main_nav.dart';
 
 class LoginScreen extends StatefulWidget {
   final JobRepository repository;
@@ -19,33 +21,22 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await widget.repository.signInWithGoogle();
-      if (mounted) {
+      final user = await widget.repository.getCurrentUserProfile();
+      if (user != null && mounted) {
+        UIHelper.showSuccessSnackBar(context, 'Selamat datang, ${user.fullName}!');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => MainNavigationScreen(repository: widget.repository),
+            builder: (_) => MainNav(repository: widget.repository),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal login: ${e.toString()}'),
-            backgroundColor: AppColors.statusRejected,
-          ),
-        );
+        UIHelper.handleError(context, e);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  void _continueAsDemo() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => MainNavigationScreen(repository: widget.repository),
-      ),
-    );
   }
 
   @override
@@ -53,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -62,75 +53,85 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo & Header Icon
-                Container(
-                  width: 64,
-                  height: 64,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.work_outline,
+                // App Icon Badge
+                Center(
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.briefcase_fill,
                       color: Colors.white,
-                      size: 32,
+                      size: 34,
                     ),
                   ),
                 ),
 
-                // App Name & Subtitle
+                // App Title
                 Text(
                   'AppliQ',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
-                    letterSpacing: -0.5,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    letterSpacing: -1.0,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   'Pelacak Lamaran Kerja Terstruktur & Real-time',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
-                    height: 1.4,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    letterSpacing: -0.2,
                   ),
                 ),
 
-                const SizedBox(height: 48),
+                const SizedBox(height: 40),
 
-                // Login Card Container
+                // Card Container
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                    borderRadius: BorderRadius.circular(16),
+                    color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                      width: 0.8,
                     ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Masuk ke Akun',
+                        'Masuk Akun',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          letterSpacing: -0.4,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
-                        'Sinkronkan data lamaran Anda secara aman.',
+                        'Kelola dan pantau seluruh progres lamaran kerjamu.',
                         style: TextStyle(
                           fontSize: 13,
-                          color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          letterSpacing: -0.2,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -139,12 +140,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ElevatedButton(
                         onPressed: _isLoading ? null : _handleGoogleSignIn,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black87,
+                          backgroundColor: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                          foregroundColor: isDark ? Colors.white : Colors.black87,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(color: Color(0xFFDADCE0)),
+                            borderRadius: BorderRadius.circular(14),
+                            side: BorderSide(
+                              color: isDark ? AppColors.borderDark : const Color(0xFFDADCE0),
+                            ),
                           ),
                           elevation: 0,
                         ),
@@ -159,8 +162,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 children: [
                                   Image.network(
                                     'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                                    height: 18,
-                                    width: 18,
+                                    height: 20,
+                                    width: 20,
                                     errorBuilder: (_, __, ___) => const Icon(
                                       Icons.g_mobiledata,
                                       size: 24,
@@ -168,40 +171,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  const Text(
+                                  Text(
                                     'Lanjutkan dengan Google',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 15,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
+                                      letterSpacing: -0.3,
+                                      color: isDark ? Colors.white : Colors.black87,
                                     ),
                                   ),
                                 ],
                               ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Continue with Demo / Guest Mode Button
-                      OutlinedButton(
-                        onPressed: _continueAsDemo,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
-                          side: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Coba Mode Demo (Data Lokal)',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -209,13 +189,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 32),
 
-                // Footer Privacy Note
+                // Privacy Note
                 Text(
-                  'Data lamaran Anda terproteksi secara privat dengan Supabase Row Level Security.',
+                  'Data lamaranmu tersimpan secara aman dan hanya bisa diakses olehmu.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                    letterSpacing: -0.1,
                   ),
                 ),
               ],

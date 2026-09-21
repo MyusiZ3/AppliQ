@@ -9,6 +9,17 @@ import 'job_repository.dart';
 class MockJobRepository implements JobRepository {
   final _uuid = const Uuid();
   final _authController = StreamController<UserProfile?>.broadcast();
+  final _dataChangeController = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get dataChanges => _dataChangeController.stream;
+
+  @override
+  void notifyDataChanged() {
+    if (!_dataChangeController.isClosed) {
+      _dataChangeController.add(null);
+    }
+  }
 
   UserProfile? _currentUser = UserProfile(
     id: 'mock-user-1',
@@ -160,7 +171,7 @@ class MockJobRepository implements JobRepository {
   }
 
   @override
-  Future<UserProfile?> getCurrentUserProfile() async {
+  Future<UserProfile?> getCurrentUserProfile({bool forceRefresh = false}) async {
     return _currentUser;
   }
 
@@ -186,7 +197,7 @@ class MockJobRepository implements JobRepository {
   Stream<UserProfile?> get authStateChanges => _authController.stream;
 
   @override
-  Future<List<JobApplication>> getApplications() async {
+  Future<List<JobApplication>> getApplications({bool forceRefresh = false}) async {
     // Sort by applied date descending
     _applications.sort((a, b) => b.appliedDate.compareTo(a.appliedDate));
     return List.unmodifiable(_applications);
@@ -199,6 +210,7 @@ class MockJobRepository implements JobRepository {
       userId: _currentUser?.id ?? 'mock-user-1',
     );
     _applications.insert(0, newApp);
+    notifyDataChanged();
     return newApp;
   }
 
@@ -207,6 +219,7 @@ class MockJobRepository implements JobRepository {
     final index = _applications.indexWhere((a) => a.id == application.id);
     if (index != -1) {
       _applications[index] = application.copyWith(updatedAt: DateTime.now());
+      notifyDataChanged();
       return _applications[index];
     }
     throw Exception('Lamaran tidak ditemukan');
@@ -216,6 +229,7 @@ class MockJobRepository implements JobRepository {
   Future<void> deleteApplication(String id) async {
     _applications.removeWhere((a) => a.id == id);
     _logs.removeWhere((l) => l.applicationId == id);
+    notifyDataChanged();
   }
 
   @override
@@ -224,11 +238,12 @@ class MockJobRepository implements JobRepository {
     if (index != -1) {
       final current = _applications[index];
       _applications[index] = current.copyWith(isFavorite: !current.isFavorite);
+      notifyDataChanged();
     }
   }
 
   @override
-  Future<List<ApplicationLog>> getApplicationLogs(String applicationId) async {
+  Future<List<ApplicationLog>> getApplicationLogs(String applicationId, {bool forceRefresh = false}) async {
     return _logs.where((l) => l.applicationId == applicationId).toList();
   }
 
@@ -246,16 +261,18 @@ class MockJobRepository implements JobRepository {
       result: log.result,
     );
     _logs.add(newLog);
+    notifyDataChanged();
     return newLog;
   }
 
   @override
   Future<void> deleteApplicationLog(String id) async {
     _logs.removeWhere((l) => l.id == id);
+    notifyDataChanged();
   }
 
   @override
-  Future<Map<String, dynamic>> getDashboardStats() async {
+  Future<Map<String, dynamic>> getDashboardStats({bool forceRefresh = false}) async {
     final total = _applications.length;
     final applied = _applications.where((a) => a.status == ApplicationStatus.applied).length;
     final interview = _applications.where((a) => a.status == ApplicationStatus.interview).length;

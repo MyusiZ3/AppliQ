@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
@@ -7,6 +8,7 @@ import '../../../core/utils/status_helper.dart';
 import '../../../data/models/application_log.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/ui_helper.dart';
 import '../../widgets/status_badge.dart';
 import 'application_form_screen.dart';
 
@@ -49,6 +51,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
+        UIHelper.handleError(context, e);
         Navigator.of(context).pop();
       }
     }
@@ -56,34 +59,47 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
   Future<void> _updateStatus(ApplicationStatus newStatus) async {
     if (_application == null) return;
-    final updated = _application!.copyWith(status: newStatus);
-    await widget.repository.updateApplication(updated);
-    _loadData();
+    try {
+      final updated = _application!.copyWith(status: newStatus);
+      await widget.repository.updateApplication(updated);
+      if (mounted) UIHelper.showSuccessSnackBar(context, 'Status diubah ke ${newStatus.label}');
+      _loadData();
+    } catch (e) {
+      if (mounted) UIHelper.handleError(context, e);
+    }
   }
 
   Future<void> _deleteApplication() async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showCupertinoDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Hapus Lamaran?'),
         content: const Text('Seluruh data lamaran dan riwayat tahapan wawancara terkait akan dihapus permanen.'),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Batal'),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.statusRejected),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+            child: const Text('Hapus'),
           ),
         ],
       ),
     );
 
     if (confirmed == true) {
-      await widget.repository.deleteApplication(widget.applicationId);
-      if (mounted) Navigator.of(context).pop(true);
+      try {
+        await widget.repository.deleteApplication(widget.applicationId);
+        if (mounted) {
+          UIHelper.showSuccessSnackBar(context, 'Lamaran telah dihapus');
+          Navigator.of(context).pop(true);
+        }
+      } catch (e) {
+        if (mounted) UIHelper.handleError(context, e);
+      }
     }
   }
 
@@ -94,72 +110,79 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     final notesController = TextEditingController();
     DateTime scheduledDate = DateTime.now().add(const Duration(days: 1));
 
-    await showModalBottomSheet(
+    await UIHelper.showPremiumBottomSheet(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-                left: 20,
-                right: 20,
-                top: 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Tambah Tahap Rekrutmen',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+      child: StatefulBuilder(
+        builder: (context, setSheetState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              left: 20,
+              right: 20,
+              top: 20,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Tambah Tahap Rekrutmen',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  TextField(
-                    controller: stageNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nama Tahap *',
-                      hintText: 'e.g. HR Interview, Technical Test, User Interview',
+                    IconButton(
+                      icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
+                      color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                      onPressed: () => Navigator.pop(context),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: stageNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Tahap *',
+                    hintText: 'e.g. HR Interview, Technical Test, User Interview',
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: interviewerController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nama Pewawancara',
-                      hintText: 'e.g. Ibu Sarah (HRD)',
-                    ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: interviewerController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Pewawancara',
+                    hintText: 'e.g. Ibu Sarah (HRD)',
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: linkController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tautan Meeting / Lokasi',
-                      hintText: 'https://meet.google.com/...',
-                    ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: linkController,
+                  decoration: const InputDecoration(
+                    labelText: 'Tautan Meeting / Lokasi',
+                    hintText: 'https://meet.google.com/...',
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: notesController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Catatan / Kisi-kisi',
-                      hintText: 'Poin penting yang perlu dipersiapkan...',
-                    ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: notesController,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: 'Catatan / Kisi-kisi',
+                    hintText: 'Poin penting yang perlu dipersiapkan...',
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (stageNameController.text.trim().isEmpty) return;
+                ),
+                const SizedBox(height: 18),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (stageNameController.text.trim().isEmpty) return;
+                    try {
                       final log = ApplicationLog(
                         id: '',
                         applicationId: widget.applicationId,
@@ -171,18 +194,22 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
                       );
                       await widget.repository.createApplicationLog(log);
-                      if (context.mounted) Navigator.of(context).pop();
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        UIHelper.showSuccessSnackBar(context, 'Tahap wawancara berhasil ditambahkan');
+                      }
                       _loadData();
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                    child: const Text('Simpan Tahap', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+                    } catch (e) {
+                      if (context.mounted) UIHelper.handleError(context, e);
+                    }
+                  },
+                  child: const Text('Simpan Tahap'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -192,7 +219,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
     if (_isLoading || _application == null) {
       return Scaffold(
-        backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -201,21 +228,22 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     final feedback = StatusHelper.getFeedbackText(app.status, app.appliedDate);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
         elevation: 0,
         title: Text(
           app.companyName,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            letterSpacing: -0.4,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
+            icon: const Icon(CupertinoIcons.pencil, size: 20),
             tooltip: 'Edit Lamaran',
             onPressed: () async {
               final updated = await Navigator.of(context).push(
@@ -230,7 +258,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.statusRejected),
+            icon: const Icon(CupertinoIcons.trash, color: AppColors.expense, size: 20),
             tooltip: 'Hapus',
             onPressed: _deleteApplication,
           ),
@@ -243,10 +271,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-              borderRadius: BorderRadius.circular(16),
+              color: isDark ? AppColors.surfaceDark : AppColors.surface,
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                width: 0.8,
               ),
             ),
             child: Column(
@@ -261,7 +290,8 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                          letterSpacing: -0.5,
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -273,8 +303,8 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   app.companyName,
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -284,16 +314,17 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: StatusHelper.getStatusColor(app.status).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: StatusHelper.getStatusColor(app.status).withValues(alpha: 0.3),
+                      color: StatusHelper.getStatusColor(app.status).withValues(alpha: 0.25),
+                      width: 0.8,
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        Icons.info_outline,
-                        size: 18,
+                        CupertinoIcons.info_circle_fill,
+                        size: 16,
                         color: StatusHelper.getStatusColor(app.status),
                       ),
                       const SizedBox(width: 8),
@@ -303,6 +334,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
+                            letterSpacing: -0.2,
                             color: StatusHelper.getStatusColor(app.status),
                           ),
                         ),
@@ -319,7 +351,8 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                    letterSpacing: -0.1,
+                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -332,28 +365,30 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         padding: const EdgeInsets.only(right: 6),
                         child: InkWell(
                           onTap: () => _updateStatus(st),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(100),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? StatusHelper.getStatusColor(st)
-                                  : (isDark ? AppColors.darkSurfaceSubtle : AppColors.lightSurfaceSubtle),
-                              borderRadius: BorderRadius.circular(6),
+                                  : (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant),
+                              borderRadius: BorderRadius.circular(100),
                               border: Border.all(
                                 color: isSelected
                                     ? StatusHelper.getStatusColor(st)
-                                    : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                                width: 0.8,
                               ),
                             ),
                             child: Text(
                               st.label,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 11.5,
                                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                letterSpacing: -0.2,
                                 color: isSelected
                                     ? Colors.white
-                                    : (isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary),
+                                    : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
                               ),
                             ),
                           ),
@@ -368,34 +403,35 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
           const SizedBox(height: 16),
 
-          // Detail Attributes
+          // Detail Attributes Card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-              borderRadius: BorderRadius.circular(16),
+              color: isDark ? AppColors.surfaceDark : AppColors.surface,
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                width: 0.8,
               ),
             ),
             child: Column(
               children: [
-                _buildInfoRow('Tanggal Melamar', DateFormat('dd MMMM yyyy').format(app.appliedDate), Icons.calendar_today, isDark),
+                _buildInfoRow('Tanggal Melamar', DateFormat('dd MMMM yyyy').format(app.appliedDate), CupertinoIcons.calendar, isDark),
                 const Divider(height: 20),
-                _buildInfoRow('Sistem Kerja', app.workSystem.label, Icons.work_outline, isDark),
+                _buildInfoRow('Sistem Kerja', app.workSystem.label, CupertinoIcons.briefcase, isDark),
                 const Divider(height: 20),
-                _buildInfoRow('Sumber Lowongan', app.jobPortalCustom ?? app.jobPortal.label, Icons.language_outlined, isDark),
+                _buildInfoRow('Sumber Lowongan', app.jobPortalCustom ?? app.jobPortal.label, CupertinoIcons.globe, isDark),
                 if (app.location != null && app.location!.isNotEmpty) ...[
                   const Divider(height: 20),
-                  _buildInfoRow('Lokasi', app.location!, Icons.location_on_outlined, isDark),
+                  _buildInfoRow('Lokasi', app.location!, CupertinoIcons.location_solid, isDark),
                 ],
                 if (app.salaryExpectation != null) ...[
                   const Divider(height: 20),
-                  _buildInfoRow('Ekspektasi Gaji', 'Rp ${NumberFormat('#,###').format(app.salaryExpectation)}', Icons.payments_outlined, isDark),
+                  _buildInfoRow('Ekspektasi Gaji', 'Rp ${NumberFormat('#,###').format(app.salaryExpectation)}', CupertinoIcons.money_dollar_circle, isDark),
                 ],
                 if (app.salaryOffered != null) ...[
                   const Divider(height: 20),
-                  _buildInfoRow('Gaji Ditawarkan', 'Rp ${NumberFormat('#,###').format(app.salaryOffered)}', Icons.attach_money, isDark),
+                  _buildInfoRow('Gaji Ditawarkan', 'Rp ${NumberFormat('#,###').format(app.salaryOffered)}', CupertinoIcons.money_dollar, isDark),
                 ],
                 if (app.jobUrl != null && app.jobUrl!.isNotEmpty) ...[
                   const Divider(height: 20),
@@ -404,13 +440,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.link, size: 18, color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted),
+                          Icon(CupertinoIcons.link, size: 18, color: isDark ? AppColors.textHintDark : AppColors.textHint),
                           const SizedBox(width: 8),
-                          Text('Link Lowongan', style: TextStyle(color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary)),
+                          Text('Link Lowongan', style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
                         ],
                       ),
                       TextButton.icon(
-                        icon: const Icon(Icons.open_in_new, size: 14),
+                        icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 14),
                         label: const Text('Buka URL'),
                         onPressed: () => launchUrl(Uri.parse(app.jobUrl!), mode: LaunchMode.externalApplication),
                       ),
@@ -427,10 +463,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                borderRadius: BorderRadius.circular(16),
+                color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                  width: 0.8,
                 ),
               ),
               child: Column(
@@ -441,16 +478,17 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                      letterSpacing: -0.2,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     app.notes!,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 13.5,
                       height: 1.5,
-                      color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -465,15 +503,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Tahapan Rekrutmen & Interview',
+                'Tahapan Rekrutmen',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                  letterSpacing: -0.3,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                 ),
               ),
               TextButton.icon(
-                icon: const Icon(Icons.add, size: 16),
+                icon: const Icon(CupertinoIcons.plus_circle, size: 16),
                 label: const Text('Tambah Tahap'),
                 onPressed: _showAddStageSheet,
               ),
@@ -485,18 +524,20 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                borderRadius: BorderRadius.circular(12),
+                color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                  width: 0.8,
                 ),
               ),
               child: Center(
                 child: Text(
                   'Belum ada jadwal wawancara atau tahapan tes dicatat.',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
-                    color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
                   ),
                 ),
               ),
@@ -505,12 +546,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             ..._logs.map((log) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    width: 0.8,
                   ),
                 ),
                 child: Column(
@@ -523,17 +565,24 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           log.stageName,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                            fontSize: 14.5,
+                            letterSpacing: -0.2,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, size: 16),
+                          icon: const Icon(CupertinoIcons.xmark_circle, size: 16),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
+                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
                           onPressed: () async {
-                            await widget.repository.deleteApplicationLog(log.id);
-                            _loadData();
+                            try {
+                              await widget.repository.deleteApplicationLog(log.id);
+                              UIHelper.showGlobalSuccessToast('Tahap berhasil dihapus');
+                              _loadData();
+                            } catch (e) {
+                              UIHelper.showGlobalErrorToast(UIHelper.parseErrorMessage(e));
+                            }
                           },
                         ),
                       ],
@@ -544,7 +593,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         'Jadwal: ${DateFormat('dd MMM yyyy, HH:mm').format(log.scheduledAt!)} WIB',
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -554,7 +603,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         'Pewawancara: ${log.interviewerName}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -564,7 +613,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         log.notes!,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted,
+                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
                         ),
                       ),
                     ],
@@ -583,17 +632,24 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       children: [
         Row(
           children: [
-            Icon(icon, size: 18, color: isDark ? AppColors.textDarkMuted : AppColors.textLightMuted),
+            Icon(icon, size: 18, color: isDark ? AppColors.textHintDark : AppColors.textHint),
             const SizedBox(width: 8),
-            Text(title, style: TextStyle(fontSize: 13, color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary)),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 13.5,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            letterSpacing: -0.2,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
       ],

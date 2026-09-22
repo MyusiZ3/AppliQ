@@ -11,6 +11,9 @@ import 'home/home_screen.dart';
 import 'profile/profile_screen.dart';
 import 'schedule/schedule_screen.dart';
 
+import '../../core/localization/app_strings.dart';
+import '../../utils/language_manager.dart';
+
 class MainNav extends StatefulWidget {
   final JobRepository repository;
 
@@ -31,6 +34,21 @@ class _MainNavState extends State<MainNav> {
     (ctx) => ScheduleScreen(repository: widget.repository),
     (ctx) => DashboardScreen(repository: widget.repository),
   ];
+
+  String _getNavLabel(int index) {
+    switch (index) {
+      case 0:
+        return AppStrings.navHome;
+      case 1:
+        return AppStrings.navApplications;
+      case 2:
+        return LanguageManager.isEnglish ? 'Schedule' : 'Jadwal';
+      case 3:
+        return LanguageManager.isEnglish ? 'Stats' : 'Statistik';
+      default:
+        return '';
+    }
+  }
 
   static final List<_NavItemData> _navItems = [
     _NavItemData(
@@ -224,7 +242,7 @@ class _MainNavState extends State<MainNav> {
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    item.label,
+                    _getNavLabel(index),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

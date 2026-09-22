@@ -1,15 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:appliq/core/localization/app_strings.dart';
 import 'package:appliq/presentation/screens/auth/login_screen.dart';
 import 'package:appliq/presentation/screens/onboarding_screen.dart';
 import 'package:appliq/presentation/screens/main_nav.dart';
 import 'package:appliq/presentation/screens/applications/application_detail_screen.dart';
-import 'package:appliq/presentation/screens/applications/application_form_screen.dart';
 import 'package:appliq/presentation/screens/profile/profile_screen.dart';
 import 'package:appliq/data/repositories/mock_job_repository.dart';
+import 'package:appliq/utils/language_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
   testWidgets('OnboardingScreen renders initial onboarding page', (WidgetTester tester) async {
     final mockRepo = MockJobRepository();
     await tester.pumpWidget(
@@ -87,11 +92,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Notifikasi Pengingat'), findsOneWidget);
-    expect(find.text('Dark mode'), findsOneWidget);
-    expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Log Out'), findsOneWidget);
+    expect(find.text(AppStrings.profileTitle), findsOneWidget);
+    expect(find.text(AppStrings.notificationsSetting), findsOneWidget);
+    expect(find.text(AppStrings.languageSetting), findsOneWidget);
+    expect(find.text(AppStrings.logoutButton), findsOneWidget);
 
     // Tap Profile card to open EditProfileScreen
     await tester.tap(find.text('Fajar Pratama'));
@@ -100,5 +104,20 @@ void main() {
     expect(find.text('Edit Profile'), findsOneWidget);
     expect(find.text('Save Changes'), findsOneWidget);
     expect(find.text('Delete Account'), findsOneWidget);
+  });
+
+  testWidgets('LanguageManager dynamically switches between Indonesian and English', (WidgetTester tester) async {
+    await LanguageManager.setLanguage(AppLanguage.id);
+    expect(LanguageManager.isEnglish, isFalse);
+    expect(AppStrings.applicationsTitle, 'Daftar Lamaran');
+    expect(AppStrings.cancel, 'Batal');
+
+    await LanguageManager.setLanguage(AppLanguage.en);
+    expect(LanguageManager.isEnglish, isTrue);
+    expect(AppStrings.applicationsTitle, 'Applications');
+    expect(AppStrings.cancel, 'Cancel');
+
+    // Reset back to Indonesian
+    await LanguageManager.setLanguage(AppLanguage.id);
   });
 }

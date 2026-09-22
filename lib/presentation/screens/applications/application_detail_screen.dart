@@ -4,11 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/utils/status_helper.dart';
 import '../../../data/models/application_log.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../services/google_drive_service.dart';
+import '../../../utils/language_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
@@ -1116,22 +1118,23 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     final action = await showCupertinoModalPopup<String>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: const Text('Kelola Berkas Lampiran'),
-        message: Text(app.cvFileName ?? 'Berkas Google Drive'),
+        title: Text(AppStrings.manageAttachment),
+        message: Text(app.cvFileName ?? (LanguageManager.isEnglish ? 'Google Drive Document' : 'Berkas Google Drive')),
         actions: [
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(ctx, 'delete_drive'),
-            child: const Text('Hapus Permanen dari Google Drive'),
-          ),
+          if (app.cvFileUrl != null && app.cvFileUrl!.isNotEmpty)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(ctx, 'delete_drive'),
+              child: Text(AppStrings.deleteFromDrive),
+            ),
           CupertinoActionSheetAction(
             onPressed: () => Navigator.pop(ctx, 'detach_only'),
-            child: const Text('Lepas Lampiran Saja'),
+            child: Text(AppStrings.detachOnly),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Batal'),
+          child: Text(AppStrings.cancel),
         ),
       ),
     );
@@ -1156,8 +1159,8 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         UIHelper.showSuccessSnackBar(
           context,
           action == 'delete_drive'
-              ? 'Berkas berhasil dihapus dari Google Drive.'
-              : 'Lampiran berkas berhasil dilepaskan.',
+              ? AppStrings.fileDeletedDrive
+              : AppStrings.attachmentDetached,
         );
       }
     } catch (e) {
@@ -1198,7 +1201,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Detail Lamaran',
+          AppStrings.applicationDetailTitle,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,

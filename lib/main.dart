@@ -10,6 +10,7 @@ import 'presentation/screens/main_nav.dart';
 import 'presentation/screens/onboarding_screen.dart';
 import 'presentation/widgets/appliq_loading.dart';
 import 'services/notification_service.dart';
+import 'utils/language_manager.dart';
 import 'utils/navigator_key.dart';
 import 'utils/theme_manager.dart';
 
@@ -19,8 +20,9 @@ void main() async {
   // Load environment & configuration
   await AppConfig.initialize();
 
-  // Initialize ThemeManager from SharedPreferences
+  // Initialize ThemeManager & LanguageManager from SharedPreferences
   await ThemeManager.init();
+  await LanguageManager.init();
 
   // Initialize Local Push Notifications
   await NotificationService.instance.init();
@@ -47,20 +49,25 @@ class AppliQApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: ThemeManager.notifier,
-      builder: (context, themeMode, _) {
-        return ValueListenableBuilder<AccentThemeMode>(
-          valueListenable: ThemeManager.accentNotifier,
-          builder: (context, accentMode, _) {
-            return MaterialApp(
-              title: 'AppliQ',
-              navigatorKey: navigatorKey,
-              debugShowCheckedModeBanner: false,
-              themeMode: themeMode,
-              theme: AppTheme.buildLightTheme(accentMode),
-              darkTheme: AppTheme.buildDarkTheme(accentMode),
-              home: AuthGate(repository: repository),
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: LanguageManager.notifier,
+      builder: (context, currentLanguage, _) {
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: ThemeManager.notifier,
+          builder: (context, themeMode, _) {
+            return ValueListenableBuilder<AccentThemeMode>(
+              valueListenable: ThemeManager.accentNotifier,
+              builder: (context, accentMode, _) {
+                return MaterialApp(
+                  title: 'AppliQ',
+                  navigatorKey: navigatorKey,
+                  debugShowCheckedModeBanner: false,
+                  themeMode: themeMode,
+                  theme: AppTheme.buildLightTheme(accentMode),
+                  darkTheme: AppTheme.buildDarkTheme(accentMode),
+                  home: AuthGate(repository: repository),
+                );
+              },
             );
           },
         );

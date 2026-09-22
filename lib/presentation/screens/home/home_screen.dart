@@ -6,11 +6,13 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/utils/status_helper.dart';
 import '../../../data/models/application_log.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/language_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../applications/application_detail_screen.dart';
 import '../applications/application_form_screen.dart';
@@ -66,13 +68,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String _getDynamicGreeting() {
     final hour = DateTime.now().hour;
     if (hour >= 3 && hour < 11) {
-      return 'Selamat Pagi';
+      return AppStrings.greetingMorning;
     } else if (hour >= 11 && hour < 15) {
-      return 'Selamat Siang';
+      return AppStrings.greetingAfternoon;
     } else if (hour >= 15 && hour < 18) {
-      return 'Selamat Sore';
+      return AppStrings.greetingEvening;
     } else {
-      return 'Selamat Malam';
+      return AppStrings.greetingNight;
     }
   }
 
@@ -256,8 +258,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               // Section 1: Lamaran Terbaru (Horizontal Carousel)
                               _buildSectionHeader(
-                                title: 'Lamaran Terbaru',
-                                actionLabel: 'Lihat Semua',
+                                title: AppStrings.recentApplications,
+                                actionLabel: AppStrings.viewAll,
                                 onAction: () => widget.onNavigateToTab?.call(1),
                                 isDark: isDark,
                               ),
@@ -270,8 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               // Section 2: Perusahaan yang Dilamar
                               _buildSectionHeader(
-                                title: 'Perusahaan Dilamar',
-                                actionLabel: 'Lihat Detail',
+                                title: LanguageManager.isEnglish ? 'Applied Companies' : 'Perusahaan Dilamar',
+                                actionLabel: LanguageManager.isEnglish ? 'View Detail' : 'Lihat Detail',
                                 onAction: () => widget.onNavigateToTab?.call(1),
                                 isDark: isDark,
                               ),
@@ -292,6 +294,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActions(bool isDark, bool isMono) {
+    final isEn = LanguageManager.isEnglish;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       decoration: BoxDecoration(
@@ -314,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildQuickActionItem(
             icon: CupertinoIcons.plus,
-            label: 'Lamaran',
+            label: isEn ? 'Add' : 'Lamaran',
             isPrimary: !isMono,
             onTap: () {
               HapticFeedback.lightImpact();
@@ -331,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _buildQuickActionItem(
             icon: CupertinoIcons.calendar,
-            label: 'Jadwal',
+            label: isEn ? 'Schedule' : 'Jadwal',
             onTap: () {
               HapticFeedback.lightImpact();
               widget.onNavigateToTab?.call(2);
@@ -349,7 +353,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _buildQuickActionItem(
             icon: CupertinoIcons.square_arrow_up,
-            label: 'Ekspor',
+            label: isEn ? 'Export' : 'Ekspor',
             onTap: () {
               HapticFeedback.lightImpact();
               ExportSheet.show(context, _applications);
@@ -409,6 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildUpcomingScheduleCard(Map<String, dynamic> item, bool isDark) {
+    final isEn = LanguageManager.isEnglish;
     final app = item['app'] as JobApplication;
     final log = item['log'] as ApplicationLog;
     final date = log.scheduledAt!;
@@ -421,33 +426,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     String timeLabel;
     if (isToday) {
-      timeLabel = 'Hari ini, $timeStr WIB';
+      timeLabel = isEn ? 'Today, $timeStr' : 'Hari ini, $timeStr WIB';
     } else if (isTomorrow) {
-      timeLabel = 'Besok, $timeStr WIB';
+      timeLabel = isEn ? 'Tomorrow, $timeStr' : 'Besok, $timeStr WIB';
     } else {
-      const days = [
-        'Senin',
-        'Selasa',
-        'Rabu',
-        'Kamis',
-        'Jumat',
-        'Sabtu',
-        'Minggu'
-      ];
-      const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Okt',
-        'Nov',
-        'Des'
-      ];
+      final days = isEn
+          ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          : ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+      final months = isEn
+          ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+          : ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       final dayName = days[(date.weekday - 1).clamp(0, 6)];
       final monthName = months[(date.month - 1).clamp(0, 11)];
       timeLabel = '$dayName, ${date.day} $monthName • $timeStr';
@@ -480,13 +468,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(CupertinoIcons.calendar,
+                  children: [
+                    const Icon(CupertinoIcons.calendar,
                         color: Colors.white, size: 12),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
-                      'Jadwal Terdekat',
-                      style: TextStyle(
+                      isEn ? 'Next Schedule' : 'Jadwal Terdekat',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,

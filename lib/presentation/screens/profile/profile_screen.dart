@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../services/notification_service.dart';
+import '../../../utils/language_manager.dart';
 import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/app_avatar.dart';
@@ -112,11 +114,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
 
     final languages = [
-      {'name': 'Bahasa Indonesia', 'code': 'id', 'subtitle': 'Bahasa Indonesia (Standar)', 'badge': 'Utama', 'icon': '🇮🇩'},
-      {'name': 'English', 'code': 'en', 'subtitle': 'English (United States)', 'badge': 'Global', 'icon': '🇺🇸'},
-      {'name': '日本語', 'code': 'ja', 'subtitle': 'Japanese (Nihongo)', 'badge': 'Segera Hadir', 'icon': '🇯🇵'},
-      {'name': '한국어', 'code': 'ko', 'subtitle': 'Korean (Hangugeo)', 'badge': 'Segera Hadir', 'icon': '🇰🇷'},
+      {
+        'name': 'Bahasa Indonesia',
+        'code': 'id',
+        'subtitle': AppStrings.languageIdSubtitle,
+        'badge': LanguageManager.isEnglish ? 'Default' : 'Utama',
+        'icon': '🇮🇩',
+        'locked': false,
+      },
+      {
+        'name': 'English',
+        'code': 'en',
+        'subtitle': AppStrings.languageEnSubtitle,
+        'badge': 'Global',
+        'icon': '🇺🇸',
+        'locked': false,
+      },
+      {
+        'name': '日本語',
+        'code': 'ja',
+        'subtitle': AppStrings.languageJaSubtitle,
+        'badge': AppStrings.comingSoon,
+        'icon': '🇯🇵',
+        'locked': true,
+      },
+      {
+        'name': '한국어',
+        'code': 'ko',
+        'subtitle': AppStrings.languageKoSubtitle,
+        'badge': AppStrings.comingSoon,
+        'icon': '🇰🇷',
+        'locked': true,
+      },
     ];
+
+    final isEn = LanguageManager.isEnglish;
 
     UIHelper.showPremiumBottomSheet(
       context: context,
@@ -134,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pilih Bahasa (Language)',
+                        AppStrings.languageModalTitle,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -144,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Pilih bahasa antarmuka aplikasi',
+                        AppStrings.languageModalSubtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -164,15 +196,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             ...languages.map((lang) {
-              final isSelected = _selectedLanguage == lang['name'];
+              final isLocked = lang['locked'] == true;
+              final isSelected = (!isLocked) &&
+                  ((lang['code'] == 'en' && isEn) || (lang['code'] == 'id' && !isEn));
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: InkWell(
                   onTap: () async {
                     _triggerHaptic();
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('app_language', lang['name']!);
-                    setState(() => _selectedLanguage = lang['name']!);
+                    if (isLocked) {
+                      UIHelper.showInfoSnackBar(context, AppStrings.languageComingSoonToast);
+                      return;
+                    }
+
+                    final newLang = lang['code'] == 'en' ? AppLanguage.en : AppLanguage.id;
+                    await LanguageManager.setLanguage(newLang);
+                    setState(() => _selectedLanguage = lang['name'] as String);
                     if (mounted) Navigator.pop(context);
                   },
                   borderRadius: BorderRadius.circular(16),
@@ -181,7 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? (isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7))
-                          : cardBg,
+                          : (isLocked ? (isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA)) : cardBg),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected
@@ -192,7 +232,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: Row(
                       children: [
-                        Text(lang['icon']!, style: const TextStyle(fontSize: 22)),
+                        Text(
+                          lang['icon'] as String,
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: isLocked ? Colors.grey.withValues(alpha: 0.6) : null,
+                          ),
+                        ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
@@ -202,13 +248,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 children: [
                                   Flexible(
                                     child: Text(
-                                      lang['name']!,
+                                      lang['name'] as String,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                        color: isDark ? Colors.white : const Color(0xFF18181B),
+                                        color: isLocked
+                                            ? (isDark ? AppColors.textHintDark : AppColors.textHint)
+                                            : (isDark ? Colors.white : const Color(0xFF18181B)),
                                       ),
                                     ),
                                   ),
@@ -216,23 +264,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                                      color: isLocked
+                                          ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+                                          : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7)),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: Text(
-                                      lang['badge']!,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                                      ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (isLocked) ...[
+                                          Icon(
+                                            CupertinoIcons.lock_fill,
+                                            size: 9,
+                                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                          ),
+                                          const SizedBox(width: 3),
+                                        ],
+                                        Text(
+                                          lang['badge'] as String,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: isLocked
+                                                ? (isDark ? AppColors.textHintDark : AppColors.textHint)
+                                                : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                lang['subtitle']!,
+                                lang['subtitle'] as String,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -244,29 +309,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Container(
-                          width: 22,
-                          height: 22,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected
-                                ? (isDark ? Colors.white : const Color(0xFF18181B))
-                                : Colors.transparent,
-                            border: Border.all(
+                        if (isLocked)
+                          Icon(
+                            CupertinoIcons.lock,
+                            size: 16,
+                            color: isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
+                          )
+                        else
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
                               color: isSelected
-                                  ? Colors.transparent
-                                  : (isDark ? AppColors.textHintDark : AppColors.textHint),
-                              width: 1.5,
+                                  ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                  : Colors.transparent,
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.transparent
+                                    : (isDark ? AppColors.textHintDark : AppColors.textHint),
+                                width: 1.5,
+                              ),
                             ),
+                            child: isSelected
+                                ? Icon(
+                                    CupertinoIcons.checkmark_alt,
+                                    size: 14,
+                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                  )
+                                : null,
                           ),
-                          child: isSelected
-                              ? Icon(
-                                  CupertinoIcons.checkmark_alt,
-                                  size: 14,
-                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                )
-                              : null,
-                        ),
                       ],
                     ),
                   ),
@@ -1611,18 +1683,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Keluar dari Akun?'),
-        content: const Text('Kamu perlu masuk kembali untuk mengakses riwayat lamaran kerjamu.'),
+        title: Text(AppStrings.logoutConfirmTitle),
+        content: Text(AppStrings.logoutConfirmMessage),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Batal'),
+            child: Text(AppStrings.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Keluar'),
+            child: Text(AppStrings.logoutButton),
           ),
         ],
       ),
@@ -1632,7 +1704,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       try {
         await widget.repository.signOut();
         if (mounted) {
-          UIHelper.showSuccessSnackBar(context, 'Berhasil keluar');
+          UIHelper.showSuccessSnackBar(
+            context,
+            LanguageManager.isEnglish ? 'Signed out successfully' : 'Berhasil keluar',
+          );
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (_) => LoginScreen(repository: widget.repository),
@@ -1684,7 +1759,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             : null,
         centerTitle: true,
         title: Text(
-          'Settings',
+          AppStrings.profileTitle,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
@@ -1788,7 +1863,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           // Notifications Toggle Tile
                           _buildTile(
                             icon: CupertinoIcons.bell_fill,
-                            title: 'Notifikasi Pengingat',
+                            title: AppStrings.notificationsSetting,
                             isDark: isDark,
                             trailing: _buildCustomSwitch(
                               value: _notificationsEnabled,
@@ -1801,7 +1876,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           // General Settings Tile
                           _buildTile(
                             icon: CupertinoIcons.slider_horizontal_3,
-                            title: 'General settings',
+                            title: LanguageManager.isEnglish ? 'General preferences' : 'Pengaturan umum',
                             isDark: isDark,
                             showChevron: true,
                             onTap: () {
@@ -1820,7 +1895,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                               return _buildTile(
                                 icon: CupertinoIcons.moon,
-                                title: 'Dark mode',
+                                title: LanguageManager.isEnglish ? 'Dark mode' : 'Mode gelap',
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
                                   value: isDarkModeActive,
@@ -1844,7 +1919,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               final isMonochrome = accentMode == AccentThemeMode.monochrome;
                               return _buildTile(
                                 icon: CupertinoIcons.circle_righthalf_fill,
-                                title: 'Monochrome mode',
+                                title: LanguageManager.isEnglish ? 'Monochrome mode' : 'Mode monokrom',
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
                                   value: isMonochrome,
@@ -1864,7 +1939,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           // Language Tile
                           _buildTile(
                             icon: CupertinoIcons.globe,
-                            title: 'Language',
+                            title: AppStrings.languageSetting,
                             isDark: isDark,
                             subtitle: _selectedLanguage,
                             showChevron: true,
@@ -1901,7 +1976,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _buildDivider(borderColor),
                           _buildTile(
                             icon: CupertinoIcons.info_circle,
-                            title: 'Terms of service',
+                            title: LanguageManager.isEnglish ? 'Terms of service' : 'Syarat & ketentuan',
                             isDark: isDark,
                             showChevron: true,
                             onTap: () {
@@ -1912,7 +1987,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _buildDivider(borderColor),
                           _buildTile(
                             icon: CupertinoIcons.shield,
-                            title: 'User policy',
+                            title: LanguageManager.isEnglish ? 'Privacy policy' : 'Kebijakan privasi',
                             isDark: isDark,
                             showChevron: true,
                             onTap: () {
@@ -1949,18 +2024,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               CupertinoIcons.square_arrow_right,
                               color: Color(0xFFEF4444),
                               size: 17,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'Log Out',
-                              style: TextStyle(
+                              AppStrings.logoutButton,
+                              style: const TextStyle(
                                 color: Color(0xFFEF4444),
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14.5,

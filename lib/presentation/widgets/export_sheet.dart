@@ -7,7 +7,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_enums.dart';
+import '../../core/localization/app_strings.dart';
 import '../../data/models/job_application.dart';
+import '../../utils/language_manager.dart';
 import '../../utils/ui_helper.dart';
 
 class ExportSheet extends StatefulWidget {
@@ -554,7 +556,7 @@ class _ExportSheetState extends State<ExportSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Ekspor Data Lamaran',
+                AppStrings.exportSheetTitle,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -577,7 +579,7 @@ class _ExportSheetState extends State<ExportSheet> {
 
           const SizedBox(height: 4),
           Text(
-            'Pilih format ekspor data seluruh riwayat lamaran kerjamu.',
+            AppStrings.exportSheetSubtitle,
             style: TextStyle(
               fontSize: 13,
               color: isDark
@@ -604,17 +606,25 @@ class _ExportSheetState extends State<ExportSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatItem(
-                    'Total Catatan', '${widget.applications.length}', isDark),
+                    LanguageManager.isEnglish ? 'Total Records' : 'Total Catatan',
+                    '${widget.applications.length}',
+                    isDark),
                 Container(
                     height: 28,
                     width: 1,
                     color: isDark ? Colors.white24 : Colors.black12),
-                _buildStatItem('Format', 'PDF & CSV', isDark),
+                _buildStatItem(
+                    LanguageManager.isEnglish ? 'Formats' : 'Format',
+                    'PDF & CSV',
+                    isDark),
                 Container(
                     height: 28,
                     width: 1,
                     color: isDark ? Colors.white24 : Colors.black12),
-                _buildStatItem('Status', 'Siap Ekspor', isDark),
+                _buildStatItem(
+                    LanguageManager.isEnglish ? 'Status' : 'Status',
+                    LanguageManager.isEnglish ? 'Ready' : 'Siap Ekspor',
+                    isDark),
               ],
             ),
           ),
@@ -665,7 +675,9 @@ class _ExportSheetState extends State<ExportSheet> {
                       ),
                     ),
                   Text(
-                    _isPdfLoading ? 'Menyiapkan PDF...' : 'Simpan Sebagai PDF',
+                    _isPdfLoading
+                        ? (LanguageManager.isEnglish ? 'Generating PDF...' : 'Menyiapkan PDF...')
+                        : (LanguageManager.isEnglish ? 'Save as PDF' : 'Simpan Sebagai PDF'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -723,7 +735,9 @@ class _ExportSheetState extends State<ExportSheet> {
                       ),
                     ),
                   Text(
-                    _isCsvLoading ? 'Menyalin CSV...' : 'Simpan Sebagai CSV',
+                    _isCsvLoading
+                        ? (LanguageManager.isEnglish ? 'Copying CSV...' : 'Menyalin CSV...')
+                        : (LanguageManager.isEnglish ? 'Save as CSV' : 'Simpan Sebagai CSV'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

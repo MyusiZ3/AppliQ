@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/language_manager.dart';
 import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/export_sheet.dart';
@@ -109,12 +111,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
               color: isDark ? AppColors.backgroundDark : AppColors.background,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Text(
-                      'Statistik & Analitik',
+                      AppStrings.analyticsTitle,
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -160,15 +162,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
               child: NotchedPillCard<int>(
-                items: const [
+                items: [
                   NotchedPillItem(
                     value: 0,
-                    label: 'Kategori Status',
+                    label: LanguageManager.isEnglish ? 'Pipeline Funnel' : 'Kategori Status',
                     icon: CupertinoIcons.chart_pie_fill,
                   ),
                   NotchedPillItem(
                     value: 1,
-                    label: 'Sistem & Portal',
+                    label: LanguageManager.isEnglish ? 'Systems & Portals' : 'Sistem & Portal',
                     icon: CupertinoIcons.chart_bar_alt_fill,
                   ),
                 ],
@@ -191,9 +193,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           onRefresh: () => _loadStats(forceRefresh: true),
                           child: EmptyStateView(
                             icon: CupertinoIcons.chart_bar_alt_fill,
-                            title: 'Belum Ada Data Statistik',
-                            message:
-                                'Statistik, rasio panggilan interview, dan efektivitas portal loker akan dihitung otomatis saat kamu mulai mencatat lamaran.',
+                            title: LanguageManager.isEnglish ? 'No Analytics Data' : 'Belum Ada Data Statistik',
+                            message: LanguageManager.isEnglish
+                                ? 'Career analytics, interview conversion rates, and portal performance will be calculated once you start tracking applications.'
+                                : 'Statistik, rasio panggilan interview, dan efektivitas portal loker akan dihitung otomatis saat kamu mulai mencatat lamaran.',
                             action: ElevatedButton.icon(
                               onPressed: () async {
                                 final added = await Navigator.of(context).push(
@@ -212,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     : Colors.white,
                               ),
                               label: Text(
-                                'Catat Lamaran Pertama',
+                                LanguageManager.isEnglish ? 'Add First Application' : 'Catat Lamaran Pertama',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,

@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../services/google_drive_service.dart';
+import '../../../utils/language_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
 

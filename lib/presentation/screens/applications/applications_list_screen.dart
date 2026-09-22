@@ -4,8 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/language_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/application_card.dart';
 import '../../widgets/empty_state_view.dart';
@@ -149,7 +151,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Daftar Lamaran',
+                      AppStrings.applicationsTitle,
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -226,7 +228,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                           : AppColors.textPrimary,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Cari perusahaan, posisi, atau lokasi...',
+                      hintText: AppStrings.searchApplicationPlaceholder,
                       hintStyle: TextStyle(
                         color: isDark
                             ? AppColors.textHintDark
@@ -266,15 +268,15 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
               child: NotchedPillCard<bool>(
-                items: const [
+                items: [
                   NotchedPillItem(
                     value: false,
-                    label: 'Tampilan List',
+                    label: LanguageManager.isEnglish ? 'List View' : 'Tampilan List',
                     icon: CupertinoIcons.list_bullet,
                   ),
                   NotchedPillItem(
                     value: true,
-                    label: 'Papan Kanban',
+                    label: LanguageManager.isEnglish ? 'Kanban Board' : 'Papan Kanban',
                     icon: CupertinoIcons.square_grid_2x2,
                   ),
                 ],
@@ -307,7 +309,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                 child: Row(
                   children: [
                     _buildPill(
-                      label: 'Semua',
+                      label: AppStrings.allStatusTab,
                       isSelected: !_onlyFavorites && _selectedStatusFilter == null,
                       onTap: () {
                         setState(() {
@@ -319,7 +321,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                     ),
                     const SizedBox(width: 8),
                     _buildPill(
-                      label: 'Ditandai',
+                      label: LanguageManager.isEnglish ? 'Starred' : 'Ditandai',
                       isSelected: _onlyFavorites,
                       onTap: () {
                         setState(() {
@@ -358,7 +360,9 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${filtered.length} Lamaran',
+                    LanguageManager.isEnglish
+                        ? '${filtered.length} Application${filtered.length == 1 ? '' : 's'}'
+                        : '${filtered.length} Lamaran',
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
@@ -426,13 +430,14 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
   }
 
   Widget _buildSortButton(bool isDark) {
-    String sortLabel = 'Terbaru';
-    if (_sortBy == 'oldest') sortLabel = 'Terlama';
-    if (_sortBy == 'favorite') sortLabel = 'Ditandai';
-    if (_sortBy == 'name') sortLabel = 'Nama A-Z';
+    final isEn = LanguageManager.isEnglish;
+    String sortLabel = isEn ? 'Newest' : 'Terbaru';
+    if (_sortBy == 'oldest') sortLabel = isEn ? 'Oldest' : 'Terlama';
+    if (_sortBy == 'favorite') sortLabel = isEn ? 'Starred' : 'Ditandai';
+    if (_sortBy == 'name') sortLabel = isEn ? 'Name A-Z' : 'Nama A-Z';
 
     return PopupMenuButton<String>(
-      tooltip: 'Urutkan',
+      tooltip: AppStrings.sort,
       initialValue: _sortBy,
       onSelected: (val) {
         HapticFeedback.selectionClick();
@@ -442,11 +447,16 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: isDark ? const Color(0xFF27272A) : Colors.white,
       itemBuilder: (context) => [
-        const PopupMenuItem(value: 'newest', child: Text('Tanggal Terbaru')),
-        const PopupMenuItem(value: 'oldest', child: Text('Tanggal Terlama')),
-        const PopupMenuItem(value: 'favorite', child: Text('Ditandai Dahulu')),
-        const PopupMenuItem(
-            value: 'name', child: Text('Nama Perusahaan (A-Z)')),
+        PopupMenuItem(value: 'newest', child: Text(AppStrings.sortNewest)),
+        PopupMenuItem(value: 'oldest', child: Text(AppStrings.sortOldest)),
+        PopupMenuItem(
+          value: 'favorite',
+          child: Text(isEn ? 'Starred First' : 'Ditandai Dahulu'),
+        ),
+        PopupMenuItem(
+          value: 'name',
+          child: Text(AppStrings.sortCompanyAZ),
+        ),
       ],
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -633,7 +643,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                   child: appsInStatus.isEmpty
                       ? Center(
                           child: Text(
-                            'Kosong',
+                            LanguageManager.isEnglish ? 'Empty' : 'Kosong',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark
@@ -676,10 +686,13 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
   }
 
   Widget _buildEmptyState(bool isDark) {
+    final isEn = LanguageManager.isEnglish;
     return EmptyStateView(
       icon: CupertinoIcons.tray,
-      title: 'Belum Ada Lamaran',
-      message: 'Mulai catat lowongan dan tahapan lamaran kerjamu dengan rapi.',
+      title: isEn ? 'No Applications Yet' : 'Belum Ada Lamaran',
+      message: isEn
+          ? 'Start tracking your job applications and interview stages neatly.'
+          : 'Mulai catat lowongan dan tahapan lamaran kerjamu dengan rapi.',
       action: ElevatedButton.icon(
         onPressed: () async {
           final added = await Navigator.of(context).push(
@@ -696,7 +709,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
           color: isDark ? const Color(0xFF18181B) : Colors.white,
         ),
         label: Text(
-          'Catat Lamaran Baru',
+          isEn ? 'New Application' : 'Catat Lamaran Baru',
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 14,

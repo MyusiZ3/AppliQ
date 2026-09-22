@@ -139,4 +139,49 @@ class GoogleDriveService {
       'fileId': uploadedFile.id ?? '',
     };
   }
+
+  /// Extracts the Google Drive file ID from a URL or raw ID string
+  static String? extractFileId(String urlOrId) {
+    final trimmed = urlOrId.trim();
+    if (trimmed.isEmpty) return null;
+    if (!trimmed.contains('/') && !trimmed.contains('.')) {
+      return trimmed;
+    }
+    final match = RegExp(r'\/d\/([a-zA-Z0-9_-]+)').firstMatch(trimmed);
+    if (match != null) return match.group(1);
+    final idParamMatch = RegExp(r'[?&]id=([a-zA-Z0-9_-]+)').firstMatch(trimmed);
+    if (idParamMatch != null) return idParamMatch.group(1);
+    return null;
+  }
+
+  /// Deletes a file from Google Drive permanently
+  static Future<bool> deleteDocument(String urlOrId) async {
+    final fileId = extractFileId(urlOrId);
+    if (fileId == null || fileId.isEmpty) {
+      return false;
+    }
+
+    GoogleSignInAccount? googleUser = _googleSignIn.currentUser;
+    googleUser ??= await _googleSignIn.signInSilently();
+    googleUser ??= await _googleSignIn.signIn();
+
+    if (googleUser == null) {
+      throw Exception('Autentikasi Google Drive dibatalkan.');
+    }
+
+    final authHeaders = await googleUser.authHeaders;
+    final authenticateClient = GoogleAuthClient(authHeaders);
+    final driveApi = drive.DriveApi(authenticateClient);
+
+    try {
+      await driveApi.files.delete(fileId);
+      return true;
+    } catch (e) {
+      // If the file is already deleted or not found (404), consider operation successful
+      if (e.toString().contains('404') || e.toString().contains('notFound')) {
+        return true;
+      }
+      rethrow;
+    }
+  }
 }

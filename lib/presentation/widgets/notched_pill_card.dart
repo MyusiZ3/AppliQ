@@ -158,26 +158,34 @@ class NotchedCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double borderRadius;
+  final bool showTopNotch;
+  final bool showBottomNotch;
+  final Color? backgroundColor;
+  final Color? borderColor;
 
   const NotchedCard({
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.borderRadius = 22,
+    this.showTopNotch = true,
+    this.showBottomNotch = false,
+    this.backgroundColor,
+    this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? AppColors.surfaceDark : AppColors.surface;
-    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final scaffoldBg = isDark ? AppColors.backgroundDark : AppColors.background;
+    final effectiveBgColor = backgroundColor ?? (isDark ? AppColors.surfaceDark : AppColors.surface);
+    final effectiveBorderColor = borderColor ?? (isDark ? AppColors.borderDark : AppColors.borderLight);
+    final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
 
     return Container(
       decoration: BoxDecoration(
-        color: bgColor,
+        color: effectiveBgColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: borderColor, width: 0.8),
+        border: Border.all(color: effectiveBorderColor, width: 0.8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
@@ -188,27 +196,50 @@ class NotchedCard extends StatelessWidget {
       ),
       child: Stack(
         clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
+        alignment: Alignment.center,
         children: [
           // Top Notch Visual (MyDuitGweh Signature)
-          Positioned(
-            top: -1,
-            child: Container(
-              width: 38,
-              height: 7,
-              decoration: BoxDecoration(
-                color: scaffoldBg,
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(10),
-                ),
-                border: Border(
-                  left: BorderSide(color: borderColor, width: 0.8),
-                  right: BorderSide(color: borderColor, width: 0.8),
-                  bottom: BorderSide(color: borderColor, width: 0.8),
+          if (showTopNotch)
+            Positioned(
+              top: -1,
+              child: Container(
+                width: 38,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: scaffoldBg,
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(10),
+                  ),
+                  border: Border(
+                    left: BorderSide(color: effectiveBorderColor, width: 0.8),
+                    right: BorderSide(color: effectiveBorderColor, width: 0.8),
+                    bottom: BorderSide(color: effectiveBorderColor, width: 0.8),
+                  ),
                 ),
               ),
             ),
-          ),
+
+          // Bottom Notch Visual (MyDuitGweh Signature)
+          if (showBottomNotch)
+            Positioned(
+              bottom: -1,
+              child: Container(
+                width: 38,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: scaffoldBg,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(10),
+                  ),
+                  border: Border(
+                    left: BorderSide(color: effectiveBorderColor, width: 0.8),
+                    right: BorderSide(color: effectiveBorderColor, width: 0.8),
+                    top: BorderSide(color: effectiveBorderColor, width: 0.8),
+                  ),
+                ),
+              ),
+            ),
+
           Padding(
             padding: padding,
             child: child,

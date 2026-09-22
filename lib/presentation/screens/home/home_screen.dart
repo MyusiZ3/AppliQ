@@ -812,23 +812,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeroBanner(int total, int interview, int offering, bool isDark) {
-    return Container(
+    return NotchedCard(
+      showTopNotch: true,
+      showBottomNotch: false,
+      borderRadius: 26,
       padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        color: isDark ? const Color(0xFF1E1E22) : const Color(0xFF18181B),
-        border: Border.all(
-          color: isDark ? const Color(0xFF323238) : const Color(0x1F000000),
-          width: 0.8,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      backgroundColor: isDark ? const Color(0xFF1E1E22) : const Color(0xFF18181B),
+      borderColor: isDark ? const Color(0xFF323238) : const Color(0x1F000000),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

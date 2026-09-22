@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://myusiz3.github.io/AppliQ/sitemap.xml

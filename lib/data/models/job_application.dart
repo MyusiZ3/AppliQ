@@ -6,6 +6,7 @@ class JobApplication {
   final String companyName;
   final String positionTitle;
   final String? location;
+  final EmploymentType employmentType;
   final WorkSystem workSystem;
   final JobPortal jobPortal;
   final String? jobPortalCustom;
@@ -25,6 +26,7 @@ class JobApplication {
     required this.companyName,
     required this.positionTitle,
     this.location,
+    this.employmentType = EmploymentType.fullTime,
     required this.workSystem,
     required this.jobPortal,
     this.jobPortalCustom,
@@ -47,6 +49,7 @@ class JobApplication {
       companyName: json['company_name'] as String? ?? '',
       positionTitle: json['position_title'] as String? ?? '',
       location: json['location'] as String?,
+      employmentType: EmploymentType.fromString(json['employment_type'] as String? ?? 'Full Time'),
       workSystem: WorkSystem.fromString(json['work_system'] as String? ?? 'On-site'),
       jobPortal: JobPortal.fromString(json['job_portal'] as String? ?? 'Linked In'),
       jobPortalCustom: json['job_portal_custom'] as String?,
@@ -79,6 +82,7 @@ class JobApplication {
       'company_name': companyName,
       'position_title': positionTitle,
       'location': location,
+      'employment_type': employmentType.label,
       'work_system': workSystem.label,
       'job_portal': jobPortal.label,
       'job_portal_custom': jobPortalCustom,
@@ -100,6 +104,7 @@ class JobApplication {
     String? companyName,
     String? positionTitle,
     String? location,
+    EmploymentType? employmentType,
     WorkSystem? workSystem,
     JobPortal? jobPortal,
     String? jobPortalCustom,
@@ -110,6 +115,7 @@ class JobApplication {
     double? salaryOffered,
     String? notes,
     bool? isFavorite,
+    DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return JobApplication(
@@ -118,6 +124,7 @@ class JobApplication {
       companyName: companyName ?? this.companyName,
       positionTitle: positionTitle ?? this.positionTitle,
       location: location ?? this.location,
+      employmentType: employmentType ?? this.employmentType,
       workSystem: workSystem ?? this.workSystem,
       jobPortal: jobPortal ?? this.jobPortal,
       jobPortalCustom: jobPortalCustom ?? this.jobPortalCustom,
@@ -128,8 +135,8 @@ class JobApplication {
       salaryOffered: salaryOffered ?? this.salaryOffered,
       notes: notes ?? this.notes,
       isFavorite: isFavorite ?? this.isFavorite,
-      createdAt: createdAt,
-      updatedAt: updatedAt ?? DateTime.now(),
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

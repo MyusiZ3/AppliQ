@@ -1,3 +1,21 @@
+enum EmploymentType {
+  fullTime('Full Time'),
+  internship('Internship'),
+  contract('Contract'),
+  partTime('Part Time'),
+  freelance('Freelance');
+
+  final String label;
+  const EmploymentType(this.label);
+
+  static EmploymentType fromString(String val) {
+    return EmploymentType.values.firstWhere(
+      (e) => e.label.toLowerCase() == val.trim().toLowerCase(),
+      orElse: () => EmploymentType.fullTime,
+    );
+  }
+}
+
 enum WorkSystem {
   onSite('On-site'),
   hybrid('Hybrid'),

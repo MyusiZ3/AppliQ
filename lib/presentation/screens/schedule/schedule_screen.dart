@@ -30,6 +30,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   bool _upcomingOnly = true;
   StreamSubscription? _dataSub;
 
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearchOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,8 +45,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _dataSub?.cancel();
     super.dispose();
+  }
+
+  void closeSearch() {
+    if (_isSearchOpen && mounted) {
+      setState(() {
+        _isSearchOpen = false;
+        _searchQuery = '';
+        _searchController.clear();
+      });
+    }
   }
 
   static final DateFormat _scheduleDateFormat = DateFormat('EEEE, dd MMM yyyy, HH:mm');
@@ -99,10 +114,36 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final now = DateTime.now();
 
     final filteredItems = _scheduleItems.where((item) {
-      if (!_upcomingOnly) return true;
+      final app = item['app'] as JobApplication;
       final log = item['log'] as ApplicationLog;
-      if (log.scheduledAt == null) return false;
-      return log.scheduledAt!.isAfter(now.subtract(const Duration(hours: 12)));
+
+      if (_upcomingOnly) {
+        if (log.scheduledAt == null) return false;
+        if (!log.scheduledAt!.isAfter(now.subtract(const Duration(hours: 12)))) {
+          return false;
+        }
+      }
+
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final matchesCompany = app.companyName.toLowerCase().contains(query);
+        final matchesPosition = app.positionTitle.toLowerCase().contains(query);
+        final matchesStage = log.stageName.toLowerCase().contains(query);
+        final matchesInterviewer = log.interviewerName?.toLowerCase().contains(query) ?? false;
+        final matchesNotes = log.notes?.toLowerCase().contains(query) ?? false;
+        final matchesResult = log.result.toLowerCase().contains(query);
+
+        if (!matchesCompany &&
+            !matchesPosition &&
+            !matchesStage &&
+            !matchesInterviewer &&
+            !matchesNotes &&
+            !matchesResult) {
+          return false;
+        }
+      }
+
+      return true;
     }).toList();
 
     return Scaffold(
@@ -130,39 +171,92 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      final added = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ApplicationFormScreen(repository: widget.repository),
-                        ),
-                      );
-                      if (added == true) _loadSchedules();
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
-                          width: 0.8,
-                        ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCircleActionButton(
+                        icon: _isSearchOpen ? CupertinoIcons.xmark : CupertinoIcons.search,
+                        isDark: isDark,
+                        isActive: _isSearchOpen,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _isSearchOpen = !_isSearchOpen;
+                            if (!_isSearchOpen) {
+                              _searchQuery = '';
+                              _searchController.clear();
+                            }
+                          });
+                        },
                       ),
-                      child: Center(
-                        child: Icon(
-                          CupertinoIcons.plus,
-                          size: 18,
-                          color: isDark ? Colors.white : const Color(0xFF18181B),
-                        ),
+                      const SizedBox(width: 8),
+                      _buildCircleActionButton(
+                        icon: CupertinoIcons.plus,
+                        isDark: isDark,
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          closeSearch();
+                          final added = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ApplicationFormScreen(repository: widget.repository),
+                            ),
+                          );
+                          if (added == true) _loadSchedules();
+                        },
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
             ),
+            // Collapsible Search Bar (Only appears when search icon is clicked)
+            if (_isSearchOpen)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                      width: 0.8,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    onChanged: (val) => setState(() => _searchQuery = val),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Cari perusahaan, posisi, atau tahap...',
+                      hintStyle: TextStyle(
+                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        fontSize: 13.5,
+                      ),
+                      prefixIcon: Icon(
+                        CupertinoIcons.search,
+                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        size: 17,
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(CupertinoIcons.clear_circled_solid, size: 16),
+                              color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
+              ),
             // Notched Pill Filter Switcher (Mendatang vs Semua)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
@@ -230,7 +324,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             ),
                           ),
                         )
-                      : _buildGroupedScheduleList(context, isDark),
+                      : _buildGroupedScheduleList(context, isDark, filteredItems),
             ),
           ],
         ),
@@ -238,7 +332,43 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  Widget _buildGroupedScheduleList(BuildContext context, bool isDark) {
+  Widget _buildCircleActionButton({
+    required IconData icon,
+    required bool isDark,
+    required VoidCallback onTap,
+    bool isActive = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isActive
+              ? (isDark ? Colors.white : const Color(0xFF18181B))
+              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isActive
+                ? Colors.transparent
+                : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7)),
+            width: 0.8,
+          ),
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: 18,
+            color: isActive
+                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                : (isDark ? Colors.white : const Color(0xFF18181B)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupedScheduleList(BuildContext context, bool isDark, List<Map<String, dynamic>> itemsList) {
     final now = DateTime.now();
     final startOfToday = DateTime(now.year, now.month, now.day);
     final endOfToday = startOfToday.add(const Duration(days: 1));
@@ -250,7 +380,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final upcomingItems = <Map<String, dynamic>>[];
     final pastHistoryItems = <Map<String, dynamic>>[];
 
-    for (var item in _scheduleItems) {
+    for (var item in itemsList) {
       final log = item['log'] as ApplicationLog;
       final date = log.scheduledAt;
       if (date == null) {
@@ -281,6 +411,43 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         pastHistoryItems.length;
 
     if (totalVisible == 0) {
+      if (_searchQuery.isNotEmpty) {
+        return RefreshIndicator(
+          onRefresh: () => _loadSchedules(forceRefresh: true),
+          child: EmptyStateView(
+            icon: CupertinoIcons.search,
+            title: 'Tidak Ada Jadwal Ditemukan',
+            message: 'Tidak ada agenda wawancara atau tahapan yang cocok dengan kata kunci "$_searchQuery".',
+            action: ElevatedButton.icon(
+              onPressed: () {
+                _searchController.clear();
+                setState(() => _searchQuery = '');
+              },
+              icon: Icon(
+                CupertinoIcons.clear,
+                size: 16,
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+              ),
+              label: Text(
+                'Reset Pencarian',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
+                foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+              ),
+            ),
+          ),
+        );
+      }
+
       return RefreshIndicator(
         onRefresh: () => _loadSchedules(forceRefresh: true),
         child: EmptyStateView(
@@ -426,6 +593,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       child: GestureDetector(
         onTap: () async {
           HapticFeedback.lightImpact();
+          closeSearch();
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => ApplicationDetailScreen(
@@ -473,22 +641,29 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: isOverdue
-                          ? const Color(0xFFEF4444).withValues(alpha: 0.12)
-                          : AppColors.warning.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Text(
-                      isOverdue ? 'Terlewat' : log.result,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: isOverdue ? const Color(0xFFEF4444) : AppColors.warning,
-                      ),
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final badgeColor = _getLogResultColor(log.result, isOverdue: isOverdue);
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            color: badgeColor.withValues(alpha: 0.3),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          isOverdue ? 'Terlewat' : log.result,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: badgeColor,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -581,6 +756,31 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         ),
       ),
     );
+  }
+
+  Color _getLogResultColor(String result, {bool isOverdue = false}) {
+    if (isOverdue) return const Color(0xFFEF4444);
+    switch (result.trim().toLowerCase()) {
+      case 'lolos':
+      case 'selesai':
+      case 'passed':
+      case 'done':
+        return const Color(0xFF10B981);
+      case 'diterima':
+      case 'offering':
+      case 'accepted':
+        return const Color(0xFF059669);
+      case 'gagal':
+      case 'ditolak':
+      case 'failed':
+      case 'rejected':
+      case 'tidak lolos':
+        return const Color(0xFFEF4444);
+      case 'waiting':
+      case 'menunggu':
+      default:
+        return const Color(0xFFF59E0B);
+    }
   }
 }
 

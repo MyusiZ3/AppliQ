@@ -687,11 +687,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader(bool isDark) {
-    final displayName = _userProfile?.fullName.isNotEmpty == true
+    final rawName = _userProfile?.fullName.isNotEmpty == true
         ? _userProfile!.fullName
         : 'Pencari Karir';
+    final displayName =
+        rawName.length > 12 ? '${rawName.substring(0, 12)}...' : rawName;
     final initialLetter =
-        displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+        rawName.isNotEmpty ? rawName[0].toUpperCase() : 'U';
     final greeting = _getDynamicGreeting();
 
     return Row(
@@ -791,23 +793,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        // Action Buttons (Calendar/Schedule & Notification)
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(CupertinoIcons.calendar, size: 22),
-              color: isDark ? Colors.white : const Color(0xFF18181B),
-              onPressed: () => widget.onNavigateToTab?.call(2),
-            ),
-            IconButton(
-              icon: const Icon(CupertinoIcons.bell, size: 22),
-              color: isDark ? Colors.white : const Color(0xFF18181B),
-              onPressed: () {
-                UIHelper.showInfoSnackBar(
-                    context, 'Tidak ada pengingat jadwal mendesak hari ini.');
-              },
-            ),
-          ],
+        // Action Button (Notification only)
+        IconButton(
+          icon: const Icon(CupertinoIcons.bell, size: 22),
+          color: isDark ? Colors.white : const Color(0xFF18181B),
+          onPressed: () {
+            UIHelper.showInfoSnackBar(
+                context, 'Tidak ada pengingat jadwal mendesak hari ini.');
+          },
         ),
       ],
     );

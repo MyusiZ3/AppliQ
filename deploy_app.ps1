@@ -1,14 +1,15 @@
 # ==========================================
-# AppliQ - Auto Deploy (GitHub Pages & Releases)
+# AppliQ - Auto Build & GitHub Release
 # ==========================================
 
-Write-Host "--- Memulai proses Auto-Deploy AppliQ ke GitHub ---" -ForegroundColor Cyan
+Write-Host "--- Memulai proses Build & Release AppliQ ---" -ForegroundColor Cyan
 
 # 1. Ambil Versi dari pubspec.yaml
 $pubspec = Get-Content "pubspec.yaml" -Raw
 if ($pubspec -match "version:\s*([^\s#]+)") {
-    $versionName = $Matches[1].Trim()
-    Write-Host "[OK] Versi terdeteksi: $versionName" -ForegroundColor Green
+    $fullVersion = $Matches[1].Trim()
+    $versionName = ($fullVersion -split '\+')[0]
+    Write-Host "[OK] Versi terdeteksi: $versionName (Build: $fullVersion)" -ForegroundColor Green
 } else {
     Write-Host "[ERROR] Gagal membaca versi dari pubspec.yaml" -ForegroundColor Red
     exit
@@ -54,40 +55,15 @@ if ($shouldBuild) {
 }
 
 # 3. Bersihkan Folder Public
-Write-Host "--- Membersihkan file lama di folder public ---" -ForegroundColor Yellow
-if (!(Test-Path "public")) { New-Item -ItemType Directory -Path "public" }
-
-Remove-Item "public\AppliQ_*.bin" -ErrorAction SilentlyContinue
-Remove-Item "public\*.apk" -ErrorAction SilentlyContinue
-Remove-Item "public\app.bin" -ErrorAction SilentlyContinue
+if (Test-Path "public") {
+    Remove-Item "public\AppliQ_*.bin" -ErrorAction SilentlyContinue
+    Remove-Item "public\*.apk" -ErrorAction SilentlyContinue
+    Remove-Item "public\app.bin" -ErrorAction SilentlyContinue
+}
 
 $apkSource = "build\app\outputs\flutter-apk\app-release.apk"
 
-# 4. Sinkronisasi Versi di Landing Page (public\index.html)
-Write-Host "--- Sinkronisasi Versi di Landing Page ---" -ForegroundColor Yellow
-$indexPath = "public\index.html"
-if (Test-Path $indexPath) {
-    $content = Get-Content $indexPath -Raw
-    $newContent = $content
-    
-    # Ganti placeholder {{VERSION}} jika ada
-    if ($newContent -match "\{\{VERSION\}\}") {
-        $newContent = $newContent -replace "\{\{VERSION\}\}", $versionName
-        Write-Host "[INFO] Placeholder {{VERSION}} ditemukan dan diperbarui." -ForegroundColor Cyan
-    } 
-    # Jika tidak ada placeholder, cari versi lama dan timpa
-    elseif ($lastVersion -and ($newContent -match [regex]::Escape($lastVersion))) {
-        $newContent = $newContent -replace [regex]::Escape($lastVersion), $versionName
-        Write-Host "[INFO] Versi lama $lastVersion ditemukan dan diperbarui ke $versionName." -ForegroundColor Cyan
-    }
-    else {
-        Write-Host "[WARN] Tidak ditemukan placeholder {{VERSION}} atau versi lama di index.html. Sinkronisasi dilewati." -ForegroundColor Yellow
-    }
-
-    $newContent | Set-Content $indexPath -NoNewline
-}
-
-# 5. Buat GitHub Release dan Upload File APK
+# 4. Buat GitHub Release dan Upload File APK
 Write-Host "--- Membuat GitHub Release (v$versionName) ---" -ForegroundColor Yellow
 
 if (Get-Command gh -ErrorAction SilentlyContinue) {
@@ -119,18 +95,5 @@ if (Test-Path $ghPath) {
     Write-Host "[WARN] GitHub CLI ($ghPath) tidak ditemukan. Melewati upload release." -ForegroundColor Yellow
 }
 
-# 6. Deploy Landing Page ke GitHub Pages (via gh-pages branch)
-Write-Host "--- Deploy Landing Page ke GitHub Pages ---" -ForegroundColor Yellow
-try {
-    # Commit perubahan public folder ke branch saat ini jika ada
-    git add public/index.html .github/workflows/deploy-pages.yml
-    git commit -m "chore(release): sync landing page for v$versionName" 2>$null
-    git push origin main 2>$null
-    Write-Host "[OK] Landing page ter-push ke repository! GitHub Actions akan men-deploy ke GitHub Pages." -ForegroundColor Green
-} catch {
-    Write-Host "[INFO] Melewati auto push git." -ForegroundColor Gray
-}
-
-Write-Host "`n[OK] Selesai! Versi AppliQ tersinkronisasi (v$versionName)" -ForegroundColor DarkGreen
-Write-Host "Link Web Landing Page  : https://myusiz3.github.io/AppliQ/" -ForegroundColor Cyan
+Write-Host "`n[OK] Selesai! Versi AppliQ v$versionName siap." -ForegroundColor DarkGreen
 Write-Host "Link Download APK Rilis: https://github.com/MyusiZ3/AppliQ/releases/download/v$versionName/app-release.apk" -ForegroundColor Cyan

@@ -74,8 +74,9 @@ class GoogleDriveService {
       final rootFolder = await driveApi.files.create(
         drive.File()
           ..name = 'AppliQ'
+          ..parents = ['root']
           ..mimeType = 'application/vnd.google-apps.folder',
-        $fields: 'id, name',
+        $fields: 'id, name, parents',
       );
       appliQFolderId = rootFolder.id!;
     }

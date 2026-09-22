@@ -118,15 +118,26 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   }
 
   Future<void> _updateLogResult(ApplicationLog log, String newResult) async {
+    final prevLogs = List<ApplicationLog>.from(_logs);
+    final updated = log.copyWith(result: newResult);
+    setState(() {
+      final index = _logs.indexWhere((l) => l.id == log.id);
+      if (index != -1) {
+        _logs[index] = updated;
+      }
+    });
+
     try {
-      final updated = log.copyWith(result: newResult);
       await widget.repository.updateApplicationLog(updated);
       if (mounted) {
         UIHelper.showSuccessSnackBar(context, 'Status tahap "${log.stageName}" diubah ke $newResult');
         _loadData();
       }
     } catch (e) {
-      if (mounted) UIHelper.handleError(context, e);
+      if (mounted) {
+        setState(() => _logs = prevLogs);
+        UIHelper.handleError(context, e);
+      }
     }
   }
 
@@ -330,12 +341,23 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     );
   }
 
-  Future<void> _showAddStageSheet() async {
-    final stageNameController = TextEditingController();
-    final interviewerController = TextEditingController();
-    final linkController = TextEditingController();
-    final notesController = TextEditingController();
-    DateTime scheduledDate = DateTime.now().add(const Duration(days: 1));
+  void _showAddStageSheet() => _showStageFormSheet();
+
+  void _showEditStageSheet(ApplicationLog log) => _showStageFormSheet(logToEdit: log);
+
+  Future<void> _showStageFormSheet({ApplicationLog? logToEdit}) async {
+    final isEditing = logToEdit != null;
+    final stageNameController =
+        TextEditingController(text: logToEdit?.stageName ?? '');
+    final interviewerController =
+        TextEditingController(text: logToEdit?.interviewerName ?? '');
+    final linkController =
+        TextEditingController(text: logToEdit?.meetingLink ?? '');
+    final notesController =
+        TextEditingController(text: logToEdit?.notes ?? '');
+    DateTime scheduledDate = logToEdit?.scheduledAt ??
+        DateTime.now().add(const Duration(days: 1));
+    String selectedResult = logToEdit?.result ?? 'Waiting';
     bool isSubmitting = false;
 
     final quickStages = [
@@ -344,6 +366,14 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       'User Interview',
       'Final Interview',
       'Offering Call',
+    ];
+
+    final resultsList = [
+      'Waiting',
+      'Lolos',
+      'Selesai',
+      'Diterima',
+      'Gagal',
     ];
 
     await showModalBottomSheet(
@@ -396,7 +426,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         ),
                         const SizedBox(height: 8),
 
-                        // iOS Nav Header: [Batal] [Tahap Baru] [Simpan]
+                        // iOS Nav Header: [Batal] [Judul] [Simpan]
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Row(
@@ -423,7 +453,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                 ),
                               ),
                               Text(
-                                'Tahap Baru',
+                                isEditing ? 'Edit Tahap' : 'Tahap Baru',
                                 style: TextStyle(
                                   fontSize: 16.5,
                                   fontWeight: FontWeight.w700,
@@ -450,46 +480,88 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                         HapticFeedback.mediumImpact();
 
                                         try {
-                                          final log = ApplicationLog(
-                                            id: '',
-                                            applicationId:
-                                                widget.applicationId,
-                                            userId: '',
-                                            stageName: stageNameController
-                                                .text
-                                                .trim(),
-                                            scheduledAt: scheduledDate,
-                                            interviewerName:
-                                                interviewerController
-                                                        .text
-                                                        .trim()
-                                                        .isEmpty
-                                                    ? null
-                                                    : interviewerController
-                                                        .text
-                                                        .trim(),
-                                            meetingLink: linkController
-                                                    .text
-                                                    .trim()
-                                                    .isEmpty
-                                                ? null
-                                                : linkController.text
-                                                    .trim(),
-                                            notes: notesController
-                                                    .text
-                                                    .trim()
-                                                    .isEmpty
-                                                ? null
-                                                : notesController.text
-                                                    .trim(),
-                                          );
-                                          await widget.repository
-                                              .createApplicationLog(log);
-                                          if (context.mounted) {
-                                            Navigator.of(context).pop();
-                                            UIHelper.showSuccessSnackBar(
-                                                context,
-                                                'Tahap wawancara berhasil ditambahkan');
+                                          if (isEditing) {
+                                            final updatedLog =
+                                                logToEdit.copyWith(
+                                              stageName: stageNameController
+                                                  .text
+                                                  .trim(),
+                                              scheduledAt: scheduledDate,
+                                              interviewerName:
+                                                  interviewerController
+                                                          .text
+                                                          .trim()
+                                                          .isEmpty
+                                                      ? null
+                                                      : interviewerController
+                                                          .text
+                                                          .trim(),
+                                              meetingLink: linkController
+                                                      .text
+                                                      .trim()
+                                                      .isEmpty
+                                                  ? null
+                                                  : linkController.text
+                                                      .trim(),
+                                              notes: notesController.text
+                                                      .trim()
+                                                      .isEmpty
+                                                  ? null
+                                                  : notesController.text
+                                                      .trim(),
+                                              result: selectedResult,
+                                            );
+                                            await widget.repository
+                                                .updateApplicationLog(
+                                                    updatedLog);
+                                            if (context.mounted) {
+                                              Navigator.of(context).pop();
+                                              UIHelper.showSuccessSnackBar(
+                                                  context,
+                                                  'Tahap rekrutmen berhasil diperbarui');
+                                            }
+                                          } else {
+                                            final log = ApplicationLog(
+                                              id: '',
+                                              applicationId:
+                                                  widget.applicationId,
+                                              userId: '',
+                                              stageName: stageNameController
+                                                  .text
+                                                  .trim(),
+                                              scheduledAt: scheduledDate,
+                                              interviewerName:
+                                                  interviewerController
+                                                          .text
+                                                          .trim()
+                                                          .isEmpty
+                                                      ? null
+                                                      : interviewerController
+                                                          .text
+                                                          .trim(),
+                                              meetingLink: linkController
+                                                      .text
+                                                      .trim()
+                                                      .isEmpty
+                                                  ? null
+                                                  : linkController.text
+                                                      .trim(),
+                                              notes: notesController.text
+                                                      .trim()
+                                                      .isEmpty
+                                                  ? null
+                                                  : notesController.text
+                                                      .trim(),
+                                              result: selectedResult,
+                                            );
+                                            await widget.repository
+                                                .createApplicationLog(log);
+                                            if (context.mounted) {
+                                              Navigator.of(context).pop();
+                                              UIHelper.showSuccessSnackBar(
+                                                  context,
+                                                  'Tahap wawancara berhasil ditambahkan');
+                                            }
                                           }
                                           _loadData();
                                         } catch (e) {
@@ -507,8 +579,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                       ? SizedBox(
                                           width: 16,
                                           height: 16,
-                                          child:
-                                              CircularProgressIndicator(
+                                          child: CircularProgressIndicator(
                                             strokeWidth: 2,
                                             color: isDark
                                                 ? Colors.white
@@ -659,7 +730,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         ),
                         const SizedBox(height: 8),
 
-                        // Inset Grouped Form Card (Matching Screenshot exactly)
+                        // Inset Grouped Form Card
                         Padding(
                           padding:
                               const EdgeInsets.symmetric(horizontal: 20),
@@ -894,6 +965,104 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             ),
                           ),
                         ),
+
+                        // Section 3: STATUS HASIL TAHAP
+                        if (isEditing) ...[
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Text(
+                              'STATUS HASIL TAHAP',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                                color: isDark
+                                    ? AppColors.textHintDark
+                                    : AppColors.textHint,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: insetBg,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                    color: borderColor, width: 0.8),
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: resultsList.map((res) {
+                                    final isSelected = selectedResult == res;
+                                    final resColor = _getLogResultColor(res);
+                                    return GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setSheetState(() => selectedResult = res);
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 7),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? resColor.withValues(alpha: 0.18)
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? resColor
+                                                : Colors.transparent,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: 7,
+                                              height: 7,
+                                              decoration: BoxDecoration(
+                                                color: resColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              res,
+                                              style: TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? (isDark
+                                                        ? Colors.white
+                                                        : const Color(
+                                                            0xFF18181B))
+                                                    : (isDark
+                                                        ? AppColors
+                                                            .textSecondaryDark
+                                                        : AppColors
+                                                            .textSecondary),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 32),
                       ],
                     ),
@@ -1491,40 +1660,121 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          IconButton(
-                            icon: const Icon(CupertinoIcons.trash, size: 16),
+                          PopupMenuButton<String>(
+                            icon: Icon(
+                              CupertinoIcons.ellipsis_vertical,
+                              size: 16,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondary,
+                            ),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
-                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                            onPressed: () async {
-                              final confirm = await showCupertinoDialog<bool>(
-                                context: context,
-                                builder: (ctx) => CupertinoAlertDialog(
-                                  title: const Text('Hapus Tahap?'),
-                                  content: Text('Hapus tahap "${log.stageName}" dari lamaran ini?'),
-                                  actions: [
-                                    CupertinoDialogAction(
-                                      child: const Text('Batal'),
-                                      onPressed: () => Navigator.pop(ctx, false),
-                                    ),
-                                    CupertinoDialogAction(
-                                      isDestructiveAction: true,
-                                      child: const Text('Hapus'),
-                                      onPressed: () => Navigator.pop(ctx, true),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirm == true) {
-                                try {
-                                  await widget.repository.deleteApplicationLog(log.id);
-                                  UIHelper.showGlobalSuccessToast('Tahap berhasil dihapus');
-                                  _loadData();
-                                } catch (e) {
-                                  UIHelper.showGlobalErrorToast(UIHelper.parseErrorMessage(e));
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              side: BorderSide(
+                                color: isDark
+                                    ? AppColors.borderDark
+                                    : AppColors.borderLight,
+                                width: 0.8,
+                              ),
+                            ),
+                            color: isDark
+                                ? const Color(0xFF1E1E22)
+                                : Colors.white,
+                            elevation: 8,
+                            onSelected: (value) async {
+                              HapticFeedback.selectionClick();
+                              if (value == 'edit') {
+                                _showEditStageSheet(log);
+                              } else if (value == 'delete') {
+                                final confirm =
+                                    await showCupertinoDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => CupertinoAlertDialog(
+                                    title: const Text('Hapus Tahap?'),
+                                    content: Text(
+                                        'Hapus tahap "${log.stageName}" dari lamaran ini?'),
+                                    actions: [
+                                      CupertinoDialogAction(
+                                        child: const Text('Batal'),
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, false),
+                                      ),
+                                      CupertinoDialogAction(
+                                        isDestructiveAction: true,
+                                        child: const Text('Hapus'),
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, true),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  try {
+                                    await widget.repository
+                                        .deleteApplicationLog(log.id);
+                                    UIHelper.showGlobalSuccessToast(
+                                        'Tahap berhasil dihapus');
+                                    _loadData();
+                                  } catch (e) {
+                                    UIHelper.showGlobalErrorToast(
+                                        UIHelper.parseErrorMessage(e));
+                                  }
                                 }
                               }
                             },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                height: 38,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.pencil,
+                                      size: 15,
+                                      color: isDark
+                                          ? AppColors.textPrimaryDark
+                                          : AppColors.textPrimary,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Edit Tahap',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? AppColors.textPrimaryDark
+                                            : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuDivider(height: 1),
+                              PopupMenuItem(
+                                value: 'delete',
+                                height: 38,
+                                child: Row(
+                                  children: const [
+                                    Icon(
+                                      CupertinoIcons.trash,
+                                      size: 15,
+                                      color: AppColors.expense,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Hapus Tahap',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.expense,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -1627,7 +1877,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   }
 
   Color _getLogResultColor(String result) {
-    switch (result.toLowerCase()) {
+    switch (result.trim().toLowerCase()) {
       case 'lolos':
       case 'selesai':
       case 'passed':
@@ -1636,16 +1886,17 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       case 'diterima':
       case 'offering':
       case 'accepted':
-        return const Color(0xFFF59E0B);
+        return const Color(0xFF059669);
       case 'gagal':
       case 'ditolak':
       case 'failed':
       case 'rejected':
+      case 'tidak lolos':
         return const Color(0xFFEF4444);
       case 'waiting':
       case 'menunggu':
       default:
-        return AppColors.warning;
+        return const Color(0xFFF59E0B);
     }
   }
 

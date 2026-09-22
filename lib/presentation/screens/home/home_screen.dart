@@ -20,6 +20,7 @@ import '../../widgets/export_sheet.dart';
 import '../../widgets/notification_sheet.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../widgets/app_avatar.dart';
 import '../../../services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -124,6 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
             id: log.id.hashCode,
             company: app.companyName,
             position: app.positionTitle,
+            stageName: log.stageName,
             scheduledAt: log.scheduledAt!,
             remindMinutesBefore: 60,
           );
@@ -719,48 +721,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Row(
       children: [
         // Avatar with Tap to open Profile
-        GestureDetector(
+        AppAvatar(
+          url: _userProfile?.avatarUrl,
+          radius: 23,
+          isDark: isDark,
+          fallbackName: _userProfile?.fullName,
           onTap: _openProfile,
-          child: Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color:
-                    isDark ? const Color(0x33FFFFFF) : const Color(0x1F000000),
-                width: 1,
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: _userProfile?.avatarUrl.isNotEmpty == true
-                ? Image.network(
-                    _userProfile!.avatarUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Center(
-                      child: Text(
-                        initialLetter,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color:
-                              isDark ? Colors.white : const Color(0xFF18181B),
-                        ),
-                      ),
-                    ),
-                  )
-                : Center(
-                    child: Text(
-                      initialLetter,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
-                      ),
-                    ),
-                  ),
-          ),
         ),
         const SizedBox(width: 12),
         // Name & Dynamic Greeting

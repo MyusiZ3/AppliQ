@@ -45,7 +45,11 @@ class SupabaseJobRepository implements JobRepository {
           .maybeSingle();
 
       if (data != null) {
-        _cachedProfile = UserProfile.fromJson(data);
+        final profile = UserProfile.fromJson(data);
+        final googleAvatar = user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'] ?? '';
+        _cachedProfile = profile.copyWith(
+          avatarUrl: profile.avatarUrl.isNotEmpty ? profile.avatarUrl : googleAvatar,
+        );
         return _cachedProfile;
       }
       
@@ -226,7 +230,8 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<JobApplication> updateApplication(JobApplication application) async {
-    final updateData = {
+    final userId = _supabase.auth.currentUser?.id;
+    final updateData = <String, dynamic>{
       'company_name': application.companyName,
       'position_title': application.positionTitle,
       'location': application.location,
@@ -250,9 +255,9 @@ class SupabaseJobRepository implements JobRepository {
         .update(updateData)
         .eq('id', application.id)
         .select()
-        .single();
+        .maybeSingle();
 
-    final result = JobApplication.fromJson(response);
+    final result = response != null ? JobApplication.fromJson(response) : application;
     
     // Update local cache directly
     if (_cachedApplications != null) {
@@ -358,10 +363,10 @@ class SupabaseJobRepository implements JobRepository {
         .from('application_logs')
         .insert(json)
         .select()
-        .single();
+        .maybeSingle();
 
-    final result = ApplicationLog.fromJson(response);
-    _cachedLogs[log.applicationId]?.add(result);
+    final result = response != null ? ApplicationLog.fromJson(response) : log;
+    _cachedLogs.putIfAbsent(log.applicationId, () => []).add(result);
     _cachedAllLogs?.add(result);
     notifyDataChanged();
     return result;
@@ -369,7 +374,7 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<ApplicationLog> updateApplicationLog(ApplicationLog log) async {
-    final updateData = {
+    final updateData = <String, dynamic>{
       'stage_name': log.stageName,
       'scheduled_at': log.scheduledAt?.toIso8601String(),
       'interviewer_name': log.interviewerName,
@@ -383,9 +388,9 @@ class SupabaseJobRepository implements JobRepository {
         .update(updateData)
         .eq('id', log.id)
         .select()
-        .single();
+        .maybeSingle();
 
-    final result = ApplicationLog.fromJson(response);
+    final result = response != null ? ApplicationLog.fromJson(response) : log;
     if (_cachedLogs.containsKey(log.applicationId)) {
       final index = _cachedLogs[log.applicationId]!.indexWhere((l) => l.id == log.id);
       if (index != -1) {

@@ -36,6 +36,10 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   late TextEditingController _salaryOfferedController;
   late TextEditingController _notesController;
 
+  final FocusNode _companyFocusNode = FocusNode();
+  final FocusNode _positionFocusNode = FocusNode();
+  final FocusNode _locationFocusNode = FocusNode();
+
   late EmploymentType _employmentType;
   late WorkSystem _workSystem;
   late JobPortal _jobPortal;
@@ -45,6 +49,98 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   String? _cvFileUrl;
   bool _isUploadingDrive = false;
   bool _isLoading = false;
+  bool _showAllPortals = false;
+
+  Set<String> _userCompanies = {};
+  Set<String> _userPositions = {};
+  Set<String> _userLocations = {};
+
+  static const List<String> _defaultCompanies = [
+    // Top Indonesian Startups & Tech
+    'GoTo', 'Tokopedia', 'Gojek', 'Shopee Indonesia', 'Traveloka', 'Grab Indonesia',
+    'Blibli', 'Bukalapak', 'TikTok Indonesia', 'ByteDance', 'Lazada Indonesia',
+    'DANA Indonesia', 'OVO', 'Xendit', 'Midtrans', 'Tiket.com', 'Kredivo',
+    'Ajaib', 'Bibit', 'Stockbit', 'Ruangguru', 'Halodoc', 'Alodokter',
+    'Sirclo', 'Mekari', 'Pinhome', 'Sayurbox', 'eFishery', 'Kopi Kenangan',
+    // Banking & Finance
+    'Bank Central Asia (BCA)', 'Bank Mandiri', 'Bank Rakyat Indonesia (BRI)',
+    'Bank Negara Indonesia (BNI)', 'Bank Syariah Indonesia (BSI)', 'Bank Danamon',
+    'Bank CIMB Niaga', 'Bank Jago', 'Jenius (BTPN)', 'SeaBank', 'Blu by BCA Digital',
+    // BUMN, Telco & Energy
+    'Telkom Indonesia', 'Telkomsel', 'Pertamina', 'PLN', 'Pegadaian',
+    'Kereta Api Indonesia (KAI)', 'Garuda Indonesia', 'Pelindo', 'Adaro Energy',
+    'Freeport Indonesia', 'Vale Indonesia', 'Aneka Tambang (Antam)',
+    // FMCG, Healthcare & Conglomerates
+    'Astra International', 'Unilever Indonesia', 'Indofood', 'Mayora Indah',
+    'Kalbe Farma', 'Djarum', 'Wings Group', 'Paragon Technology and Innovation',
+    'Nutrifood', 'HM Sampoerna',
+    // Consulting & Professional Services
+    'McKinsey & Company', 'Boston Consulting Group (BCG)', 'Bain & Company',
+    'PwC Indonesia', 'EY (Ernst & Young)', 'Deloitte Indonesia', 'KPMG Indonesia', 'Accenture',
+    // Big Tech & Global
+    'Google', 'Microsoft', 'Amazon (AWS)', 'Meta', 'Apple', 'Canva', 'Spotify',
+  ];
+
+  static const List<String> _defaultPositions = [
+    'Software Engineer', 'Frontend Developer', 'Backend Developer', 'Full Stack Developer',
+    'Mobile Developer (Flutter)', 'Mobile Developer (React Native)', 'Android Developer', 'iOS Developer',
+    'UI/UX Designer', 'Product Designer', 'Product Manager', 'Project Manager', 'Scrum Master',
+    'Data Analyst', 'Data Scientist', 'Data Engineer', 'AI / ML Engineer',
+    'DevOps Engineer', 'Cloud Engineer', 'QA / Quality Assurance Engineer', 'Cyber Security Specialist',
+    'Digital Marketing Specialist', 'Content Creator / Specialist', 'Social Media Specialist', 'SEO Specialist',
+    'Human Resources (HR / HRGA)', 'Talent Acquisition / Recruiter', 'Finance & Accounting Specialist',
+    'Business Development / Sales', 'Account Executive', 'Customer Success / Support',
+    'Operations Specialist', 'Graphic Designer', 'Copywriter',
+  ];
+
+  static const List<String> _defaultLocations = [
+    'Jakarta Selatan', 'Jakarta Pusat', 'Jakarta Barat', 'Jakarta Timur', 'Jakarta Utara',
+    'DKI Jakarta', 'Tangerang', 'Tangerang Selatan (BSD / Bintaro)', 'Bekasi', 'Depok', 'Bogor',
+    'Bandung', 'Cimahi', 'Karawang', 'Cirebon',
+    'Semarang', 'Solo / Surakarta', 'Yogyakarta (DIY)', 'Sleman',
+    'Surabaya', 'Sidoarjo', 'Malang', 'Denpasar, Bali',
+    'Medan', 'Palembang', 'Batam', 'Pekanbaru', 'Bandar Lampung',
+    'Balikpapan', 'Samarinda', 'Banjarmasin', 'Pontianak',
+    'Makassar', 'Manado',
+    'Remote (Indonesia)', 'Remote (Worldwide / Global)', 'Hybrid (Jakarta)', 'Hybrid (Bandung)', 'Hybrid (Surabaya)',
+    'Singapura', 'Kuala Lumpur, Malaysia',
+  ];
+
+  List<String> get _combinedCompanySuggestions {
+    final seen = <String>{};
+    final list = <String>[];
+    for (final c in _userCompanies) {
+      if (seen.add(c.toLowerCase())) list.add(c);
+    }
+    for (final c in _defaultCompanies) {
+      if (seen.add(c.toLowerCase())) list.add(c);
+    }
+    return list;
+  }
+
+  List<String> get _combinedPositionSuggestions {
+    final seen = <String>{};
+    final list = <String>[];
+    for (final p in _userPositions) {
+      if (seen.add(p.toLowerCase())) list.add(p);
+    }
+    for (final p in _defaultPositions) {
+      if (seen.add(p.toLowerCase())) list.add(p);
+    }
+    return list;
+  }
+
+  List<String> get _combinedLocationSuggestions {
+    final seen = <String>{};
+    final list = <String>[];
+    for (final l in _userLocations) {
+      if (seen.add(l.toLowerCase())) list.add(l);
+    }
+    for (final l in _defaultLocations) {
+      if (seen.add(l.toLowerCase())) list.add(l);
+    }
+    return list;
+  }
 
   @override
   void initState() {
@@ -76,6 +172,41 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     _appliedDate = app?.appliedDate ?? DateTime.now();
     _cvFileName = app?.cvFileName;
     _cvFileUrl = app?.cvFileUrl;
+
+    const topPortals = [
+      JobPortal.linkedIn,
+      JobPortal.jobStreet,
+      JobPortal.glints,
+      JobPortal.kalibrr,
+      JobPortal.dealls,
+      JobPortal.referral,
+    ];
+    if (!topPortals.contains(_jobPortal)) {
+      _showAllPortals = true;
+    }
+
+    _loadHistoricalSuggestions();
+  }
+
+  Future<void> _loadHistoricalSuggestions() async {
+    try {
+      final apps = await widget.repository.getApplications(forceRefresh: false);
+      if (!mounted) return;
+      setState(() {
+        _userCompanies = apps
+            .map((a) => a.companyName.trim())
+            .where((name) => name.isNotEmpty)
+            .toSet();
+        _userPositions = apps
+            .map((a) => a.positionTitle.trim())
+            .where((p) => p.isNotEmpty)
+            .toSet();
+        _userLocations = apps
+            .map((a) => a.location?.trim() ?? '')
+            .where((loc) => loc.isNotEmpty)
+            .toSet();
+      });
+    } catch (_) {}
   }
 
   @override
@@ -88,6 +219,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     _salaryExpectationController.dispose();
     _salaryOfferedController.dispose();
     _notesController.dispose();
+    _companyFocusNode.dispose();
+    _positionFocusNode.dispose();
+    _locationFocusNode.dispose();
     super.dispose();
   }
 
@@ -287,34 +421,43 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               icon: CupertinoIcons.building_2_fill,
               isDark: isDark,
               children: [
-                _buildTextField(
+                _buildAutocompleteTextField(
                   controller: _companyController,
+                  focusNode: _companyFocusNode,
                   label: 'Nama Perusahaan *',
-                  hint: 'e.g. PT Maju Bersama',
+                  hint: 'e.g. GoTo, Shopee, BCA, Telkom',
                   icon: CupertinoIcons.building_2_fill,
                   isDark: isDark,
+                  allSuggestions: _combinedCompanySuggestions,
+                  userHistory: _userCompanies,
                   validator: (v) => v == null || v.trim().isEmpty
                       ? 'Nama perusahaan wajib diisi'
                       : null,
                 ),
                 const SizedBox(height: 14),
-                _buildTextField(
+                _buildAutocompleteTextField(
                   controller: _positionController,
+                  focusNode: _positionFocusNode,
                   label: 'Posisi / Role *',
                   hint: 'e.g. Software Engineer, Finance Staff',
                   icon: CupertinoIcons.briefcase_fill,
                   isDark: isDark,
+                  allSuggestions: _combinedPositionSuggestions,
+                  userHistory: _userPositions,
                   validator: (v) => v == null || v.trim().isEmpty
                       ? 'Posisi pekerjaan wajib diisi'
                       : null,
                 ),
                 const SizedBox(height: 14),
-                _buildTextField(
+                _buildAutocompleteTextField(
                   controller: _locationController,
+                  focusNode: _locationFocusNode,
                   label: 'Lokasi Perusahaan',
-                  hint: 'e.g. Jakarta Selatan, Remote',
+                  hint: 'e.g. Jakarta Selatan, BSD, Remote',
                   icon: CupertinoIcons.location_solid,
                   isDark: isDark,
+                  allSuggestions: _combinedLocationSuggestions,
+                  userHistory: _userLocations,
                 ),
               ],
             ),
@@ -384,40 +527,56 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 const SizedBox(height: 16),
                 _buildLabel('Sistem Kerja', isDark),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: WorkSystem.values.map((sys) {
                     final isSelected = _workSystem == sys;
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() => _workSystem = sys);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          padding: const EdgeInsets.symmetric(vertical: 9),
-                          decoration: BoxDecoration(
+                    final icon = _getWorkSystemIcon(sys);
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _workSystem = sys);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? (isDark
+                                  ? Colors.white
+                                  : const Color(0xFF18181B))
+                              : (isDark
+                                  ? const Color(0xFF27272A)
+                                  : const Color(0xFFF4F4F5)),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
                             color: isSelected
                                 ? (isDark
                                     ? Colors.white
                                     : const Color(0xFF18181B))
                                 : (isDark
-                                    ? const Color(0xFF27272A)
-                                    : const Color(0xFFF4F4F5)),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
+                                    ? AppColors.borderDark
+                                    : AppColors.borderLight),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              icon,
+                              size: 14,
                               color: isSelected
                                   ? (isDark
-                                      ? Colors.white
-                                      : const Color(0xFF18181B))
+                                      ? const Color(0xFF18181B)
+                                      : Colors.white)
                                   : (isDark
-                                      ? AppColors.borderDark
-                                      : AppColors.borderLight),
-                              width: 0.8,
+                                      ? AppColors.textSecondaryDark
+                                      : AppColors.textSecondary),
                             ),
-                          ),
-                          child: Center(
-                            child: Text(
+                            const SizedBox(width: 6),
+                            Text(
                               sys.label,
                               style: TextStyle(
                                 fontSize: 12.5,
@@ -433,7 +592,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                                         : AppColors.textPrimary),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     );
@@ -521,64 +680,174 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               children: [
                 _buildLabel('Pilih Portal Loker', isDark),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: JobPortal.values.map((portal) {
-                    final isSelected = _jobPortal == portal;
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _jobPortal = portal);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? (isDark
-                                  ? Colors.white
-                                  : const Color(0xFF18181B))
-                              : (isDark
-                                  ? const Color(0xFF27272A)
-                                  : const Color(0xFFF4F4F5)),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: isSelected
-                                ? (isDark
-                                    ? Colors.white
-                                    : const Color(0xFF18181B))
-                                : (isDark
+                Builder(
+                  builder: (context) {
+                    const topPortals = [
+                      JobPortal.linkedIn,
+                      JobPortal.jobStreet,
+                      JobPortal.glints,
+                      JobPortal.kalibrr,
+                      JobPortal.dealls,
+                      JobPortal.referral,
+                    ];
+
+                    final visiblePortals = _showAllPortals
+                        ? JobPortal.values
+                        : (topPortals.contains(_jobPortal)
+                            ? topPortals
+                            : [...topPortals, _jobPortal]);
+
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ...visiblePortals.map((portal) {
+                          final isSelected = _jobPortal == portal;
+                          final icon = _getJobPortalIcon(portal);
+                          return GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _jobPortal = portal);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? (isDark
+                                        ? Colors.white
+                                        : const Color(0xFF18181B))
+                                    : (isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF4F4F5)),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? (isDark
+                                          ? Colors.white
+                                          : const Color(0xFF18181B))
+                                      : (isDark
+                                          ? AppColors.borderDark
+                                          : AppColors.borderLight),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    icon,
+                                    size: 14,
+                                    color: isSelected
+                                        ? (isDark
+                                            ? const Color(0xFF18181B)
+                                            : Colors.white)
+                                        : (isDark
+                                            ? AppColors.textSecondaryDark
+                                            : AppColors.textSecondary),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    portal.label,
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? (isDark
+                                              ? const Color(0xFF18181B)
+                                              : Colors.white)
+                                          : (isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                        // Show More / Show Less Toggle Button
+                        GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _showAllPortals = !_showAllPortals);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF3F3F46).withValues(alpha: 0.35)
+                                  : const Color(0xFFE4E4E7).withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
                                     ? AppColors.borderDark
-                                    : AppColors.borderLight),
-                            width: 0.8,
+                                    : AppColors.borderLight,
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _showAllPortals
+                                      ? 'Lebih Sedikit'
+                                      : '+${JobPortal.values.length - topPortals.length} Opsi Lainnya',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? AppColors.textSecondaryDark
+                                        : AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  _showAllPortals
+                                      ? CupertinoIcons.chevron_up
+                                      : CupertinoIcons.chevron_down,
+                                  size: 11,
+                                  color: isDark
+                                      ? AppColors.textSecondaryDark
+                                      : AppColors.textSecondary,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        child: Text(
-                          portal.label,
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight:
-                                isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected
-                                ? (isDark
-                                    ? const Color(0xFF18181B)
-                                    : Colors.white)
-                                : (isDark
-                                    ? AppColors.textPrimaryDark
-                                    : AppColors.textPrimary),
-                          ),
-                        ),
-                      ),
+                      ],
                     );
-                  }).toList(),
+                  },
                 ),
+                if (_jobPortal == JobPortal.referral) ...[
+                  const SizedBox(height: 14),
+                  _buildTextField(
+                    controller: _portalCustomController,
+                    label: 'Nama Pemberi Referensi / Kontak (Opsional)',
+                    hint: 'Contoh: Kak Kevin (Tech Lead di Perusahaan ini)',
+                    icon: CupertinoIcons.person_crop_circle_badge_checkmark,
+                    isDark: isDark,
+                  ),
+                ],
+                if (_jobPortal == JobPortal.directEmail) ...[
+                  const SizedBox(height: 14),
+                  _buildTextField(
+                    controller: _portalCustomController,
+                    label: 'Email / Nama Recruiter (Opsional)',
+                    hint: 'Contoh: recruiter@company.com / HR Talenta',
+                    icon: CupertinoIcons.mail,
+                    isDark: isDark,
+                  ),
+                ],
                 if (_jobPortal == JobPortal.lainnya) ...[
                   const SizedBox(height: 14),
                   _buildTextField(
                     controller: _portalCustomController,
                     label: 'Sebutkan Nama Portal *',
-                    hint: 'e.g. Kalibrr, TechInAsia, Telegram',
+                    hint: 'e.g. Indeed, Glassdoor, Dribbble',
                     icon: CupertinoIcons.link,
                     isDark: isDark,
                     validator: (v) => _jobPortal == JobPortal.lainnya &&
@@ -929,6 +1198,212 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     );
   }
 
+  Widget _buildAutocompleteTextField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String label,
+    required String hint,
+    required IconData icon,
+    required bool isDark,
+    required List<String> allSuggestions,
+    required Set<String> userHistory,
+    String? Function(String?)? validator,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildLabel(label, isDark),
+            const SizedBox(height: 6),
+            RawAutocomplete<String>(
+              textEditingController: controller,
+              focusNode: focusNode,
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                final query = textEditingValue.text.trim().toLowerCase();
+                if (query.isEmpty) {
+                  return const Iterable<String>.empty();
+                }
+                final startsWithList = <String>[];
+                final containsList = <String>[];
+                for (final option in allSuggestions) {
+                  final optLower = option.toLowerCase();
+                  if (optLower.startsWith(query)) {
+                    startsWithList.add(option);
+                  } else if (optLower.contains(query)) {
+                    containsList.add(option);
+                  }
+                }
+                return [...startsWithList, ...containsList].take(5);
+              },
+              onSelected: (String selection) {
+                HapticFeedback.selectionClick();
+                controller.text = selection;
+              },
+              optionsViewBuilder: (context, onSelected, options) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 8,
+                    shadowColor: Colors.black.withValues(alpha: 0.25),
+                    color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: constraints.maxWidth,
+                      constraints: const BoxConstraints(maxHeight: 220),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
+                          width: 0.8,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          separatorBuilder: (context, index) => Divider(
+                            height: 1,
+                            thickness: 0.5,
+                            color: isDark
+                                ? AppColors.borderDark.withValues(alpha: 0.5)
+                                : AppColors.borderLight,
+                          ),
+                          itemBuilder: (BuildContext context, int index) {
+                            final String option = options.elementAt(index);
+                            final isRecent = userHistory.contains(option);
+                            return InkWell(
+                              onTap: () => onSelected(option),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      isRecent ? CupertinoIcons.clock_fill : icon,
+                                      size: 15,
+                                      color: isRecent
+                                          ? AppColors.primary
+                                          : (isDark
+                                              ? AppColors.textHintDark
+                                              : AppColors.textHint),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        option,
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: isRecent
+                                              ? FontWeight.w600
+                                              : FontWeight.w500,
+                                          color: isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isRecent)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary
+                                              .withValues(alpha: 0.15),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        child: const Text(
+                                          'Riwayat',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              fieldViewBuilder: (context, fieldTextEditingController,
+                  fieldFocusNode, onFieldSubmitted) {
+                return TextFormField(
+                  controller: fieldTextEditingController,
+                  focusNode: fieldFocusNode,
+                  validator: validator,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: TextStyle(
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHint,
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      icon,
+                      size: 18,
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHint,
+                    ),
+                    filled: true,
+                    fillColor: isDark
+                        ? const Color(0xFF27272A)
+                        : const Color(0xFFF4F4F5),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? AppColors.borderDark
+                            : AppColors.borderLight,
+                        width: 0.8,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? AppColors.borderDark
+                            : AppColors.borderLight,
+                        width: 0.8,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(
+                          color: AppColors.primary, width: 1.5),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -1043,6 +1518,56 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         ),
       ],
     );
+  }
+
+  IconData _getWorkSystemIcon(WorkSystem sys) {
+    switch (sys) {
+      case WorkSystem.onSite:
+        return CupertinoIcons.building_2_fill;
+      case WorkSystem.hybrid:
+        return CupertinoIcons.arrow_2_squarepath;
+      case WorkSystem.wfh:
+        return CupertinoIcons.house_fill;
+      case WorkSystem.remoteOverseas:
+        return CupertinoIcons.globe;
+      case WorkSystem.flexible:
+        return CupertinoIcons.sparkles;
+    }
+  }
+
+  IconData _getJobPortalIcon(JobPortal portal) {
+    switch (portal) {
+      case JobPortal.linkedIn:
+        return CupertinoIcons.person_2_fill;
+      case JobPortal.jobStreet:
+        return CupertinoIcons.briefcase_fill;
+      case JobPortal.glints:
+        return CupertinoIcons.flame_fill;
+      case JobPortal.kalibrr:
+        return CupertinoIcons.compass_fill;
+      case JobPortal.dealls:
+        return CupertinoIcons.star_fill;
+      case JobPortal.techInAsia:
+        return CupertinoIcons.bolt_fill;
+      case JobPortal.referral:
+        return CupertinoIcons.person_crop_circle_badge_checkmark;
+      case JobPortal.directEmail:
+        return CupertinoIcons.mail_solid;
+      case JobPortal.kitaLulus:
+        return CupertinoIcons.check_mark_circled_solid;
+      case JobPortal.jobFair:
+        return CupertinoIcons.placemark_fill;
+      case JobPortal.website:
+        return CupertinoIcons.globe;
+      case JobPortal.instagram:
+        return CupertinoIcons.camera_fill;
+      case JobPortal.komunitas:
+        return CupertinoIcons.chat_bubble_2_fill;
+      case JobPortal.freelance:
+        return CupertinoIcons.device_laptop;
+      case JobPortal.lainnya:
+        return CupertinoIcons.ellipsis_circle_fill;
+    }
   }
 }
 

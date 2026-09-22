@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -17,6 +18,17 @@ class NotificationService {
       'Notifikasi pengingat jadwal wawancara, tes kerja, dan follow-up lamaran.';
 
   bool _isInitialized = false;
+
+  /// Cek apakah notifikasi diizinkan oleh user di pengaturan profil
+  Future<bool> isEnabled() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isPaused = prefs.getBool('pause_notifications') ?? false;
+      return !isPaused;
+    } catch (_) {
+      return true;
+    }
+  }
 
   /// Inisialisasi Service Notifikasi
   Future<void> init() async {
@@ -112,6 +124,7 @@ class NotificationService {
     String? payload,
   }) async {
     if (!_isInitialized) return;
+    if (!await isEnabled()) return;
     try {
       const androidDetails = AndroidNotificationDetails(
         _channelId,
@@ -160,6 +173,7 @@ class NotificationService {
     int remindMinutesBefore = 60,
   }) async {
     if (!_isInitialized) return;
+    if (!await isEnabled()) return;
     try {
       final reminderTime = scheduledAt.subtract(Duration(minutes: remindMinutesBefore));
 

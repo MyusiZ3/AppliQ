@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../services/notification_service.dart';
 import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/appliq_loading.dart';
@@ -23,7 +24,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   UserProfile? _profile;
   bool _isLoading = true;
-  bool _pauseNotifications = false;
+  bool _notificationsEnabled = true;
   String _selectedLanguage = 'Bahasa Indonesia';
 
   @override
@@ -35,17 +36,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _pauseNotifications = prefs.getBool('pause_notifications') ?? false;
-      _selectedLanguage = prefs.getString('app_language') ?? 'Bahasa Indonesia';
-    });
+    final isPaused = prefs.getBool('pause_notifications') ?? false;
+    if (mounted) {
+      setState(() {
+        _notificationsEnabled = !isPaused;
+        _selectedLanguage = prefs.getString('app_language') ?? 'Bahasa Indonesia';
+      });
+    }
   }
 
-  Future<void> _togglePauseNotifications(bool value) async {
+  Future<void> _toggleNotifications(bool value) async {
     HapticFeedback.selectionClick();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('pause_notifications', value);
-    setState(() => _pauseNotifications = value);
+    await prefs.setBool('pause_notifications', !value);
+    if (mounted) {
+      setState(() => _notificationsEnabled = value);
+    }
+
+    if (value) {
+      final granted = await NotificationService.instance.requestPermissions();
+      if (mounted) {
+        if (granted) {
+          UIHelper.showSuccessSnackBar(context, 'Notifikasi pengingat agenda diaktifkan.');
+        } else {
+          UIHelper.showInfoSnackBar(context, 'Notifikasi diaktifkan.');
+        }
+      }
+    } else {
+      await NotificationService.instance.cancelAll();
+      if (mounted) {
+        UIHelper.showInfoSnackBar(context, 'Notifikasi pengingat dinonaktifkan.');
+      }
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -527,15 +549,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      // Pause Notifications Tile
+                      // Notifications Toggle Tile
                       _buildTile(
-                        icon: CupertinoIcons.bell,
-                        title: 'Pause notifications',
+                        icon: CupertinoIcons.bell_fill,
+                        title: 'Notifikasi Pengingat',
                         isDark: isDark,
                         trailing: _buildCustomSwitch(
-                          value: _pauseNotifications,
+                          value: _notificationsEnabled,
                           isDark: isDark,
-                          onChanged: _togglePauseNotifications,
+                          onChanged: _toggleNotifications,
                         ),
                       ),
                       _buildDivider(borderColor),

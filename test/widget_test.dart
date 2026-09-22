@@ -88,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Pause notifications'), findsOneWidget);
+    expect(find.text('Notifikasi Pengingat'), findsOneWidget);
     expect(find.text('Dark mode'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Log Out'), findsOneWidget);

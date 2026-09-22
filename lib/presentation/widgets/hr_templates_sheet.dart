@@ -336,31 +336,45 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
 
                       // Action Buttons
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          OutlinedButton.icon(
-                            onPressed: () => _copyToClipboard(item['subject']!, 'Subject Email'),
-                            icon: const Icon(CupertinoIcons.doc_on_clipboard, size: 14),
-                            label: const Text('Salin Subject'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                              side: BorderSide(
-                                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => _copyToClipboard(item['subject']!, 'Subject Email'),
+                              icon: const Icon(CupertinoIcons.doc_on_clipboard, size: 13),
+                              label: const Text(
+                                'Salin Subject',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: isDark ? Colors.white : const Color(0xFF18181B),
+                                side: BorderSide(
+                                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          ElevatedButton.icon(
-                            onPressed: () => _copyToClipboard(item['body']!, 'Template Email'),
-                            icon: const Icon(CupertinoIcons.doc_text, size: 14),
-                            label: const Text('Salin Body Email'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                              foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => _copyToClipboard(item['body']!, 'Template Email'),
+                              icon: const Icon(CupertinoIcons.doc_text, size: 13),
+                              label: const Text(
+                                'Salin Body Email',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
+                                foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
                             ),
                           ),
                         ],

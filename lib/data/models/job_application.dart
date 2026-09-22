@@ -16,6 +16,8 @@ class JobApplication {
   final double? salaryExpectation;
   final double? salaryOffered;
   final String? notes;
+  final String? cvFileUrl;
+  final String? cvFileName;
   final bool isFavorite;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -36,6 +38,8 @@ class JobApplication {
     this.salaryExpectation,
     this.salaryOffered,
     this.notes,
+    this.cvFileUrl,
+    this.cvFileName,
     this.isFavorite = false,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -65,6 +69,8 @@ class JobApplication {
           ? double.tryParse(json['salary_offered'].toString())
           : null,
       notes: json['notes'] as String?,
+      cvFileUrl: json['cv_file_url'] as String?,
+      cvFileName: json['cv_file_name'] as String?,
       isFavorite: json['is_favorite'] as bool? ?? false,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
@@ -92,6 +98,8 @@ class JobApplication {
       'salary_expectation': salaryExpectation,
       'salary_offered': salaryOffered,
       'notes': notes,
+      'cv_file_url': cvFileUrl,
+      'cv_file_name': cvFileName,
       'is_favorite': isFavorite,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -114,6 +122,8 @@ class JobApplication {
     double? salaryExpectation,
     double? salaryOffered,
     String? notes,
+    String? cvFileUrl,
+    String? cvFileName,
     bool? isFavorite,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -134,6 +144,8 @@ class JobApplication {
       salaryExpectation: salaryExpectation ?? this.salaryExpectation,
       salaryOffered: salaryOffered ?? this.salaryOffered,
       notes: notes ?? this.notes,
+      cvFileUrl: cvFileUrl ?? this.cvFileUrl,
+      cvFileName: cvFileName ?? this.cvFileName,
       isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

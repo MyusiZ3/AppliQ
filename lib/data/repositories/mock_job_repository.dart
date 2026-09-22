@@ -273,6 +273,17 @@ class MockJobRepository implements JobRepository {
   }
 
   @override
+  Future<ApplicationLog> updateApplicationLog(ApplicationLog log) async {
+    final index = _logs.indexWhere((l) => l.id == log.id);
+    if (index != -1) {
+      _logs[index] = log;
+      notifyDataChanged();
+      return log;
+    }
+    return log;
+  }
+
+  @override
   Future<void> deleteApplicationLog(String id) async {
     _logs.removeWhere((l) => l.id == id);
     notifyDataChanged();

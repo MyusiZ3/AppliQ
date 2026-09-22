@@ -201,6 +201,8 @@ class SupabaseJobRepository implements JobRepository {
       'salary_expectation': application.salaryExpectation,
       'salary_offered': application.salaryOffered,
       'notes': application.notes,
+      'cv_file_url': application.cvFileUrl,
+      'cv_file_name': application.cvFileName,
       'is_favorite': application.isFavorite,
     };
 
@@ -237,6 +239,8 @@ class SupabaseJobRepository implements JobRepository {
       'salary_expectation': application.salaryExpectation,
       'salary_offered': application.salaryOffered,
       'notes': application.notes,
+      'cv_file_url': application.cvFileUrl,
+      'cv_file_name': application.cvFileName,
       'is_favorite': application.isFavorite,
       'updated_at': DateTime.now().toIso8601String(),
     };
@@ -359,6 +363,41 @@ class SupabaseJobRepository implements JobRepository {
     final result = ApplicationLog.fromJson(response);
     _cachedLogs[log.applicationId]?.add(result);
     _cachedAllLogs?.add(result);
+    notifyDataChanged();
+    return result;
+  }
+
+  @override
+  Future<ApplicationLog> updateApplicationLog(ApplicationLog log) async {
+    final updateData = {
+      'stage_name': log.stageName,
+      'scheduled_at': log.scheduledAt?.toIso8601String(),
+      'interviewer_name': log.interviewerName,
+      'meeting_link': log.meetingLink,
+      'notes': log.notes,
+      'result': log.result,
+    };
+
+    final response = await _supabase
+        .from('application_logs')
+        .update(updateData)
+        .eq('id', log.id)
+        .select()
+        .single();
+
+    final result = ApplicationLog.fromJson(response);
+    if (_cachedLogs.containsKey(log.applicationId)) {
+      final index = _cachedLogs[log.applicationId]!.indexWhere((l) => l.id == log.id);
+      if (index != -1) {
+        _cachedLogs[log.applicationId]![index] = result;
+      }
+    }
+    if (_cachedAllLogs != null) {
+      final index = _cachedAllLogs!.indexWhere((l) => l.id == log.id);
+      if (index != -1) {
+        _cachedAllLogs![index] = result;
+      }
+    }
     notifyDataChanged();
     return result;
   }

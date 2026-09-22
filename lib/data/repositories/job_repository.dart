@@ -22,6 +22,7 @@ abstract class JobRepository {
   Future<List<ApplicationLog>> getApplicationLogs(String applicationId, {bool forceRefresh = false});
   Future<List<ApplicationLog>> getAllApplicationLogs({bool forceRefresh = false});
   Future<ApplicationLog> createApplicationLog(ApplicationLog log);
+  Future<ApplicationLog> updateApplicationLog(ApplicationLog log);
   Future<void> deleteApplicationLog(String id);
 
   // Stats / Dashboard

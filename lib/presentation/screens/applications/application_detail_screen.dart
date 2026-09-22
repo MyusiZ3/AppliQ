@@ -117,6 +117,219 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     }
   }
 
+  Future<void> _updateLogResult(ApplicationLog log, String newResult) async {
+    try {
+      final updated = log.copyWith(result: newResult);
+      await widget.repository.updateApplicationLog(updated);
+      if (mounted) {
+        UIHelper.showSuccessSnackBar(context, 'Status tahap "${log.stageName}" diubah ke $newResult');
+        _loadData();
+      }
+    } catch (e) {
+      if (mounted) UIHelper.handleError(context, e);
+    }
+  }
+
+  Future<void> _showUpdateStageResultSheet(ApplicationLog log) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    HapticFeedback.lightImpact();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final sheetBg = isDark ? AppColors.surfaceDark : Colors.white;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: sheetBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.fromLTRB(
+              20, 12, 20, 20 + MediaQuery.of(ctx).padding.bottom),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 38,
+                    height: 4.5,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.22)
+                          : Colors.black.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Update Status Tahap',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${log.stageName} • ${_application?.companyName ?? ''}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                _buildStageOptionTile(
+                  title: 'Lolos / Selesai',
+                  icon: CupertinoIcons.checkmark_circle_fill,
+                  color: const Color(0xFF10B981),
+                  isDark: isDark,
+                  isSelected: log.result == 'Lolos' || log.result == 'Selesai',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await _updateLogResult(log, 'Lolos');
+                  },
+                ),
+                const SizedBox(height: 8),
+
+                _buildStageOptionTile(
+                  title: 'Lanjut Tahap Berikutnya',
+                  icon: CupertinoIcons.arrow_right_circle_fill,
+                  color: const Color(0xFF3B82F6),
+                  isDark: isDark,
+                  isSelected: false,
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await _updateLogResult(log, 'Lolos');
+                    if (mounted) _showAddStageSheet();
+                  },
+                ),
+                const SizedBox(height: 8),
+
+                _buildStageOptionTile(
+                  title: 'Diterima / Offering',
+                  icon: CupertinoIcons.sparkles,
+                  color: const Color(0xFFF59E0B),
+                  isDark: isDark,
+                  isSelected: log.result == 'Diterima',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await _updateLogResult(log, 'Diterima');
+                    await _updateStatus(ApplicationStatus.offering);
+                  },
+                ),
+                const SizedBox(height: 8),
+
+                _buildStageOptionTile(
+                  title: 'Menunggu (Waiting)',
+                  icon: CupertinoIcons.hourglass,
+                  color: isDark
+                      ? const Color(0xFFA1A1AA)
+                      : const Color(0xFF71717A),
+                  isDark: isDark,
+                  isSelected: log.result == 'Waiting' ||
+                      log.result == 'Menunggu',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await _updateLogResult(log, 'Waiting');
+                  },
+                ),
+                const SizedBox(height: 8),
+
+                _buildStageOptionTile(
+                  title: 'Tidak Lolos (Gagal)',
+                  icon: CupertinoIcons.xmark_circle_fill,
+                  color: const Color(0xFFEF4444),
+                  isDark: isDark,
+                  isSelected: log.result == 'Gagal' ||
+                      log.result == 'Ditolak',
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await _updateLogResult(log, 'Gagal');
+                    await _updateStatus(ApplicationStatus.rejected);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStageOptionTile({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required bool isDark,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? color : (isDark ? AppColors.borderDark : AppColors.borderLight),
+            width: isSelected ? 1.5 : 0.8,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 17),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(CupertinoIcons.checkmark_alt, color: color, size: 18)
+            else
+              Icon(
+                CupertinoIcons.chevron_forward,
+                size: 14,
+                color: isDark
+                    ? AppColors.textHintDark
+                    : AppColors.textHint,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _showAddStageSheet() async {
     final stageNameController = TextEditingController();
     final interviewerController = TextEditingController();
@@ -1017,6 +1230,144 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             ),
           ],
 
+          const SizedBox(height: 16),
+
+          // Google Drive Document Attachment Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : AppColors.surface,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                width: 0.8,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF27272A)
+                                : const Color(0xFFF4F4F5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            CupertinoIcons.cloud_upload_fill,
+                            size: 15,
+                            color: isDark ? Colors.white70 : const Color(0xFF3F3F46),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Berkas & CV (Google Drive)',
+                          style: TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (app.cvFileName != null && app.cvFileName!.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(CupertinoIcons.doc_fill, size: 22, color: Color(0xFF10B981)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                app.cvFileName!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Folder: AppliQ / ${app.companyName}_${app.positionTitle}'.replaceAll(' ', '_'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (app.cvFileUrl != null && app.cvFileUrl!.isNotEmpty)
+                          ElevatedButton.icon(
+                            onPressed: () => launchUrl(
+                              Uri.parse(app.cvFileUrl!),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                            icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 14),
+                            label: const Text('Buka'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF10B981),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.info_circle,
+                        size: 14,
+                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Belum ada berkas CV yang dilampirkan. Edit lamaran untuk mengupload ke Google Drive.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+
           const SizedBox(height: 24),
 
           // Recruitment Stage Timeline Section
@@ -1069,37 +1420,77 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? const Color(0xFF27272A)
-                                      : const Color(0xFFF4F4F5),
-                                  borderRadius: BorderRadius.circular(8),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF4F4F5),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    CupertinoIcons.checkmark_seal_fill,
+                                    size: 15,
+                                    color: isDark ? Colors.white70 : const Color(0xFF3F3F46),
+                                  ),
                                 ),
-                                child: Icon(
-                                  CupertinoIcons.checkmark_seal_fill,
-                                  size: 15,
-                                  color: isDark ? Colors.white70 : const Color(0xFF3F3F46),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    log.stageName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14.5,
+                                      letterSpacing: -0.2,
+                                      color: isDark
+                                          ? AppColors.textPrimaryDark
+                                          : AppColors.textPrimary,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                log.stageName,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14.5,
-                                  letterSpacing: -0.2,
-                                  color: isDark
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 8),
+                          // Clickable Stage Result Badge
+                          GestureDetector(
+                            onTap: () => _showUpdateStageResultSheet(log),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _getLogResultColor(log.result).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(
+                                  color: _getLogResultColor(log.result).withValues(alpha: 0.3),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    log.result,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: _getLogResultColor(log.result),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    CupertinoIcons.chevron_down,
+                                    size: 10,
+                                    color: _getLogResultColor(log.result),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
                           IconButton(
                             icon: const Icon(CupertinoIcons.trash, size: 16),
                             padding: EdgeInsets.zero,
@@ -1233,6 +1624,29 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         ],
       ),
     );
+  }
+
+  Color _getLogResultColor(String result) {
+    switch (result.toLowerCase()) {
+      case 'lolos':
+      case 'selesai':
+      case 'passed':
+      case 'done':
+        return const Color(0xFF10B981);
+      case 'diterima':
+      case 'offering':
+      case 'accepted':
+        return const Color(0xFFF59E0B);
+      case 'gagal':
+      case 'ditolak':
+      case 'failed':
+      case 'rejected':
+        return const Color(0xFFEF4444);
+      case 'waiting':
+      case 'menunggu':
+      default:
+        return AppColors.warning;
+    }
   }
 
   Widget _buildInfoRow(String title, String value, IconData icon, bool isDark) {

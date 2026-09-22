@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../services/google_drive_service.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
 
@@ -40,6 +41,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   late JobPortal _jobPortal;
   late ApplicationStatus _status;
   late DateTime _appliedDate;
+  String? _cvFileName;
+  String? _cvFileUrl;
+  bool _isUploadingDrive = false;
   bool _isLoading = false;
 
   @override
@@ -70,6 +74,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     _jobPortal = app?.jobPortal ?? JobPortal.linkedIn;
     _status = app?.status ?? ApplicationStatus.applied;
     _appliedDate = app?.appliedDate ?? DateTime.now();
+    _cvFileName = app?.cvFileName;
+    _cvFileUrl = app?.cvFileUrl;
   }
 
   @override
@@ -95,6 +101,47 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     );
     if (picked != null) {
       setState(() => _appliedDate = picked);
+    }
+  }
+
+  Future<void> _handleDriveUpload() async {
+    final company = _companyController.text.trim();
+    final position = _positionController.text.trim();
+
+    if (company.isEmpty || position.isEmpty) {
+      UIHelper.showGlobalErrorToast('Isi nama perusahaan dan posisi terlebih dahulu');
+      return;
+    }
+
+    HapticFeedback.lightImpact();
+    setState(() => _isUploadingDrive = true);
+
+    try {
+      final uploadResult = await GoogleDriveService.pickAndUploadDocument(
+        companyName: company,
+        positionTitle: position,
+      );
+
+      if (uploadResult != null) {
+        setState(() {
+          _cvFileName = uploadResult['fileName'];
+          _cvFileUrl = uploadResult['fileUrl'];
+          _isUploadingDrive = false;
+        });
+        if (mounted) {
+          UIHelper.showSuccessSnackBar(
+            context,
+            'Berkas berhasil diupload ke Google Drive folder: ${uploadResult['folderPath']}',
+          );
+        }
+      } else {
+        setState(() => _isUploadingDrive = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isUploadingDrive = false);
+        UIHelper.handleError(context, e);
+      }
     }
   }
 
@@ -138,6 +185,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
+        cvFileName: _cvFileName,
+        cvFileUrl: _cvFileUrl,
         isFavorite: widget.applicationToEdit?.isFavorite ?? false,
       );
 
@@ -587,6 +636,166 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   maxLines: 3,
                   isDark: isDark,
                 ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Section 5: Lampiran Berkas & CV (Google Drive)
+            _buildSectionCard(
+              title: 'Lampiran Berkas & CV',
+              icon: CupertinoIcons.cloud_upload_fill,
+              isDark: isDark,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.folder_badge_plus,
+                            size: 16,
+                            color: isDark ? Colors.white70 : const Color(0xFF52525B),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Penyimpanan Google Drive Otomatis',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'File CV & berkas akan otomatis disimpan rapi di folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Perusahaan"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Posisi"}',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          height: 1.4,
+                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (_cvFileName != null && _cvFileName!.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(CupertinoIcons.doc_fill, size: 20, color: Color(0xFF10B981)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _cvFileName!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Tersimpan di Google Drive',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF10B981),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(CupertinoIcons.trash, size: 16, color: Color(0xFFEF4444)),
+                          onPressed: () {
+                            setState(() {
+                              _cvFileName = null;
+                              _cvFileUrl = null;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: OutlinedButton(
+                      onPressed: _isUploadingDrive ? null : _handleDriveUpload,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                          width: 1.0,
+                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_isUploadingDrive)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: isDark ? Colors.white : const Color(0xFF18181B),
+                                ),
+                              ),
+                            )
+                          else
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Icon(
+                                CupertinoIcons.cloud_upload,
+                                size: 17,
+                                color: isDark ? Colors.white : const Color(0xFF18181B),
+                              ),
+                            ),
+                          Text(
+                            _isUploadingDrive ? 'Mengupload ke Google Drive...' : 'Upload CV / Berkas ke Google Drive',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : const Color(0xFF18181B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ],

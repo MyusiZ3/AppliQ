@@ -56,4 +56,30 @@ class ApplicationLog {
       'created_at': createdAt.toIso8601String(),
     };
   }
+
+  ApplicationLog copyWith({
+    String? id,
+    String? applicationId,
+    String? userId,
+    String? stageName,
+    DateTime? scheduledAt,
+    String? interviewerName,
+    String? meetingLink,
+    String? notes,
+    String? result,
+    DateTime? createdAt,
+  }) {
+    return ApplicationLog(
+      id: id ?? this.id,
+      applicationId: applicationId ?? this.applicationId,
+      userId: userId ?? this.userId,
+      stageName: stageName ?? this.stageName,
+      scheduledAt: scheduledAt ?? this.scheduledAt,
+      interviewerName: interviewerName ?? this.interviewerName,
+      meetingLink: meetingLink ?? this.meetingLink,
+      notes: notes ?? this.notes,
+      result: result ?? this.result,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

@@ -39,10 +39,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.dispose();
   }
 
-  Future<void> _loadStats({bool isSilent = false, bool forceRefresh = false}) async {
+  Future<void> _loadStats(
+      {bool isSilent = false, bool forceRefresh = false}) async {
     if (!isSilent) setState(() => _isLoading = true);
     try {
-      final data = await widget.repository.getDashboardStats(forceRefresh: forceRefresh);
+      final data =
+          await widget.repository.getDashboardStats(forceRefresh: forceRefresh);
       if (mounted) {
         setState(() {
           _stats = data;
@@ -69,16 +71,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final rejected = _stats['rejected_count'] as int? ?? 0;
     final noResponse = _stats['no_response_count'] as int? ?? 0;
 
-    final byWorkSystem = Map<String, dynamic>.from(_stats['by_work_system'] as Map? ?? {});
-    final byPortal = Map<String, dynamic>.from(_stats['by_portal'] as Map? ?? {});
+    final byWorkSystem =
+        Map<String, dynamic>.from(_stats['by_work_system'] as Map? ?? {});
+    final byPortal =
+        Map<String, dynamic>.from(_stats['by_portal'] as Map? ?? {});
 
-    final interviewRate = total > 0 ? ((interview + offering + accepted) / total * 100).toStringAsFixed(1) : '0';
-    final successRate = total > 0 ? (accepted / total * 100).toStringAsFixed(1) : '0';
+    final interviewRate = total > 0
+        ? ((interview + offering + accepted) / total * 100).toStringAsFixed(1)
+        : '0';
+    final successRate =
+        total > 0 ? (accepted / total * 100).toStringAsFixed(1) : '0';
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        backgroundColor:
+            isDark ? AppColors.backgroundDark : AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
@@ -92,19 +100,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 60),
+                child: CircularProgressIndicator(),
+              ),
+            )
           : total == 0
               ? RefreshIndicator(
                   onRefresh: () => _loadStats(forceRefresh: true),
                   child: EmptyStateView(
                     icon: CupertinoIcons.chart_bar_alt_fill,
                     title: 'Belum Ada Data Statistik',
-                    message: 'Statistik, rasio panggilan interview, dan efektivitas portal loker akan dihitung otomatis saat kamu mulai mencatat lamaran.',
+                    message:
+                        'Statistik, rasio panggilan interview, dan efektivitas portal loker akan dihitung otomatis saat kamu mulai mencatat lamaran.',
                     action: ElevatedButton.icon(
                       onPressed: () async {
                         final added = await Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => ApplicationFormScreen(repository: widget.repository),
+                            builder: (_) => ApplicationFormScreen(
+                                repository: widget.repository),
                           ),
                         );
                         if (added == true) _loadStats();
@@ -112,8 +127,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: const Icon(CupertinoIcons.plus, size: 16),
                       label: const Text('Catat Lamaran Pertama'),
                       style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                       ),
                     ),
                   ),
@@ -121,8 +138,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               : RefreshIndicator(
                   onRefresh: () => _loadStats(forceRefresh: true),
                   child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+                    physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics()),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 130),
                     children: [
                       // Notched Pill Selector (MyDuitGweh Signature)
                       NotchedPillCard<int>(
@@ -139,7 +157,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ],
                         selectedValue: _selectedTab,
-                        onValueChanged: (val) => setState(() => _selectedTab = val),
+                        onValueChanged: (val) =>
+                            setState(() => _selectedTab = val),
                       ),
 
                       const SizedBox(height: 14),
@@ -149,15 +168,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1E1E22) : const Color(0xFF18181B),
+                            color: isDark
+                                ? const Color(0xFF1E1E22)
+                                : const Color(0xFF18181B),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: isDark ? const Color(0xFF323238) : const Color(0x1F000000),
+                              color: isDark
+                                  ? const Color(0xFF323238)
+                                  : const Color(0x1F000000),
                               width: 0.8,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                                color: Colors.black
+                                    .withValues(alpha: isDark ? 0.35 : 0.08),
                                 blurRadius: 16,
                                 offset: const Offset(0, 6),
                               ),
@@ -180,7 +204,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           '$interviewRate%',
@@ -195,7 +220,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         Text(
                                           'Rasio Panggilan Interview',
                                           style: TextStyle(
-                                            color: Colors.white.withValues(alpha: 0.85),
+                                            color: Colors.white
+                                                .withValues(alpha: 0.85),
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -211,7 +237,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           '$successRate%',
@@ -226,7 +253,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         Text(
                                           'Rasio Diterima Kerja',
                                           style: TextStyle(
-                                            color: Colors.white.withValues(alpha: 0.85),
+                                            color: Colors.white
+                                                .withValues(alpha: 0.85),
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -290,16 +318,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 14),
 
                         // Status Breakdown Card
-                        Container(
+                        NotchedCard(
                           padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.surfaceDark : AppColors.surface,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                              color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                              width: 0.8,
-                            ),
-                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -309,36 +329,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.3,
-                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                  color: isDark
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              _buildProgressBarRow('Applied', applied, total, const Color(0xFF71717A), isDark),
+                              _buildProgressBarRow('Applied', applied, total,
+                                  const Color(0xFF71717A), isDark),
                               const SizedBox(height: 12),
-                              _buildProgressBarRow('Interview', interview, total, const Color(0xFFA1A1AA), isDark),
+                              _buildProgressBarRow('Interview', interview,
+                                  total, const Color(0xFFA1A1AA), isDark),
                               const SizedBox(height: 12),
-                              _buildProgressBarRow('Offering', offering, total, const Color(0xFFD4D4D8), isDark),
+                              _buildProgressBarRow('Offering', offering, total,
+                                  const Color(0xFFD4D4D8), isDark),
                               const SizedBox(height: 12),
-                              _buildProgressBarRow('Accepted', accepted, total, isDark ? Colors.white : const Color(0xFF18181B), isDark),
+                              _buildProgressBarRow(
+                                  'Accepted',
+                                  accepted,
+                                  total,
+                                  isDark
+                                      ? Colors.white
+                                      : const Color(0xFF18181B),
+                                  isDark),
                               const SizedBox(height: 12),
-                              _buildProgressBarRow('Rejected', rejected, total, const Color(0xFF52525B), isDark),
+                              _buildProgressBarRow('Rejected', rejected, total,
+                                  const Color(0xFF52525B), isDark),
                               const SizedBox(height: 12),
-                              _buildProgressBarRow('No Response', noResponse, total, const Color(0xFF3F3F46), isDark),
+                              _buildProgressBarRow('No Response', noResponse,
+                                  total, const Color(0xFF3F3F46), isDark),
                             ],
                           ),
                         ),
                       ] else ...[
                         // Work System Distribution Card
-                        Container(
+                        NotchedCard(
                           padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.surfaceDark : AppColors.surface,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                              color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                              width: 0.8,
-                            ),
-                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -348,17 +374,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.3,
-                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                  color: isDark
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 14),
                               if (byWorkSystem.isEmpty)
                                 Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
                                     child: Text(
                                       'Belum ada data sistem kerja',
-                                      style: TextStyle(fontSize: 13, color: isDark ? AppColors.textHintDark : AppColors.textHint),
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: isDark
+                                              ? AppColors.textHintDark
+                                              : AppColors.textHint),
                                     ),
                                   ),
                                 )
@@ -371,7 +404,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       entry.key,
                                       count,
                                       total,
-                                      isDark ? Colors.white : const Color(0xFF18181B),
+                                      isDark
+                                          ? Colors.white
+                                          : const Color(0xFF18181B),
                                       isDark,
                                     ),
                                   );
@@ -383,16 +418,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 14),
 
                         // Portal Breakdown Card
-                        Container(
+                        NotchedCard(
                           padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.surfaceDark : AppColors.surface,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                              color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                              width: 0.8,
-                            ),
-                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -402,17 +429,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.3,
-                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                  color: isDark
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 14),
                               if (byPortal.isEmpty)
                                 Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
                                     child: Text(
                                       'Belum ada data portal lowongan',
-                                      style: TextStyle(fontSize: 13, color: isDark ? AppColors.textHintDark : AppColors.textHint),
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: isDark
+                                              ? AppColors.textHintDark
+                                              : AppColors.textHint),
                                     ),
                                   ),
                                 )
@@ -425,7 +459,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       entry.key,
                                       count,
                                       total,
-                                      isDark ? Colors.white : const Color(0xFF18181B),
+                                      isDark
+                                          ? Colors.white
+                                          : const Color(0xFF18181B),
                                       isDark,
                                     ),
                                   );
@@ -440,7 +476,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildProgressBarRow(String label, int count, int total, Color color, bool isDark) {
+  Widget _buildProgressBarRow(
+      String label, int count, int total, Color color, bool isDark) {
     final ratio = total > 0 ? (count / total).clamp(0.0, 1.0) : 0.0;
     final percentage = (ratio * 100).toStringAsFixed(0);
 
@@ -456,7 +493,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.1,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                color:
+                    isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
               ),
             ),
             Text(
@@ -465,7 +503,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.2,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -475,7 +515,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(100),
           child: LinearProgressIndicator(
             value: ratio,
-            backgroundColor: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant,
+            backgroundColor: isDark
+                ? AppColors.surfaceVariantDark
+                : AppColors.surfaceVariant,
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 6,
           ),

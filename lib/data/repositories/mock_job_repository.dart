@@ -25,7 +25,9 @@ class MockJobRepository implements JobRepository {
     id: 'mock-user-1',
     email: 'user.demo@appliq.id',
     fullName: 'Fajar Pratama',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    avatarUrl: '',
+    username: '@fajarpratama',
+    phoneNumber: '0812-3456-7890',
     targetRole: 'Software Engineer / Product Specialist',
   );
 
@@ -310,5 +312,22 @@ class MockJobRepository implements JobRepository {
       'by_work_system': byWorkSystem,
       'by_portal': byPortal,
     };
+  }
+
+  @override
+  Future<UserProfile> updateUserProfile(UserProfile profile) async {
+    _currentUser = profile;
+    _authController.add(profile);
+    notifyDataChanged();
+    return profile;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    _currentUser = null;
+    _applications.clear();
+    _logs.clear();
+    _authController.add(null);
+    notifyDataChanged();
   }
 }

@@ -5,6 +5,8 @@ import '../models/user_profile.dart';
 abstract class JobRepository {
   // Auth & Profile
   Future<UserProfile?> getCurrentUserProfile({bool forceRefresh = false});
+  Future<UserProfile> updateUserProfile(UserProfile profile);
+  Future<void> deleteAccount();
   Future<void> signInWithGoogle();
   Future<void> signOut();
   Stream<UserProfile?> get authStateChanges;

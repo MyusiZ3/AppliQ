@@ -279,6 +279,64 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     }
   }
 
+  Future<void> _handleDeleteCvAttachment() async {
+    HapticFeedback.lightImpact();
+
+    final action = await showCupertinoModalPopup<String>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: const Text('Kelola Berkas Lampiran'),
+        message: Text(_cvFileName ?? 'Berkas Google Drive'),
+        actions: [
+          if (_cvFileUrl != null && _cvFileUrl!.isNotEmpty)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(ctx, 'delete_drive'),
+              child: const Text('Hapus Permanen dari Google Drive'),
+            ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'detach_only'),
+            child: const Text('Lepas Lampiran Saja'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Batal'),
+        ),
+      ),
+    );
+
+    if (action == null) return;
+
+    if (action == 'delete_drive' && _cvFileUrl != null) {
+      setState(() => _isUploadingDrive = true);
+      try {
+        await GoogleDriveService.deleteDocument(_cvFileUrl!);
+        if (mounted) {
+          setState(() {
+            _cvFileName = null;
+            _cvFileUrl = null;
+            _isUploadingDrive = false;
+          });
+          UIHelper.showSuccessSnackBar(context, 'Berkas berhasil dihapus dari Google Drive.');
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isUploadingDrive = false);
+          UIHelper.handleError(context, e);
+        }
+      }
+    } else if (action == 'detach_only') {
+      setState(() {
+        _cvFileName = null;
+        _cvFileUrl = null;
+      });
+      if (mounted) {
+        UIHelper.showSuccessSnackBar(context, 'Lampiran berkas dilepaskan dari lamaran ini.');
+      }
+    }
+  }
+
   Future<void> _saveApplication() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -326,12 +384,14 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
       if (isEditing) {
         await widget.repository.updateApplication(application);
-        if (mounted)
+        if (mounted) {
           UIHelper.showSuccessSnackBar(context, 'Lamaran berhasil diperbarui');
+        }
       } else {
         await widget.repository.createApplication(application);
-        if (mounted)
+        if (mounted) {
           UIHelper.showSuccessSnackBar(context, 'Lamaran berhasil dicatat');
+        }
       }
 
       if (mounted) Navigator.of(context).pop(true);
@@ -975,7 +1035,15 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(CupertinoIcons.doc_fill, size: 20, color: Color(0xFF10B981)),
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.2 : 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(CupertinoIcons.doc_fill, size: 18, color: Color(0xFF10B981)),
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -986,31 +1054,37 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
                                   color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              const Text(
+                              Text(
                                 'Tersimpan di Google Drive',
                                 style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF10B981),
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(CupertinoIcons.trash, size: 16, color: Color(0xFFEF4444)),
-                          onPressed: () {
-                            setState(() {
-                              _cvFileName = null;
-                              _cvFileUrl = null;
-                            });
-                          },
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.2 : 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(CupertinoIcons.trash, size: 15, color: Color(0xFFEF4444)),
+                            tooltip: 'Hapus Berkas Lampiran',
+                            padding: EdgeInsets.zero,
+                            onPressed: _isUploadingDrive ? null : _handleDeleteCvAttachment,
+                          ),
                         ),
                       ],
                     ),

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
 import '../../../core/utils/status_helper.dart';
 import '../../../data/models/application_log.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../services/google_drive_service.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
@@ -1107,6 +1107,64 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     );
   }
 
+  Future<void> _handleDeleteCvAttachment() async {
+    final app = _application;
+    if (app == null || app.cvFileUrl == null) return;
+
+    HapticFeedback.lightImpact();
+
+    final action = await showCupertinoModalPopup<String>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: const Text('Kelola Berkas Lampiran'),
+        message: Text(app.cvFileName ?? 'Berkas Google Drive'),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, 'delete_drive'),
+            child: const Text('Hapus Permanen dari Google Drive'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'detach_only'),
+            child: const Text('Lepas Lampiran Saja'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Batal'),
+        ),
+      ),
+    );
+
+    if (action == null) return;
+
+    try {
+      if (action == 'delete_drive') {
+        await GoogleDriveService.deleteDocument(app.cvFileUrl!);
+      }
+
+      final updatedApp = app.copyWith(
+        clearCvFile: true,
+      );
+
+      await widget.repository.updateApplication(updatedApp);
+
+      if (mounted) {
+        setState(() {
+          _application = updatedApp;
+        });
+        UIHelper.showSuccessSnackBar(
+          context,
+          action == 'delete_drive'
+              ? 'Berkas berhasil dihapus dari Google Drive.'
+              : 'Lampiran berkas berhasil dilepaskan.',
+        );
+      }
+    } catch (e) {
+      if (mounted) UIHelper.handleError(context, e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1464,7 +1522,15 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(CupertinoIcons.doc_fill, size: 22, color: Color(0xFF10B981)),
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.2 : 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(CupertinoIcons.doc_fill, size: 18, color: Color(0xFF10B981)),
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -1475,38 +1541,57 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
                                   color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Folder: AppliQ / ${app.companyName}_${app.positionTitle}'.replaceAll(' ', '_'),
+                                'AppliQ / ${app.companyName}_${app.positionTitle}'.replaceAll(' ', '_'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 11,
-                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        if (app.cvFileUrl != null && app.cvFileUrl!.isNotEmpty)
-                          ElevatedButton.icon(
-                            onPressed: () => UIHelper.openUrl(context, app.cvFileUrl),
-                            icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 14),
-                            label: const Text('Buka'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF10B981),
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                        if (app.cvFileUrl != null && app.cvFileUrl!.isNotEmpty) ...[
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.2 : 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 15, color: Color(0xFF10B981)),
+                              tooltip: 'Buka di Google Drive',
+                              padding: EdgeInsets.zero,
+                              onPressed: () => UIHelper.openUrl(context, app.cvFileUrl),
                             ),
                           ),
+                          const SizedBox(width: 6),
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.2 : 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(CupertinoIcons.trash, size: 15, color: Color(0xFFEF4444)),
+                              tooltip: 'Hapus Berkas',
+                              padding: EdgeInsets.zero,
+                              onPressed: _handleDeleteCvAttachment,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

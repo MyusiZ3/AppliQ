@@ -6,6 +6,7 @@ import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
+import '../../widgets/appliq_loading.dart';
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -190,7 +191,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 60),
+                child: AppliqLoading(),
+              ),
+            )
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               children: [

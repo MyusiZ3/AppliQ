@@ -12,6 +12,7 @@ import '../../../data/repositories/job_repository.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
+import '../../widgets/appliq_loading.dart';
 import 'application_form_screen.dart';
 
 class ApplicationDetailScreen extends StatefulWidget {
@@ -723,7 +724,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         body: const Center(
           child: Padding(
             padding: EdgeInsets.only(bottom: 60),
-            child: CircularProgressIndicator(),
+            child: AppliqLoading(),
           ),
         ),
       );

@@ -18,6 +18,7 @@ import '../profile/profile_screen.dart';
 import '../../widgets/hr_templates_sheet.dart';
 import '../../widgets/export_sheet.dart';
 import '../../widgets/notched_pill_card.dart';
+import '../../widgets/appliq_loading.dart';
 
 class HomeScreen extends StatefulWidget {
   final JobRepository repository;
@@ -70,6 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  static final NumberFormat _salaryFormatter =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
   Future<void> _loadDashboardData(
       {bool isSilent = false, bool forceRefresh = false}) async {
     if (!isSilent) setState(() => _isLoading = true);
@@ -78,26 +82,26 @@ class _HomeScreenState extends State<HomeScreen> {
         widget.repository.getCurrentUserProfile(forceRefresh: forceRefresh),
         widget.repository.getApplications(forceRefresh: forceRefresh),
         widget.repository.getDashboardStats(forceRefresh: forceRefresh),
+        widget.repository.getAllApplicationLogs(forceRefresh: forceRefresh),
       ]);
 
       final apps = (results[1] as List<JobApplication>?) ?? [];
+      final allLogs = (results[3] as List<ApplicationLog>?) ?? [];
       final upcoming = <Map<String, dynamic>>[];
       final now = DateTime.now();
+      final appMap = {for (var a in apps) a.id: a};
 
-      for (var app in apps) {
-        if (app.status == ApplicationStatus.interview ||
-            app.status == ApplicationStatus.applied) {
-          final logs = await widget.repository
-              .getApplicationLogs(app.id, forceRefresh: forceRefresh);
-          for (var log in logs) {
-            if (log.scheduledAt != null &&
-                log.scheduledAt!
-                    .isAfter(now.subtract(const Duration(hours: 3)))) {
-              upcoming.add({
-                'app': app,
-                'log': log,
-              });
-            }
+      for (var log in allLogs) {
+        if (log.scheduledAt != null &&
+            log.scheduledAt!.isAfter(now.subtract(const Duration(hours: 3)))) {
+          final app = appMap[log.applicationId];
+          if (app != null &&
+              (app.status == ApplicationStatus.interview ||
+               app.status == ApplicationStatus.applied)) {
+            upcoming.add({
+              'app': app,
+              'log': log,
+            });
           }
         }
       }
@@ -147,9 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _formatSalary(double? amount) {
     if (amount == null || amount == 0) return 'Gaji Dirahasiakan';
-    final formatter =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    return '${formatter.format(amount)} / bln';
+    return '${_salaryFormatter.format(amount)} / bln';
   }
 
   @override
@@ -181,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 60),
-                  child: CircularProgressIndicator(),
+                  child: AppliqLoading(),
                 ),
               )
             : Column(

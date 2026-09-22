@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/ui_helper.dart';
+import '../../widgets/appliq_logo.dart';
+import '../../widgets/appliq_loading.dart';
 import '../main_nav.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -53,27 +55,14 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // App Icon Badge
-                Center(
-                  child: Container(
-                    width: 72,
-                    height: 72,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.briefcase_fill,
-                      color: Colors.white,
-                      size: 34,
+                // App Logo dengan Background Putih
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: AppliqLogo(
+                      size: 80,
+                      borderRadius: 24,
+                      hasWhiteBackground: true,
                     ),
                   ),
                 ),

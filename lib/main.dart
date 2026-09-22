@@ -8,6 +8,7 @@ import 'data/repositories/supabase_job_repository.dart';
 import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/screens/main_nav.dart';
 import 'presentation/screens/onboarding_screen.dart';
+import 'presentation/widgets/appliq_loading.dart';
 import 'utils/navigator_key.dart';
 import 'utils/theme_manager.dart';
 
@@ -92,7 +93,7 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     if (_isCheckingOnboarding) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: AppliqLoading.fullscreen(),
       );
     }
 

@@ -7,6 +7,7 @@ import '../../../utils/ui_helper.dart';
 import '../../widgets/empty_state_view.dart';
 import '../../widgets/metric_card.dart';
 import '../../widgets/notched_pill_card.dart';
+import '../../widgets/appliq_loading.dart';
 import '../applications/application_form_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -103,7 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.only(bottom: 60),
-                child: CircularProgressIndicator(),
+                child: AppliqLoading(),
               ),
             )
           : total == 0
@@ -124,13 +125,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         );
                         if (added == true) _loadStats();
                       },
-                      icon: const Icon(CupertinoIcons.plus, size: 16),
-                      label: const Text('Catat Lamaran Pertama'),
+                      icon: Icon(
+                        CupertinoIcons.plus,
+                        size: 16,
+                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      ),
+                      label: Text(
+                        'Catat Lamaran Pertama',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: isDark ? const Color(0xFF18181B) : Colors.white,
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
+                        foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(100)),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                            horizontal: 22, vertical: 13),
                       ),
                     ),
                   ),

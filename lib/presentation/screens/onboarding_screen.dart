@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/repositories/job_repository.dart';
+import '../widgets/appliq_logo.dart';
 import 'auth/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -66,20 +67,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          CupertinoIcons.briefcase_fill,
-                          color: Colors.white,
-                          size: 16,
-                        ),
+                      const AppliqLogo(
+                        size: 34,
+                        borderRadius: 10,
+                        padding: EdgeInsets.all(4),
+                        hasWhiteBackground: true,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Text(
                         'AppliQ',
                         style: TextStyle(

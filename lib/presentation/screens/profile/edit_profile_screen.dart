@@ -128,14 +128,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF18181B) : AppColors.surface;
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final cardBg = Theme.of(context).cardTheme.color ??
+        (isDark ? const Color(0xFF18181B) : AppColors.surface);
+    final borderColor = Theme.of(context).dividerTheme.color ??
+        (isDark ? const Color(0xFF27272A) : AppColors.borderLight);
     final inputBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 14),

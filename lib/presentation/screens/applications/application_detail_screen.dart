@@ -1127,9 +1127,10 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     final feedback = StatusHelper.getFeedbackText(app.status, app.appliedDate);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
@@ -1351,7 +1352,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                       TextButton.icon(
                         icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 14),
                         label: const Text('Buka URL'),
-                        onPressed: () => launchUrl(Uri.parse(app.jobUrl!), mode: LaunchMode.externalApplication),
+                        onPressed: () => UIHelper.openUrl(context, app.jobUrl),
                       ),
                     ],
                   ),
@@ -1494,10 +1495,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         ),
                         if (app.cvFileUrl != null && app.cvFileUrl!.isNotEmpty)
                           ElevatedButton.icon(
-                            onPressed: () => launchUrl(
-                              Uri.parse(app.cvFileUrl!),
-                              mode: LaunchMode.externalApplication,
-                            ),
+                            onPressed: () => UIHelper.openUrl(context, app.cvFileUrl),
                             icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 14),
                             label: const Text('Buka'),
                             style: ElevatedButton.styleFrom(
@@ -1838,9 +1836,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             ),
                             const SizedBox(width: 6),
                             Expanded(
-                              child: GestureDetector(
-                                onTap: () => launchUrl(Uri.parse(log.meetingLink!), mode: LaunchMode.externalApplication),
-                                child: Text(
+                                child: GestureDetector(
+                                  onTap: () => UIHelper.openUrl(context, log.meetingLink),
+                                  child: Text(
                                   log.meetingLink!,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

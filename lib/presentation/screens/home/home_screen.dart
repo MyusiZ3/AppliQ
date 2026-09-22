@@ -17,8 +17,10 @@ import '../applications/application_form_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../widgets/hr_templates_sheet.dart';
 import '../../widgets/export_sheet.dart';
+import '../../widgets/notification_sheet.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../../services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final JobRepository repository;
@@ -112,6 +114,21 @@ class _HomeScreenState extends State<HomeScreen> {
         return dateA.compareTo(dateB);
       });
 
+      // Jadwalkan pengingat push notification otomatis untuk agenda mendatang
+      for (var item in upcoming) {
+        final app = item['app'] as JobApplication;
+        final log = item['log'] as ApplicationLog;
+        if (log.scheduledAt != null && log.scheduledAt!.isAfter(DateTime.now())) {
+          NotificationService.instance.scheduleInterviewReminder(
+            id: log.id.hashCode,
+            company: app.companyName,
+            position: app.positionTitle,
+            scheduledAt: log.scheduledAt!,
+            remindMinutesBefore: 60,
+          );
+        }
+      }
+
       if (mounted) {
         setState(() {
           _userProfile = results[0] as UserProfile?;
@@ -194,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: isDark
                         ? AppColors.backgroundDark
                         : AppColors.background,
-                    child: _buildHeader(isDark),
+                    child: _buildHeader(isDark, staleApplications),
                   ),
 
                   // Scrollable Content
@@ -686,7 +703,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHeader(bool isDark) {
+  Widget _buildHeader(bool isDark, List<JobApplication> staleApplications) {
     final rawName = _userProfile?.fullName.isNotEmpty == true
         ? _userProfile!.fullName
         : 'Pencari Karir';
@@ -695,6 +712,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final initialLetter =
         rawName.isNotEmpty ? rawName[0].toUpperCase() : 'U';
     final greeting = _getDynamicGreeting();
+    final hasAlerts = _upcomingSchedules.isNotEmpty || staleApplications.isNotEmpty;
 
     return Row(
       children: [
@@ -793,14 +811,36 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        // Action Button (Notification only)
-        IconButton(
-          icon: const Icon(CupertinoIcons.bell, size: 22),
-          color: isDark ? Colors.white : const Color(0xFF18181B),
-          onPressed: () {
-            UIHelper.showInfoSnackBar(
-                context, 'Tidak ada pengingat jadwal mendesak hari ini.');
-          },
+        // Action Button with Notification Center & Badge
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            IconButton(
+              icon: const Icon(CupertinoIcons.bell, size: 22),
+              color: isDark ? Colors.white : const Color(0xFF18181B),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                NotificationSheet.show(
+                  context,
+                  upcomingSchedules: _upcomingSchedules,
+                  staleApplications: staleApplications,
+                );
+              },
+            ),
+            if (hasAlerts)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEF4444),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
         ),
       ],
     );

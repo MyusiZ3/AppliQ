@@ -9,6 +9,7 @@ import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/screens/main_nav.dart';
 import 'presentation/screens/onboarding_screen.dart';
 import 'presentation/widgets/appliq_loading.dart';
+import 'services/notification_service.dart';
 import 'utils/navigator_key.dart';
 import 'utils/theme_manager.dart';
 
@@ -20,6 +21,9 @@ void main() async {
 
   // Initialize ThemeManager from SharedPreferences
   await ThemeManager.init();
+
+  // Initialize Local Push Notifications
+  await NotificationService.instance.init();
 
   // Initialize Supabase if configured
   if (AppConfig.isSupabaseConfigured) {
@@ -72,26 +76,50 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   bool _hasSeenOnboarding = false;
-  bool _isCheckingOnboarding = true;
+  bool _isChecking = true;
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-    _checkOnboarding();
+    _checkInitialState();
   }
 
-  Future<void> _checkOnboarding() async {
+  Future<void> _checkInitialState() async {
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool('has_seen_onboarding') ?? false;
-    setState(() {
-      _hasSeenOnboarding = seen;
-      _isCheckingOnboarding = false;
-    });
+    final user = await widget.repository.getCurrentUserProfile();
+
+    if (mounted) {
+      setState(() {
+        _hasSeenOnboarding = seen;
+        _isLoggedIn = user != null;
+        _isChecking = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Mode revisi Onboarding: Selalu tampilkan OnboardingScreen di awal peluncuran
-    return OnboardingScreen(repository: widget.repository);
+    if (_isChecking) {
+      return const Scaffold(
+        body: Center(
+          child: AppliqLoading(isFullScreen: true),
+        ),
+      );
+    }
+
+    // 1. Jika sudah login -> Langsung ke Dashboard Utama (MainNav)
+    if (_isLoggedIn) {
+      return MainNav(repository: widget.repository);
+    }
+
+    // 2. Jika baru pertama install -> Tampilkan Onboarding
+    if (!_hasSeenOnboarding) {
+      return OnboardingScreen(repository: widget.repository);
+    }
+
+    // 3. Jika sudah pernah onboarding -> Tampilkan LoginScreen
+    return LoginScreen(repository: widget.repository);
   }
 }

@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 /// Animated Mascot for Login Screen:
-/// Plays video animation (logo_cat_anim.webm), smoothly fades to static logo for 4s,
-/// and repeats smoothly.
+/// 1. Plays frame sequence precisely from frame 000 -> frame 097 (never starts from end).
+/// 2. Bounces in/out smoothly using Curves.easeOutBack.
+/// 3. Switches to static logo (appliq_logo.png) for 4 seconds.
+/// 4. Bounces back into frame 000 in an infinite clean loop.
 class AnimatedLogoMascot extends StatefulWidget {
   final double size;
 
@@ -14,98 +15,101 @@ class AnimatedLogoMascot extends StatefulWidget {
   State<AnimatedLogoMascot> createState() => _AnimatedLogoMascotState();
 }
 
-class _AnimatedLogoMascotState extends State<AnimatedLogoMascot> {
-  VideoPlayerController? _videoController;
-  bool _showVideo = true;
-  bool _isVideoInitialized = false;
-  Timer? _staticTimer;
+enum _MascotPhase { animation, staticLogo }
+
+class _AnimatedLogoMascotState extends State<AnimatedLogoMascot>
+    with TickerProviderStateMixin {
+  late final AnimationController _frameController;
+  late final AnimationController _transitionController;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+
+  _MascotPhase _phase = _MascotPhase.animation;
+  Timer? _holdTimer;
   bool _isDisposed = false;
+
+  static const int _totalFrames = 98;
+  static const Duration _animDuration = Duration(milliseconds: 3920); // ~25 fps
+  static const Duration _staticHoldDuration = Duration(seconds: 4);
+  static const Duration _transitionDuration = Duration(milliseconds: 450);
 
   @override
   void initState() {
     super.initState();
-    _initVideo();
-  }
+    _transitionController = AnimationController(
+      vsync: this,
+      duration: _transitionDuration,
+      value: 1.0,
+    );
 
-  Future<void> _initVideo() async {
-    try {
-      final controller =
-          VideoPlayerController.asset('assets/videos/logo_cat_anim.webm');
-      _videoController = controller;
+    _fadeAnimation = CurvedAnimation(
+      parent: _transitionController,
+      curve: Curves.easeInOut,
+    );
 
-      await controller.initialize();
-      if (_isDisposed) {
-        controller.dispose();
-        return;
-      }
+    // Spring Bounce scale curve
+    _scaleAnimation = Tween<double>(begin: 0.86, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _transitionController,
+        curve: Curves.easeOutBack,
+      ),
+    );
 
-      controller.setVolume(0.0);
-      controller.setLooping(false);
-
-      controller.addListener(_videoListener);
-
-      setState(() {
-        _isVideoInitialized = true;
-        _showVideo = true;
+    _frameController = AnimationController(
+      vsync: this,
+      duration: _animDuration,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _handleAnimationCompleted();
+        }
       });
 
-      await controller.play();
-    } catch (_) {
-      // Fallback to static logo if video fails to load
-      if (!_isDisposed && mounted) {
-        setState(() {
-          _isVideoInitialized = false;
-          _showVideo = false;
-        });
-      }
-    }
+    // Start playing from Frame 0 immediately
+    _frameController.forward(from: 0.0);
   }
 
-  void _videoListener() {
-    final controller = _videoController;
-    if (controller == null || !controller.value.isInitialized) return;
-
-    // Check if video reached its end
-    if (controller.value.position >= controller.value.duration &&
-        !controller.value.isPlaying &&
-        _showVideo) {
-      _handleVideoEnded();
-    }
-  }
-
-  void _handleVideoEnded() {
+  void _handleAnimationCompleted() async {
     if (_isDisposed || !mounted) return;
 
-    // Fade to static logo
+    // 1. Smooth bounce-out / fade-out
+    await _transitionController.reverse();
+    if (_isDisposed || !mounted) return;
+
+    // 2. Switch to static logo
     setState(() {
-      _showVideo = false;
+      _phase = _MascotPhase.staticLogo;
     });
 
-    // Hold static logo for 4 seconds, then fade back to video and replay
-    _staticTimer?.cancel();
-    _staticTimer = Timer(const Duration(seconds: 4), () async {
+    // 3. Bounce-in / fade-in static logo
+    _transitionController.forward();
+
+    // 4. Hold static logo for 4 seconds
+    _holdTimer?.cancel();
+    _holdTimer = Timer(_staticHoldDuration, () async {
       if (_isDisposed || !mounted) return;
 
-      final controller = _videoController;
-      if (controller != null && controller.value.isInitialized) {
-        await controller.seekTo(Duration.zero);
-        if (_isDisposed || !mounted) return;
+      // 5. Smooth bounce-out / fade-out static logo
+      await _transitionController.reverse();
+      if (_isDisposed || !mounted) return;
 
-        setState(() {
-          _showVideo = true;
-        });
+      // 6. Switch back to animation and explicitly reset to Frame 0
+      setState(() {
+        _phase = _MascotPhase.animation;
+      });
+      _frameController.reset();
 
-        await controller.play();
-      }
+      // 7. Bounce-in / fade-in animation and play forward from Frame 0
+      _transitionController.forward();
+      _frameController.forward(from: 0.0);
     });
   }
 
   @override
   void dispose() {
     _isDisposed = true;
-    _staticTimer?.cancel();
-    _videoController?.removeListener(_videoListener);
-    _videoController?.dispose();
+    _holdTimer?.cancel();
+    _frameController.dispose();
+    _transitionController.dispose();
     super.dispose();
   }
 
@@ -114,39 +118,40 @@ class _AnimatedLogoMascotState extends State<AnimatedLogoMascot> {
     return SizedBox(
       width: widget.size,
       height: widget.size,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 600),
-        switchInCurve: Curves.easeInOut,
-        switchOutCurve: Curves.easeInOut,
-        child: (_isVideoInitialized && _showVideo && _videoController != null)
-            ? KeyedSubtree(
-                key: const ValueKey('video_mascot'),
-                child: SizedBox(
-                  width: widget.size,
-                  height: widget.size,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox(
-                      width: _videoController!.value.size.width > 0
-                          ? _videoController!.value.size.width
-                          : widget.size,
-                      height: _videoController!.value.size.height > 0
-                          ? _videoController!.value.size.height
-                          : widget.size,
-                      child: VideoPlayer(_videoController!),
+      child: AnimatedBuilder(
+        animation: _transitionController,
+        builder: (context, _) {
+          return Opacity(
+            opacity: _fadeAnimation.value.clamp(0.0, 1.0),
+            child: Transform.scale(
+              scale: _scaleAnimation.value,
+              child: _phase == _MascotPhase.staticLogo
+                  ? Image.asset(
+                      'assets/images/appliq_logo.png',
+                      width: widget.size,
+                      height: widget.size,
+                      fit: BoxFit.contain,
+                    )
+                  : AnimatedBuilder(
+                      animation: _frameController,
+                      builder: (context, _) {
+                        final frameIndex = (_frameController.value * (_totalFrames - 1))
+                            .round()
+                            .clamp(0, _totalFrames - 1);
+                        final framePadded = frameIndex.toString().padLeft(3, '0');
+
+                        return Image.asset(
+                          'assets/images/cat_frames/frame_$framePadded.png',
+                          width: widget.size,
+                          height: widget.size,
+                          fit: BoxFit.contain,
+                          gaplessPlayback: true,
+                        );
+                      },
                     ),
-                  ),
-                ),
-              )
-            : KeyedSubtree(
-                key: const ValueKey('static_mascot'),
-                child: Image.asset(
-                  'assets/images/appliq_logo.png',
-                  width: widget.size,
-                  height: widget.size,
-                  fit: BoxFit.contain,
-                ),
-              ),
+            ),
+          );
+        },
       ),
     );
   }

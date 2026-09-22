@@ -15,6 +15,7 @@ class SupabaseJobRepository implements JobRepository {
   List<JobApplication>? _cachedApplications;
   UserProfile? _cachedProfile;
   final Map<String, List<ApplicationLog>> _cachedLogs = {};
+  List<ApplicationLog>? _cachedAllLogs;
   Map<String, dynamic>? _cachedStats;
 
   @override
@@ -107,6 +108,7 @@ class SupabaseJobRepository implements JobRepository {
     _cachedApplications = null;
     _cachedProfile = null;
     _cachedLogs.clear();
+    _cachedAllLogs = null;
     _cachedStats = null;
     try {
       final googleSignIn = GoogleSignIn();
@@ -124,6 +126,7 @@ class SupabaseJobRepository implements JobRepository {
         _cachedApplications = null;
         _cachedStats = null;
         _cachedLogs.clear();
+        _cachedAllLogs = null;
         return null;
       }
       return getCurrentUserProfile(forceRefresh: true);
@@ -249,6 +252,36 @@ class SupabaseJobRepository implements JobRepository {
   }
 
   @override
+  Future<List<ApplicationLog>> getAllApplicationLogs({bool forceRefresh = false}) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    if (!forceRefresh && _cachedAllLogs != null) {
+      return _cachedAllLogs!;
+    }
+
+    try {
+      final response = await _supabase
+          .from('application_logs')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: true);
+
+      final list = (response as List).map((json) => ApplicationLog.fromJson(json)).toList();
+      _cachedAllLogs = list;
+
+      // Populate individual application logs cache for instantaneous subsequent lookups
+      _cachedLogs.clear();
+      for (var log in list) {
+        _cachedLogs.putIfAbsent(log.applicationId, () => []).add(log);
+      }
+      return list;
+    } catch (_) {
+      return _cachedAllLogs ?? [];
+    }
+  }
+
+  @override
   Future<ApplicationLog> createApplicationLog(ApplicationLog log) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Pengguna belum terautentikasi');
@@ -264,6 +297,7 @@ class SupabaseJobRepository implements JobRepository {
 
     final result = ApplicationLog.fromJson(response);
     _cachedLogs[log.applicationId]?.add(result);
+    _cachedAllLogs?.add(result);
     notifyDataChanged();
     return result;
   }
@@ -274,6 +308,7 @@ class SupabaseJobRepository implements JobRepository {
     for (var list in _cachedLogs.values) {
       list.removeWhere((l) => l.id == id);
     }
+    _cachedAllLogs?.removeWhere((l) => l.id == id);
     notifyDataChanged();
   }
 

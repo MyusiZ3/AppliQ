@@ -248,6 +248,11 @@ class MockJobRepository implements JobRepository {
   }
 
   @override
+  Future<List<ApplicationLog>> getAllApplicationLogs({bool forceRefresh = false}) async {
+    return List.unmodifiable(_logs);
+  }
+
+  @override
   Future<ApplicationLog> createApplicationLog(ApplicationLog log) async {
     final newLog = ApplicationLog(
       id: log.id.isEmpty ? _uuid.v4() : log.id,

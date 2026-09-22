@@ -11,6 +11,8 @@ class ApplicationCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onToggleFavorite;
 
+  static final DateFormat _cardDateFormat = DateFormat('dd MMM yyyy');
+
   const ApplicationCard({
     super.key,
     required this.application,
@@ -25,18 +27,19 @@ class ApplicationCard extends StatelessWidget {
       application.status,
       application.appliedDate,
     );
-    final formattedDate = DateFormat('dd MMM yyyy').format(application.appliedDate);
+    final formattedDate = _cardDateFormat.format(application.appliedDate);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-          width: 0.8,
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            width: 0.8,
+          ),
         ),
-      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -172,8 +175,9 @@ class ApplicationCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildMetaTag(IconData icon, String label, bool isDark, {double? maxWidth}) {
     Widget content = Row(

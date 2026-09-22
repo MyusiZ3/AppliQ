@@ -61,14 +61,25 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   }
 
   Future<void> _updateStatus(ApplicationStatus newStatus) async {
-    if (_application == null) return;
+    if (_application == null || _application!.status == newStatus) return;
+    HapticFeedback.selectionClick();
+    final prevApp = _application!;
+    setState(() {
+      _application = _application!.copyWith(status: newStatus);
+    });
+
     try {
-      final updated = _application!.copyWith(status: newStatus);
-      await widget.repository.updateApplication(updated);
-      if (mounted) UIHelper.showSuccessSnackBar(context, 'Status diubah ke ${newStatus.label}');
-      _loadData();
+      final updated = prevApp.copyWith(status: newStatus);
+      final saved = await widget.repository.updateApplication(updated);
+      if (mounted) {
+        setState(() => _application = saved);
+        UIHelper.showSuccessSnackBar(context, 'Status diubah ke ${newStatus.label}');
+      }
     } catch (e) {
-      if (mounted) UIHelper.handleError(context, e);
+      if (mounted) {
+        setState(() => _application = prevApp);
+        UIHelper.handleError(context, e);
+      }
     }
   }
 
@@ -782,17 +793,12 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         padding: EdgeInsets.fromLTRB(
             16, 12, 16, MediaQuery.of(context).padding.bottom + 90),
         children: [
-          // Header Card
-          Container(
+          // Header Card with Notch Pill
+          NotchedCard(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.surface,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                width: 0.8,
-              ),
-            ),
+            borderRadius: 22,
+            showTopNotch: true,
+            showBottomNotch: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -5,10 +5,37 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../core/constants/app_colors.dart';
 import 'navigator_key.dart';
 
 class UIHelper {
+  static Future<void> openUrl(BuildContext context, String? rawUrl) async {
+    if (rawUrl == null || rawUrl.trim().isEmpty) {
+      showInfoSnackBar(context, 'Tautan URL tidak tersedia.');
+      return;
+    }
+    var trimmed = rawUrl.trim();
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      trimmed = 'https://$trimmed';
+    }
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null) {
+      showErrorSnackBar(context, 'Format tautan URL tidak valid.');
+      return;
+    }
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        showErrorSnackBar(context, 'Tidak dapat membuka tautan.');
+      }
+    } catch (_) {
+      if (context.mounted) {
+        showErrorSnackBar(context, 'Gagal membuka tautan di peramban browser.');
+      }
+    }
+  }
+
   static void showSuccessSnackBar(BuildContext context, String message) {
     _showTopToast(context, message, AppColors.income, CupertinoIcons.check_mark_circled_solid);
   }

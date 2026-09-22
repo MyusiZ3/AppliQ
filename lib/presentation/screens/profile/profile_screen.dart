@@ -1935,19 +1935,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFF18181B),
                           borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF3F3F46) : Colors.transparent,
+                            width: 0.8,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
+                              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.08),
                               blurRadius: 16,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             Icon(
                               CupertinoIcons.square_arrow_right,
                               color: Color(0xFFEF4444),

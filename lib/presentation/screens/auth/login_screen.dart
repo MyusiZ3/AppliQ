@@ -27,7 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
       await widget.repository.signInWithGoogle();
       final user = await widget.repository.getCurrentUserProfile();
       if (user != null && mounted) {
-        UIHelper.showSuccessSnackBar(context, 'Selamat datang, ${user.fullName}!');
+        UIHelper.showSuccessSnackBar(
+            context, 'Selamat datang, ${user.fullName}!');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => MainNav(repository: widget.repository),
@@ -64,7 +65,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.4,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
                   ),
                 ),
                 IconButton(
@@ -80,7 +83,9 @@ class _LoginScreenState extends State<LoginScreen> {
               style: TextStyle(
                 fontSize: 13.5,
                 height: 1.55,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 18),
@@ -96,8 +101,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Google Sign in button colors matching official design
     final googleBtnBg = isDark ? const Color(0xFF131314) : Colors.white;
-    final googleBtnBorder = isDark ? const Color(0xFF3C4043) : const Color(0xFF747775);
-    final googleBtnText = isDark ? const Color(0xFFE3E3E3) : const Color(0xFF1F1F1F);
+    final googleBtnBorder =
+        isDark ? const Color(0xFF3C4043) : const Color(0xFF747775);
+    final googleBtnText =
+        isDark ? const Color(0xFFE3E3E3) : const Color(0xFF1F1F1F);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
@@ -125,7 +132,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.w900,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
                     letterSpacing: -1.2,
                   ),
                 ),
@@ -133,12 +142,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Tagline / Subtitle
                 Text(
-                  'Kendalikan & pantau setiap tahapan\nlamaran kerjamu secara real-time.',
+                  'Kelola & pantau setiap tahapan\nlamaran kerjamu secara real-time.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.5,
                     height: 1.45,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondary,
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -154,7 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: Border.all(color: googleBtnBorder, width: 1.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                        color: Colors.black
+                            .withValues(alpha: isDark ? 0.35 : 0.06),
                         blurRadius: 14,
                         offset: const Offset(0, 4),
                       ),
@@ -211,7 +223,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Dengan masuk, kamu menyetujui ',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                            color: isDark
+                                ? AppColors.textHintDark
+                                : AppColors.textHint,
                           ),
                         ),
                         GestureDetector(
@@ -224,7 +238,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : const Color(0xFF18181B),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF18181B),
                               decoration: TextDecoration.underline,
                             ),
                           ),
@@ -233,7 +249,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ' dan ',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                            color: isDark
+                                ? AppColors.textHintDark
+                                : AppColors.textHint,
                           ),
                         ),
                         GestureDetector(
@@ -246,7 +264,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : const Color(0xFF18181B),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF18181B),
                               decoration: TextDecoration.underline,
                             ),
                           ),
@@ -255,7 +275,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ' AppliQ.',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                            color: isDark
+                                ? AppColors.textHintDark
+                                : AppColors.textHint,
                           ),
                         ),
                       ],

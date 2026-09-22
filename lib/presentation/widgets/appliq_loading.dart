@@ -2,33 +2,34 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 
 /// Loading Indicator kustom AppliQ:
-/// Menggunakan logo AppliQ dengan background putih dan elemen AppliQ yang berkedip/pulsing sebagai indikator loading aktif.
+/// Menggunakan maskot AppliQ (Kucing 3D) berlatar putih dengan elemen 3D (Briefcase, Notes, Chat)
+/// yang berkedip/pulsing lembut di sekeliling maskot sebagai indikator loading aktif.
 class AppliqLoading extends StatefulWidget {
-  final double logoSize;
-  final double elementSize;
+  final double size;
   final String? message;
   final bool isFullScreen;
+  final bool hasWhiteBackground;
 
   const AppliqLoading({
     super.key,
-    this.logoSize = 68,
-    this.elementSize = 32,
+    this.size = 160,
     this.message,
     this.isFullScreen = false,
+    this.hasWhiteBackground = false,
   });
 
   const AppliqLoading.fullscreen({
     super.key,
-    this.logoSize = 78,
-    this.elementSize = 36,
+    this.size = 200,
     this.message,
+    this.hasWhiteBackground = false,
   }) : isFullScreen = true;
 
   const AppliqLoading.compact({
     super.key,
-    this.logoSize = 44,
-    this.elementSize = 22,
+    this.size = 80,
     this.message,
+    this.hasWhiteBackground = false,
   }) : isFullScreen = false;
 
   @override
@@ -49,11 +50,11 @@ class _AppliqLoadingState extends State<AppliqLoading>
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
 
-    _opacityAnimation = Tween<double>(begin: 0.25, end: 1.0).animate(
+    _opacityAnimation = Tween<double>(begin: 0.2, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.90, end: 1.08).animate(
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.08).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -68,95 +69,62 @@ class _AppliqLoadingState extends State<AppliqLoading>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final logoAndElements = Container(
+      width: widget.size,
+      height: widget.size,
+      padding: widget.hasWhiteBackground ? EdgeInsets.all(widget.size * 0.04) : EdgeInsets.zero,
+      decoration: widget.hasWhiteBackground
+          ? BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(widget.size * 0.28),
+              border: Border.all(
+                color: const Color(0xFFE4E4E7),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            )
+          : null,
+      child: Stack(
+        alignment: Alignment.center,
+        fit: StackFit.expand,
+        children: [
+          // 1. Maskot Utama (Kucing 3D Hitam CV)
+          Image.asset(
+            'assets/images/appliq_logo.png',
+            fit: BoxFit.contain,
+          ),
+
+          // 2. Elemen 3D yang Berkedip/Pulsing di Sekitar Kucing (Briefcase & Notes)
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Opacity(
+                opacity: _opacityAnimation.value,
+                child: Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: Image.asset(
+                    'assets/images/appliq_element.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Stack Logo + Blinking Graphic Element
-        Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            // AppliQ Logo dengan Background Putih
-            Container(
-              width: widget.logoSize,
-              height: widget.logoSize,
-              padding: EdgeInsets.all(widget.logoSize * 0.14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(widget.logoSize * 0.28),
-                border: Border.all(
-                  color: const Color(0xFFE4E4E7),
-                  width: 1.0,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Image.asset(
-                  'assets/images/appliq_logo.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.work_rounded,
-                    color: Color(0xFF18181B),
-                  ),
-                ),
-              ),
-            ),
-
-            // Blinking Element Indicator (Pulsing di pojok kanan bawah atau center overlay)
-            Positioned(
-              right: -widget.elementSize * 0.25,
-              bottom: -widget.elementSize * 0.25,
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _opacityAnimation.value,
-                    child: Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: Container(
-                        width: widget.elementSize,
-                        height: widget.elementSize,
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
-                            width: 1.2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.25 * _opacityAnimation.value),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Image.asset(
-                          'assets/images/appliq_element.png',
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.auto_awesome,
-                            size: 14,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-
+        logoAndElements,
         if (widget.message != null && widget.message!.isNotEmpty) ...[
           const SizedBox(height: 18),
           Text(

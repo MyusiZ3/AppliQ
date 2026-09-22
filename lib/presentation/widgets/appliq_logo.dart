@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Reusable AppliQ Logo Widget dengan opsi background putih dan radius elegan.
+/// Reusable AppliQ Logo Widget dengan maskot 3D Kucing AppliQ dan background putih elegan.
 class AppliqLogo extends StatelessWidget {
   final double? width;
   final double? height;
@@ -15,9 +15,9 @@ class AppliqLogo extends StatelessWidget {
     super.key,
     this.width,
     this.height,
-    this.size = 72,
+    this.size = 80,
     this.hasWhiteBackground = true,
-    this.borderRadius = 20,
+    this.borderRadius = 24,
     this.padding,
     this.border,
     this.boxShadow,
@@ -33,13 +33,6 @@ class AppliqLogo extends StatelessWidget {
       width: effectiveWidth,
       height: effectiveHeight,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        return Icon(
-          Icons.work_rounded,
-          size: size * 0.6,
-          color: const Color(0xFF18181B),
-        );
-      },
     );
 
     if (!hasWhiteBackground) {
@@ -49,7 +42,7 @@ class AppliqLogo extends StatelessWidget {
     return Container(
       width: effectiveWidth,
       height: effectiveHeight,
-      padding: padding ?? EdgeInsets.all(size * 0.14),
+      padding: padding ?? EdgeInsets.all(size * 0.08),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -59,9 +52,9 @@ class AppliqLogo extends StatelessWidget {
         ),
         boxShadow: boxShadow ?? [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),

@@ -249,8 +249,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Center(
-                    child: Text('🎨', style: TextStyle(fontSize: 18)),
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.paintbrush_fill,
+                      size: 18,
+                      color: isDark ? Colors.white : const Color(0xFF18181B),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -327,8 +331,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Center(
-                        child: Text('🚀', style: TextStyle(fontSize: 22)),
+                      child: Center(
+                        child: Icon(
+                          CupertinoIcons.chevron_left_slash_chevron_right,
+                          size: 20,
+                          color: isDark ? Colors.white : const Color(0xFF18181B),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 14),

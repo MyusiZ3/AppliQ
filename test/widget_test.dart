@@ -2,7 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:appliq/presentation/screens/auth/login_screen.dart';
 import 'package:appliq/presentation/screens/onboarding_screen.dart';
 import 'package:appliq/presentation/screens/main_nav.dart';
+import 'package:appliq/presentation/screens/applications/application_detail_screen.dart';
+import 'package:appliq/presentation/screens/applications/application_form_screen.dart';
 import 'package:appliq/data/repositories/mock_job_repository.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -42,5 +45,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Ringkasan Lamaran'), findsOneWidget);
+  });
+
+  testWidgets('ApplicationDetailScreen renders and navigates to edit form', (WidgetTester tester) async {
+    final mockRepo = MockJobRepository();
+    final apps = await mockRepo.getApplications();
+    final firstApp = apps.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ApplicationDetailScreen(
+          applicationId: firstApp.id,
+          repository: mockRepo,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(CupertinoIcons.pencil), findsOneWidget);
+
+    await tester.tap(find.byIcon(CupertinoIcons.pencil));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit Lamaran'), findsOneWidget);
   });
 }

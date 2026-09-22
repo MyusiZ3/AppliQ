@@ -42,14 +42,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     super.dispose();
   }
 
-  Future<void> _loadSchedules({bool isSilent = false, bool forceRefresh = false}) async {
+  Future<void> _loadSchedules(
+      {bool isSilent = false, bool forceRefresh = false}) async {
     if (!isSilent) setState(() => _isLoading = true);
     try {
-      final apps = await widget.repository.getApplications(forceRefresh: forceRefresh);
+      final apps =
+          await widget.repository.getApplications(forceRefresh: forceRefresh);
       final items = <Map<String, dynamic>>[];
 
       for (var app in apps) {
-        final logs = await widget.repository.getApplicationLogs(app.id, forceRefresh: forceRefresh);
+        final logs = await widget.repository
+            .getApplicationLogs(app.id, forceRefresh: forceRefresh);
         for (var log in logs) {
           items.add({
             'app': app,
@@ -59,8 +62,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       }
 
       items.sort((a, b) {
-        final dateA = (a['log'] as ApplicationLog).scheduledAt ?? DateTime(2099);
-        final dateB = (b['log'] as ApplicationLog).scheduledAt ?? DateTime(2099);
+        final dateA =
+            (a['log'] as ApplicationLog).scheduledAt ?? DateTime(2099);
+        final dateB =
+            (b['log'] as ApplicationLog).scheduledAt ?? DateTime(2099);
         return dateA.compareTo(dateB);
       });
 
@@ -93,7 +98,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        backgroundColor:
+            isDark ? AppColors.backgroundDark : AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
@@ -129,13 +135,20 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 60),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
                 : filteredItems.isEmpty
                     ? RefreshIndicator(
                         onRefresh: () => _loadSchedules(forceRefresh: true),
                         child: EmptyStateView(
                           icon: CupertinoIcons.calendar_badge_minus,
-                          title: _upcomingOnly ? 'Tidak Ada Jadwal Mendatang' : 'Belum Ada Jadwal Wawancara',
+                          title: _upcomingOnly
+                              ? 'Tidak Ada Jadwal Mendatang'
+                              : 'Belum Ada Jadwal Wawancara',
                           message: _upcomingOnly
                               ? 'Tidak ada agenda wawancara terdekat. Ketuk "Semua Riwayat" untuk melihat riwayat sebelumnya.'
                               : 'Jadwal wawancara yang kamu catat pada rincian lamaran akan muncul rapi di sini.',
@@ -144,7 +157,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     : RefreshIndicator(
                         onRefresh: () => _loadSchedules(forceRefresh: true),
                         child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 130),
                           itemCount: filteredItems.length,
                           itemBuilder: (context, index) {
                             final item = filteredItems[index];
@@ -155,10 +168,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               margin: const EdgeInsets.only(bottom: 10),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                                color: isDark
+                                    ? AppColors.surfaceDark
+                                    : AppColors.surface,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                                  color: isDark
+                                      ? AppColors.borderDark
+                                      : AppColors.borderLight,
                                   width: 0.8,
                                 ),
                               ),
@@ -166,7 +183,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
@@ -175,15 +193,20 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                             fontSize: 15,
                                             fontWeight: FontWeight.w700,
                                             letterSpacing: -0.2,
-                                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                            color: isDark
+                                                ? AppColors.textPrimaryDark
+                                                : AppColors.textPrimary,
                                           ),
                                         ),
                                       ),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: AppColors.warning.withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(100),
+                                          color: AppColors.warning
+                                              .withValues(alpha: 0.12),
+                                          borderRadius:
+                                              BorderRadius.circular(100),
                                         ),
                                         child: Text(
                                           log.result,
@@ -201,7 +224,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                     '${app.positionTitle} • ${app.companyName}',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                      color: isDark
+                                          ? AppColors.textSecondaryDark
+                                          : AppColors.textSecondary,
                                     ),
                                   ),
                                   const SizedBox(height: 12),
@@ -211,15 +236,20 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                         Icon(
                                           CupertinoIcons.clock,
                                           size: 14,
-                                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                          color: isDark
+                                              ? AppColors.textHintDark
+                                              : AppColors.textHint,
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          DateFormat('EEEE, dd MMM yyyy, HH:mm').format(log.scheduledAt!),
+                                          DateFormat('EEEE, dd MMM yyyy, HH:mm')
+                                              .format(log.scheduledAt!),
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w600,
-                                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                            color: isDark
+                                                ? AppColors.textPrimaryDark
+                                                : AppColors.textPrimary,
                                           ),
                                         ),
                                       ],
@@ -231,20 +261,25 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                         Icon(
                                           CupertinoIcons.person,
                                           size: 14,
-                                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                          color: isDark
+                                              ? AppColors.textHintDark
+                                              : AppColors.textHint,
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
                                           'Pewawancara: ${log.interviewerName}',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                            color: isDark
+                                                ? AppColors.textSecondaryDark
+                                                : AppColors.textSecondary,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ],
-                                  if (log.meetingLink != null && log.meetingLink!.isNotEmpty) ...[
+                                  if (log.meetingLink != null &&
+                                      log.meetingLink!.isNotEmpty) ...[
                                     const SizedBox(height: 10),
                                     InkWell(
                                       onTap: () => launchUrl(
@@ -253,15 +288,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                       ),
                                       borderRadius: BorderRadius.circular(100),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primary.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(100),
+                                          color: AppColors.primary
+                                              .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(100),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: const [
-                                            Icon(CupertinoIcons.video_camera_solid, size: 15, color: AppColors.primary),
+                                            Icon(
+                                                CupertinoIcons
+                                                    .video_camera_solid,
+                                                size: 15,
+                                                color: AppColors.primary),
                                             SizedBox(width: 6),
                                             Text(
                                               'Buka Link Pertemuan',

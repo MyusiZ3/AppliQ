@@ -240,7 +240,12 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
           // Content
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 60),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
                 : filtered.isEmpty
                     ? _buildEmptyState(isDark)
                     : _isKanbanView
@@ -248,7 +253,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                         : RefreshIndicator(
                             onRefresh: () => _loadApplications(forceRefresh: true),
                             child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 150),
                               itemCount: filtered.length,
                               itemBuilder: (context, index) {
                                 final app = filtered[index];

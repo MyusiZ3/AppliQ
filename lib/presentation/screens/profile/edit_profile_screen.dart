@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/ui_helper.dart';
+import '../../widgets/app_avatar.dart';
 import '../auth/login_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -27,16 +28,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _emailController;
   late final TextEditingController _usernameController;
   late final TextEditingController _targetRoleController;
-  late String _avatarUrl;
   bool _isSaving = false;
-
-  final List<String> _presetAvatars = [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200',
-  ];
 
   @override
   void initState() {
@@ -48,7 +40,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       text: widget.profile.username ?? (widget.profile.email.contains('@') ? '@${widget.profile.email.split('@')[0]}' : '@user'),
     );
     _targetRoleController = TextEditingController(text: widget.profile.targetRole ?? '');
-    _avatarUrl = widget.profile.avatarUrl;
   }
 
   @override
@@ -59,127 +50,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.dispose();
     _targetRoleController.dispose();
     super.dispose();
-  }
-
-  void _showAvatarPicker() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final urlController = TextEditingController(text: _avatarUrl);
-
-    UIHelper.showPremiumBottomSheet(
-      context: context,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Ganti Foto Profil',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
-                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Pilih Avatar Bawaan',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 70,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: _presetAvatars.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final url = _presetAvatars[index];
-                  final isSelected = _avatarUrl == url;
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _avatarUrl = url);
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(2.5),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? (isDark ? Colors.white : const Color(0xFF18181B)) : Colors.transparent,
-                          width: 2.5,
-                        ),
-                      ),
-                      child: CircleAvatar(
-                        radius: 28,
-                        backgroundImage: NetworkImage(url),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Atau Masukkan Tautan Gambar (URL)',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: urlController,
-              decoration: InputDecoration(
-                hintText: 'https://...',
-                filled: true,
-                fillColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (urlController.text.trim().isNotEmpty) {
-                    setState(() => _avatarUrl = urlController.text.trim());
-                  }
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                  foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: const Text('Terapkan URL', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _handleSave() async {
@@ -198,7 +68,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         phoneNumber: _phoneController.text.trim(),
         username: _usernameController.text.trim(),
         targetRole: _targetRoleController.text.trim(),
-        avatarUrl: _avatarUrl,
+        avatarUrl: widget.profile.avatarUrl,
       );
 
       await widget.repository.updateUserProfile(updatedProfile);
@@ -307,57 +177,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               const SizedBox(height: 8),
 
-              // Avatar with Camera Badge
+              // Google Synchronized Avatar (Read-Only)
               Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
-                          width: 2,
-                        ),
-                      ),
-                      child: _buildAvatar(_avatarUrl, 52, isDark),
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                      width: 2,
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _showAvatarPicker,
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.white : const Color(0xFF18181B),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark ? AppColors.backgroundDark : Colors.white,
-                              width: 2.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            CupertinoIcons.camera_fill,
-                            size: 15,
-                            color: isDark ? const Color(0xFF18181B) : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: _buildAvatar(widget.profile.avatarUrl, 50, isDark),
                 ),
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
               // Google Account Banner (Email - Read Only with Connected Badge)
               Container(
@@ -617,33 +452,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildAvatar(String? url, double radius, bool isDark) {
-    if (url == null || url.isEmpty) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-        child: Icon(
-          CupertinoIcons.person_fill,
-          size: radius * 0.9,
-          color: isDark ? AppColors.textHintDark : AppColors.textHint,
-        ),
-      );
-    }
-    return ClipOval(
-      child: Image.network(
-        url,
-        width: radius * 2,
-        height: radius * 2,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => CircleAvatar(
-          radius: radius,
-          backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-          child: Icon(
-            CupertinoIcons.person_fill,
-            size: radius * 0.9,
-            color: isDark ? AppColors.textHintDark : AppColors.textHint,
-          ),
-        ),
-      ),
+    return AppAvatar(
+      url: url,
+      radius: radius,
+      isDark: isDark,
+      fallbackName: _fullNameController.text,
     );
   }
 }

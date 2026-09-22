@@ -169,6 +169,7 @@ class NotificationService {
     required int id,
     required String company,
     required String position,
+    String? stageName,
     required DateTime scheduledAt,
     int remindMinutesBefore = 60,
   }) async {
@@ -226,10 +227,17 @@ class NotificationService {
           ? '${remindMinutesBefore ~/ 60} jam'
           : '$remindMinutesBefore menit';
 
+      final stage = (stageName != null && stageName.trim().isNotEmpty)
+          ? stageName.trim()
+          : 'Wawancara';
+
+      final title = 'Pengingat $stage • $company';
+      final body = 'Agenda $stage untuk posisi $position akan dimulai dalam $reminderLabel. Siapkan berkas dan performa terbaikmu!';
+
       await _notificationsPlugin.zonedSchedule(
         id,
-        'Pengingat Wawancara • $company',
-        'Agenda $position kamu akan dimulai dalam $reminderLabel. Siapkan berkas dan koneksi kamu!',
+        title,
+        body,
         tzReminderTime,
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

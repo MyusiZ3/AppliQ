@@ -163,39 +163,56 @@ class UIHelper {
       isScrollControlled: isScrollControlled,
       elevation: 0,
       showDragHandle: false,
-      builder: (ctx) => BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: SafeArea(
-          bottom: false,
-          child: Container(
-            margin: EdgeInsets.fromLTRB(
-              16,
-              0,
-              16,
-              MediaQuery.of(ctx).padding.bottom + 16,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(ctx).cardColor.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: Theme.of(ctx).dividerColor.withValues(alpha: 0.15),
-                width: 1.2,
+      builder: (ctx) {
+        final keyboardInset = MediaQuery.of(ctx).viewInsets.bottom;
+        final bottomPadding = MediaQuery.of(ctx).padding.bottom;
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+
+        return BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: AnimatedPadding(
+            padding: EdgeInsets.only(bottom: keyboardInset),
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutQuad,
+            child: SafeArea(
+              top: false,
+              bottom: true,
+              child: Container(
+                margin: EdgeInsets.fromLTRB(
+                  16,
+                  0,
+                  16,
+                  bottomPadding > 0 ? 8 : 16,
+                ),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.08),
+                    width: 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+                      blurRadius: 32,
+                      offset: const Offset(0, 8),
+                    )
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: child,
+                  ),
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 32,
-                  offset: const Offset(0, 8),
-                )
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: child,
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -209,12 +226,17 @@ class UIHelper {
       }
       return 'Gagal masuk akun. Silakan coba lagi.';
     } else if (error is PostgrestException) {
+      debugPrint('PostgrestException details: code=${error.code}, message=${error.message}, details=${error.details}, hint=${error.hint}');
       if (error.code == '42P01') {
-        return 'Layanan penyimpanan sedang disiapkan. Silakan coba kembali sesaat lagi.';
+        return 'Tabel database belum ditemukan. Silakan jalankan script SQL di Supabase.';
+      } else if (error.code == '42501' || error.message.toLowerCase().contains('row-level security') || error.message.toLowerCase().contains('permission denied')) {
+        return 'Akses ditolak oleh RLS Supabase. Pastikan RLS policy telah dibuat untuk tabel ini.';
+      } else if (error.code == '42703') {
+        return 'Struktur kolom database belum sesuai: ${error.message}';
       } else if (error.code == 'PGRST301') {
         return 'Sesi masuk telah berakhir. Silakan masuk kembali.';
       }
-      return 'Gagal memproses data. Silakan coba beberapa saat lagi.';
+      return error.message.isNotEmpty ? error.message : 'Gagal memproses data. Silakan coba beberapa saat lagi.';
     } else if (error is SocketException) {
       return 'Koneksi internet terputus. Periksa jaringan Anda.';
     } else if (error is TimeoutException) {

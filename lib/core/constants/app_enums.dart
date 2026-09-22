@@ -19,14 +19,17 @@ enum EmploymentType {
 enum WorkSystem {
   onSite('On-site'),
   hybrid('Hybrid'),
-  wfh('WFH');
+  wfh('WFH'),
+  remoteOverseas('Remote Global'),
+  flexible('Fleksibel');
 
   final String label;
   const WorkSystem(this.label);
 
   static WorkSystem fromString(String val) {
+    final clean = val.trim().toLowerCase();
     return WorkSystem.values.firstWhere(
-      (e) => e.label.toLowerCase() == val.trim().toLowerCase(),
+      (e) => e.label.toLowerCase() == clean || e.name.toLowerCase() == clean,
       orElse: () => WorkSystem.onSite,
     );
   }
@@ -36,17 +39,26 @@ enum JobPortal {
   linkedIn('Linked In'),
   jobStreet('JobStreet'),
   glints('Glints'),
+  kalibrr('Kalibrr'),
+  dealls('Dealls'),
+  techInAsia('Tech in Asia'),
+  referral('Referral / Teman'),
+  directEmail('Email / HR Outreach'),
   kitaLulus('KitaLulus'),
-  website('Website'),
-  instagram('Instagram'),
+  jobFair('Job Fair / Kampus'),
+  website('Website Perusahaan'),
+  instagram('Instagram / Sosmed'),
+  komunitas('Komunitas / Grup'),
+  freelance('Freelance Platform'),
   lainnya('Lainnya');
 
   final String label;
   const JobPortal(this.label);
 
   static JobPortal fromString(String val) {
+    final clean = val.trim().toLowerCase();
     return JobPortal.values.firstWhere(
-      (e) => e.label.toLowerCase() == val.trim().toLowerCase(),
+      (e) => e.label.toLowerCase() == clean || e.name.toLowerCase() == clean,
       orElse: () => JobPortal.linkedIn,
     );
   }

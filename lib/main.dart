@@ -50,14 +50,19 @@ class AppliQApp extends StatelessWidget {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: ThemeManager.notifier,
       builder: (context, themeMode, _) {
-        return MaterialApp(
-          title: 'AppliQ',
-          navigatorKey: navigatorKey,
-          debugShowCheckedModeBanner: false,
-          themeMode: themeMode,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          home: AuthGate(repository: repository),
+        return ValueListenableBuilder<AccentThemeMode>(
+          valueListenable: ThemeManager.accentNotifier,
+          builder: (context, accentMode, _) {
+            return MaterialApp(
+              title: 'AppliQ',
+              navigatorKey: navigatorKey,
+              debugShowCheckedModeBanner: false,
+              themeMode: themeMode,
+              theme: AppTheme.buildLightTheme(accentMode),
+              darkTheme: AppTheme.buildDarkTheme(accentMode),
+              home: AuthGate(repository: repository),
+            );
+          },
         );
       },
     );

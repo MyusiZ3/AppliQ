@@ -134,7 +134,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     final filtered = _filteredApplications;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -142,7 +142,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
             // Standardized Top Header Row
             Container(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              color: isDark ? AppColors.backgroundDark : AppColors.background,
+              color: Theme.of(context).scaffoldBackgroundColor,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,

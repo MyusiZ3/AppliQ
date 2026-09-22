@@ -1649,13 +1649,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF18181B) : AppColors.surface;
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final cardBg = Theme.of(context).cardTheme.color ??
+        (isDark ? const Color(0xFF18181B) : AppColors.surface);
+    final borderColor = Theme.of(context).dividerTheme.color ??
+        (isDark ? const Color(0xFF27272A) : AppColors.borderLight);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: Navigator.canPop(context)
             ? Padding(

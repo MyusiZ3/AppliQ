@@ -132,51 +132,34 @@ class _MainNavState extends State<MainNav> {
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Align(
                         alignment: Alignment.bottomCenter,
-                        child: ValueListenableBuilder<AccentThemeMode>(
-                          valueListenable: ThemeManager.accentNotifier,
-                          builder: (context, accentMode, _) {
-                            final isMono = accentMode == AccentThemeMode.monochrome;
-                            final capsuleBg = isMono
-                                ? const Color(0xF218181B)
-                                : (isDark ? const Color(0xF20F1424) : const Color(0xF218181B));
-                            final capsuleBorder = isMono
-                                ? Colors.white.withValues(alpha: 0.12)
-                                : (isDark
-                                    ? const Color(0xFF6366F1).withValues(alpha: 0.28)
-                                    : Colors.white.withValues(alpha: 0.12));
-
-                            return Container(
-                              width: 280,
-                              height: 64,
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: capsuleBg,
-                                borderRadius: BorderRadius.circular(44),
-                                border: Border.all(
-                                  color: capsuleBorder,
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: !isMono && isDark
-                                        ? const Color(0xFF4F46E5).withValues(alpha: 0.22)
-                                        : Colors.black.withValues(alpha: isDark ? 0.45 : 0.22),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
+                        child: Container(
+                          width: 280,
+                          height: 64,
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: const Color(0xF218181B),
+                            borderRadius: BorderRadius.circular(44),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.22),
+                                blurRadius: 24,
+                                offset: const Offset(0, 8),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  _buildPillNavItem(0, isDark, isMono),
-                                  _buildPillNavItem(1, isDark, isMono),
-                                  _buildPillNavItem(2, isDark, isMono),
-                                  _buildPillNavItem(3, isDark, isMono),
-                                ],
-                              ),
-                            );
-                          },
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildPillNavItem(0, isDark),
+                              _buildPillNavItem(1, isDark),
+                              _buildPillNavItem(2, isDark),
+                              _buildPillNavItem(3, isDark),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -187,21 +170,15 @@ class _MainNavState extends State<MainNav> {
     );
   }
 
-  Widget _buildPillNavItem(int index, bool isDark, bool isMono) {
+  Widget _buildPillNavItem(int index, bool isDark) {
     final item = _navItems[index];
     final isActive = _currentIndex == index;
 
-    final activeBg = isMono
-        ? const Color(0xFFFFFFFF)
-        : (isDark ? const Color(0xFF6366F1) : const Color(0xFF4F46E5));
-    final inactiveBg = isMono
-        ? const Color(0xFF27272A)
-        : (isDark ? const Color(0xFF192033) : const Color(0xFF27272A));
+    final activeBg = const Color(0xFFFFFFFF);
+    final inactiveBg = const Color(0xFF27272A);
 
-    final activeFg = isMono ? const Color(0xFF18181B) : Colors.white;
-    final inactiveFg = isMono
-        ? const Color(0xFFA1A1AA)
-        : (isDark ? const Color(0xFF818CF8).withValues(alpha: 0.75) : const Color(0xFFA1A1AA));
+    final activeFg = const Color(0xFF18181B);
+    final inactiveFg = const Color(0xFFA1A1AA);
 
     final iconColor = isActive ? activeFg : inactiveFg;
 
@@ -230,11 +207,7 @@ class _MainNavState extends State<MainNav> {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: !isMono
-                        ? (isDark
-                            ? const Color(0xFF6366F1).withValues(alpha: 0.35)
-                            : const Color(0xFF4F46E5).withValues(alpha: 0.35))
-                        : Colors.black.withValues(alpha: 0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),

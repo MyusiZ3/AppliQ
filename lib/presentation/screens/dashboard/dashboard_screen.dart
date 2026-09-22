@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/export_sheet.dart';
 import '../../widgets/empty_state_view.dart';
@@ -244,18 +245,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             padding: const EdgeInsets.fromLTRB(16, 4, 16, 130),
                             children: [
                               if (_selectedTab == 0) ...[
-                                // Hero Conversion Rate Card (Monochrome Style)
+                                // Hero Conversion Rate Card (Option 2 Indigo / Monochrome)
                                 Container(
                                   padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
-                                    color: isDark
-                                        ? const Color(0xFF1E1E22)
-                                        : const Color(0xFF18181B),
+                                    color: ThemeManager.isMonochrome
+                                        ? (isDark
+                                            ? const Color(0xFF1E1E22)
+                                            : const Color(0xFF18181B))
+                                        : (isDark
+                                            ? const Color(0xFF4F46E5)
+                                            : const Color(0xFF4338CA)),
                                     borderRadius: BorderRadius.circular(24),
                                     border: Border.all(
-                                      color: isDark
-                                          ? const Color(0xFF323238)
-                                          : const Color(0x1F000000),
+                                      color: ThemeManager.isMonochrome
+                                          ? (isDark
+                                              ? const Color(0xFF323238)
+                                              : const Color(0x1F000000))
+                                          : Colors.white.withValues(alpha: 0.18),
                                       width: 0.8,
                                     ),
                                     boxShadow: [

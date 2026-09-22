@@ -22,6 +22,7 @@ import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
 import '../../widgets/app_avatar.dart';
 import '../../../services/notification_service.dart';
+import '../../../utils/theme_manager.dart';
 
 class HomeScreen extends StatefulWidget {
   final JobRepository repository;
@@ -196,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: _isLoading
@@ -206,86 +207,91 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: AppliqLoading(),
                 ),
               )
-            : Column(
-                children: [
-                  // Sticky Top User Bar
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
-                    color: isDark
-                        ? AppColors.backgroundDark
-                        : AppColors.background,
-                    child: _buildHeader(isDark, staleApplications),
-                  ),
+            : ValueListenableBuilder<AccentThemeMode>(
+                valueListenable: ThemeManager.accentNotifier,
+                builder: (context, accentMode, _) {
+                  final isMono = accentMode == AccentThemeMode.monochrome;
 
-                  // Scrollable Content
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () => _loadDashboardData(forceRefresh: true),
-                      child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(
-                            parent: BouncingScrollPhysics()),
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
-                        children: [
-                          // Hero Analytics Card (Monochrome Notched Pill Style)
-                          _buildHeroBanner(total, interview, offering, isDark),
-
-                          const SizedBox(height: 22),
-
-                          // Quick Action Shortcuts (4 Minimalist Quick Actions)
-                          _buildQuickActions(isDark),
-
-                          // Upcoming Schedule Widget (If any upcoming interview schedule)
-                          if (_upcomingSchedules.isNotEmpty) ...[
-                            const SizedBox(height: 22),
-                            _buildUpcomingScheduleCard(
-                                _upcomingSchedules.first, isDark),
-                          ],
-
-                          // Smart Follow-Up Reminder Alert (If any stale applications)
-                          if (!_isFollowUpDismissed &&
-                              staleApplications.isNotEmpty) ...[
-                            const SizedBox(height: 18),
-                            _buildFollowUpAlert(staleApplications, isDark),
-                          ],
-
-                          const SizedBox(height: 28),
-
-                          // Section 1: Lamaran Terbaru (Horizontal Carousel)
-                          _buildSectionHeader(
-                            title: 'Lamaran Terbaru',
-                            actionLabel: 'Lihat Semua',
-                            onAction: () => widget.onNavigateToTab?.call(1),
-                            isDark: isDark,
-                          ),
-
-                          const SizedBox(height: 14),
-
-                          _buildRecentApplications(isDark),
-
-                          const SizedBox(height: 28),
-
-                          // Section 2: Perusahaan yang Dilamar
-                          _buildSectionHeader(
-                            title: 'Perusahaan Dilamar',
-                            actionLabel: 'Lihat Detail',
-                            onAction: () => widget.onNavigateToTab?.call(1),
-                            isDark: isDark,
-                          ),
-
-                          const SizedBox(height: 14),
-
-                          _buildCompaniesList(isDark),
-                        ],
+                  return Column(
+                    children: [
+                      // Sticky Top User Bar
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        child: _buildHeader(isDark, staleApplications),
                       ),
-                    ),
-                  ),
-                ],
+
+                      // Scrollable Content
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () => _loadDashboardData(forceRefresh: true),
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(
+                                parent: BouncingScrollPhysics()),
+                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+                            children: [
+                              // Hero Analytics Card (MyDuit Signature Style)
+                              _buildHeroBanner(total, interview, offering, isDark, isMono),
+
+                              const SizedBox(height: 22),
+
+                              // Quick Action Shortcuts (4 Minimalist Quick Actions)
+                              _buildQuickActions(isDark, isMono),
+
+                              // Upcoming Schedule Widget (If any upcoming interview schedule)
+                              if (_upcomingSchedules.isNotEmpty) ...[
+                                const SizedBox(height: 22),
+                                _buildUpcomingScheduleCard(
+                                    _upcomingSchedules.first, isDark),
+                              ],
+
+                              // Smart Follow-Up Reminder Alert (If any stale applications)
+                              if (!_isFollowUpDismissed &&
+                                  staleApplications.isNotEmpty) ...[
+                                const SizedBox(height: 18),
+                                _buildFollowUpAlert(staleApplications, isDark),
+                              ],
+
+                              const SizedBox(height: 28),
+
+                              // Section 1: Lamaran Terbaru (Horizontal Carousel)
+                              _buildSectionHeader(
+                                title: 'Lamaran Terbaru',
+                                actionLabel: 'Lihat Semua',
+                                onAction: () => widget.onNavigateToTab?.call(1),
+                                isDark: isDark,
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              _buildRecentApplications(isDark),
+
+                              const SizedBox(height: 28),
+
+                              // Section 2: Perusahaan yang Dilamar
+                              _buildSectionHeader(
+                                title: 'Perusahaan Dilamar',
+                                actionLabel: 'Lihat Detail',
+                                onAction: () => widget.onNavigateToTab?.call(1),
+                                isDark: isDark,
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              _buildCompaniesList(isDark),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
       ),
     );
   }
 
-  Widget _buildQuickActions(bool isDark) {
+  Widget _buildQuickActions(bool isDark, bool isMono) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       decoration: BoxDecoration(
@@ -309,6 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildQuickActionItem(
             icon: CupertinoIcons.plus,
             label: 'Lamaran',
+            isPrimary: !isMono,
             onTap: () {
               HapticFeedback.lightImpact();
               Navigator.of(context)
@@ -359,7 +366,12 @@ class _HomeScreenState extends State<HomeScreen> {
     required String label,
     required VoidCallback onTap,
     required bool isDark,
+    bool isPrimary = false,
   }) {
+    final circleBg = isPrimary
+        ? (isDark ? const Color(0xFF6366F1) : const Color(0xFF4F46E5))
+        : (isDark ? const Color(0xFF2C2C30) : const Color(0xFF27272A));
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -370,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF2C2C30) : const Color(0xFF27272A),
+              color: circleBg,
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -815,14 +827,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHeroBanner(int total, int interview, int offering, bool isDark) {
+  Widget _buildHeroBanner(
+      int total, int interview, int offering, bool isDark, bool isMono) {
+    final heroBg = isMono
+        ? (isDark ? const Color(0xFF1E1E22) : const Color(0xFF18181B))
+        : (isDark ? const Color(0xFF4F46E5) : const Color(0xFF4338CA));
+    final heroBorder = isMono
+        ? (isDark ? const Color(0xFF323238) : const Color(0x1F000000))
+        : Colors.white.withValues(alpha: 0.18);
+
     return NotchedCard(
       showTopNotch: true,
       showBottomNotch: false,
       borderRadius: 26,
       padding: const EdgeInsets.all(22),
-      backgroundColor: isDark ? const Color(0xFF1E1E22) : const Color(0xFF18181B),
-      borderColor: isDark ? const Color(0xFF323238) : const Color(0x1F000000),
+      backgroundColor: heroBg,
+      borderColor: heroBorder,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

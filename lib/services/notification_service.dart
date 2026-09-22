@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -27,7 +27,7 @@ class NotificationService {
       tz.initializeTimeZones();
 
       const androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('@drawable/ic_notification');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
@@ -119,7 +119,9 @@ class NotificationService {
         channelDescription: _channelDescription,
         importance: Importance.max,
         priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
+        icon: '@drawable/ic_notification',
+        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: Color(0xFF18181B),
         enableVibration: true,
         playSound: true,
         fullScreenIntent: true,
@@ -187,7 +189,9 @@ class NotificationService {
         channelDescription: _channelDescription,
         importance: Importance.max,
         priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
+        icon: '@drawable/ic_notification',
+        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: Color(0xFF18181B),
         enableVibration: true,
         playSound: true,
         styleInformation: BigTextStyleInformation(''),

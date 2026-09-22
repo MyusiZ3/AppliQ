@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic> _stats = {};
   bool _isLoading = true;
   bool _isFollowUpDismissed = false;
+  bool _hasReadNotifications = false;
   StreamSubscription? _dataSub;
 
   @override
@@ -712,7 +713,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final initialLetter =
         rawName.isNotEmpty ? rawName[0].toUpperCase() : 'U';
     final greeting = _getDynamicGreeting();
-    final hasAlerts = _upcomingSchedules.isNotEmpty || staleApplications.isNotEmpty;
+    final hasAlerts = !_hasReadNotifications &&
+        (_upcomingSchedules.isNotEmpty || staleApplications.isNotEmpty);
 
     return Row(
       children: [
@@ -820,6 +822,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: isDark ? Colors.white : const Color(0xFF18181B),
               onPressed: () {
                 HapticFeedback.lightImpact();
+                setState(() => _hasReadNotifications = true);
                 NotificationSheet.show(
                   context,
                   upcomingSchedules: _upcomingSchedules,

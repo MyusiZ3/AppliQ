@@ -154,6 +154,71 @@ class NotchedPillCard<T> extends StatelessWidget {
   }
 }
 
+class NotchedCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double borderRadius;
+
+  const NotchedCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.borderRadius = 22,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final scaffoldBg = isDark ? AppColors.backgroundDark : AppColors.background;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: borderColor, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          // Top Notch Visual (MyDuitGweh Signature)
+          Positioned(
+            top: -1,
+            child: Container(
+              width: 38,
+              height: 7,
+              decoration: BoxDecoration(
+                color: scaffoldBg,
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(10),
+                ),
+                border: Border(
+                  left: BorderSide(color: borderColor, width: 0.8),
+                  right: BorderSide(color: borderColor, width: 0.8),
+                  bottom: BorderSide(color: borderColor, width: 0.8),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: padding,
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class NotchedPillItem<T> {
   final T value;
   final String label;
@@ -167,3 +232,4 @@ class NotchedPillItem<T> {
     this.iconColor,
   });
 }
+

@@ -29,7 +29,7 @@ class EmptyStateView extends StatelessWidget {
               minWidth: constraints.maxWidth,
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(36, 16, 36, 50),
+              padding: const EdgeInsets.fromLTRB(36, 0, 36, 110),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

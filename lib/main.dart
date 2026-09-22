@@ -91,33 +91,7 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isCheckingOnboarding) {
-      return const Scaffold(
-        body: AppliqLoading.fullscreen(),
-      );
-    }
-
-    if (!_hasSeenOnboarding) {
-      return OnboardingScreen(repository: widget.repository);
-    }
-
-    if (!AppConfig.isSupabaseConfigured) {
-      return LoginScreen(repository: widget.repository);
-    }
-
-    return StreamBuilder<AuthState>(
-      stream: Supabase.instance.client.auth.onAuthStateChange,
-      builder: (context, snapshot) {
-        final session = Supabase.instance.client.auth.currentSession;
-
-        if (session != null) {
-          // User terautentikasi -> Masuk ke MainNav
-          return MainNav(repository: widget.repository);
-        }
-
-        // Belum login -> Login Screen
-        return LoginScreen(repository: widget.repository);
-      },
-    );
+    // Mode revisi Onboarding: Selalu tampilkan OnboardingScreen di awal peluncuran
+    return OnboardingScreen(repository: widget.repository);
   }
 }

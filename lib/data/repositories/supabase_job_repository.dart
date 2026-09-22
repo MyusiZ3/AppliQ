@@ -68,12 +68,40 @@ class SupabaseJobRepository implements JobRepository {
   }
 
   @override
+  Future<UserProfile> updateUserProfile(UserProfile profile) async {
+    _cachedProfile = profile;
+    try {
+      await _supabase.from('profiles').upsert(profile.toJson());
+    } catch (_) {}
+    notifyDataChanged();
+    return profile;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _supabase.auth.currentUser;
+    if (user != null) {
+      try {
+        await _supabase.from('applications').delete().eq('user_id', user.id);
+        await _supabase.from('application_logs').delete().eq('user_id', user.id);
+        await _supabase.from('profiles').delete().eq('id', user.id);
+      } catch (_) {}
+    }
+    await signOut();
+  }
+
+  @override
   Future<void> signInWithGoogle() async {
     final webClientId = AppConfig.googleWebClientId;
     final googleSignIn = GoogleSignIn(
       serverClientId: webClientId.isNotEmpty ? webClientId : null,
       scopes: ['email', 'profile', 'openid'],
     );
+
+    // Reset session GoogleSignIn lokal agar selalu menampilkan dialog pilih akun (Account Picker)
+    try {
+      await googleSignIn.signOut();
+    } catch (_) {}
 
     final googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
@@ -113,8 +141,10 @@ class SupabaseJobRepository implements JobRepository {
     try {
       final googleSignIn = GoogleSignIn();
       await googleSignIn.signOut();
+      await googleSignIn.disconnect();
     } catch (_) {}
     await _supabase.auth.signOut();
+    notifyDataChanged();
   }
 
   @override
@@ -157,12 +187,26 @@ class SupabaseJobRepository implements JobRepository {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Pengguna belum terautentikasi');
 
-    final json = application.toJson()..['user_id'] = userId;
-    json.remove('id');
+    final insertData = {
+      'user_id': userId,
+      'company_name': application.companyName,
+      'position_title': application.positionTitle,
+      'location': application.location,
+      'work_system': application.workSystem.label,
+      'job_portal': application.jobPortal.label,
+      'job_portal_custom': application.jobPortalCustom,
+      'job_url': application.jobUrl,
+      'status': application.status.label,
+      'applied_date': application.appliedDate.toIso8601String().split('T')[0],
+      'salary_expectation': application.salaryExpectation,
+      'salary_offered': application.salaryOffered,
+      'notes': application.notes,
+      'is_favorite': application.isFavorite,
+    };
 
     final response = await _supabase
         .from('job_applications')
-        .insert(json)
+        .insert(insertData)
         .select()
         .single();
 
@@ -180,9 +224,26 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<JobApplication> updateApplication(JobApplication application) async {
+    final updateData = {
+      'company_name': application.companyName,
+      'position_title': application.positionTitle,
+      'location': application.location,
+      'work_system': application.workSystem.label,
+      'job_portal': application.jobPortal.label,
+      'job_portal_custom': application.jobPortalCustom,
+      'job_url': application.jobUrl,
+      'status': application.status.label,
+      'applied_date': application.appliedDate.toIso8601String().split('T')[0],
+      'salary_expectation': application.salaryExpectation,
+      'salary_offered': application.salaryOffered,
+      'notes': application.notes,
+      'is_favorite': application.isFavorite,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
     final response = await _supabase
         .from('job_applications')
-        .update(application.toJson())
+        .update(updateData)
         .eq('id', application.id)
         .select()
         .single();

@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/ui_helper.dart';
+import '../../widgets/export_sheet.dart';
 import '../../widgets/empty_state_view.dart';
 import '../../widgets/metric_card.dart';
 import '../../widgets/notched_pill_card.dart';
@@ -60,6 +62,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<void> _handleExport() async {
+    HapticFeedback.lightImpact();
+    try {
+      final apps = await widget.repository.getApplications();
+      if (mounted) {
+        ExportSheet.show(context, apps);
+      }
+    } catch (e) {
+      if (mounted) UIHelper.handleError(context, e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -85,409 +99,494 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
-      appBar: AppBar(
-        backgroundColor:
-            isDark ? AppColors.backgroundDark : AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Statistik & Analitik',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.4,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-          ),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 60),
-                child: AppliqLoading(),
-              ),
-            )
-          : total == 0
-              ? RefreshIndicator(
-                  onRefresh: () => _loadStats(forceRefresh: true),
-                  child: EmptyStateView(
-                    icon: CupertinoIcons.chart_bar_alt_fill,
-                    title: 'Belum Ada Data Statistik',
-                    message:
-                        'Statistik, rasio panggilan interview, dan efektivitas portal loker akan dihitung otomatis saat kamu mulai mencatat lamaran.',
-                    action: ElevatedButton.icon(
-                      onPressed: () async {
-                        final added = await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ApplicationFormScreen(
-                                repository: widget.repository),
-                          ),
-                        );
-                        if (added == true) _loadStats();
-                      },
-                      icon: Icon(
-                        CupertinoIcons.plus,
-                        size: 16,
-                        color: isDark ? const Color(0xFF18181B) : Colors.white,
-                      ),
-                      label: Text(
-                        'Catat Lamaran Pertama',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: isDark ? const Color(0xFF18181B) : Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                        foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100)),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 22, vertical: 13),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // Standardized Top Header Row
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              color: isDark ? AppColors.backgroundDark : AppColors.background,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Statistik & Analitik',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary,
+                        letterSpacing: -0.7,
                       ),
                     ),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => _loadStats(forceRefresh: true),
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(
-                        parent: BouncingScrollPhysics()),
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 130),
-                    children: [
-                      // Notched Pill Selector (MyDuitGweh Signature)
-                      NotchedPillCard<int>(
-                        items: const [
-                          NotchedPillItem(
-                            value: 0,
-                            label: 'Kategori',
-                            icon: CupertinoIcons.chart_pie_fill,
-                          ),
-                          NotchedPillItem(
-                            value: 1,
-                            label: 'Sistem & Portal',
-                            icon: CupertinoIcons.chart_bar_alt_fill,
-                          ),
-                        ],
-                        selectedValue: _selectedTab,
-                        onValueChanged: (val) =>
-                            setState(() => _selectedTab = val),
+                  GestureDetector(
+                    onTap: _handleExport,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF27272A)
+                            : const Color(0xFFF4F4F5),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF3F3F46)
+                              : const Color(0xFFE4E4E7),
+                          width: 0.8,
+                        ),
                       ),
-
-                      const SizedBox(height: 14),
-
-                      if (_selectedTab == 0) ...[
-                        // Hero Conversion Rate Card (Monochrome Style)
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E1E22)
-                                : const Color(0xFF18181B),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: isDark
-                                  ? const Color(0xFF323238)
-                                  : const Color(0x1F000000),
-                              width: 0.8,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black
-                                    .withValues(alpha: isDark ? 0.35 : 0.08),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Tingkat Keberhasilan Lamaran',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '$interviewRate%',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: -0.8,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Rasio Panggilan Interview',
-                                          style: TextStyle(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.85),
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 40,
-                                    width: 1,
-                                    color: Colors.white.withValues(alpha: 0.25),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '$successRate%',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: -0.8,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Rasio Diterima Kerja',
-                                          style: TextStyle(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.85),
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                      child: Center(
+                        child: Icon(
+                          CupertinoIcons.square_arrow_up,
+                          size: 18,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF18181B),
                         ),
-
-                        const SizedBox(height: 14),
-
-                        // KPI Bento Rows 2x2
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MetricCard(
-                                label: 'Total Lamaran',
-                                value: '$total',
-                                icon: CupertinoIcons.doc_text_fill,
-                                accentColor: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: MetricCard(
-                                label: 'Tahap Interview',
-                                value: '$interview',
-                                icon: CupertinoIcons.mic_fill,
-                                accentColor: AppColors.warning,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MetricCard(
-                                label: 'Offering',
-                                value: '$offering',
-                                icon: CupertinoIcons.gift_fill,
-                                accentColor: AppColors.income,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: MetricCard(
-                                label: 'Diterima Kerja',
-                                value: '$accepted',
-                                icon: CupertinoIcons.checkmark_seal_fill,
-                                accentColor: AppColors.statusAccepted,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        // Status Breakdown Card
-                        NotchedCard(
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Distribusi Status Lamaran',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
-                                  color: isDark
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              _buildProgressBarRow('Applied', applied, total,
-                                  const Color(0xFF71717A), isDark),
-                              const SizedBox(height: 12),
-                              _buildProgressBarRow('Interview', interview,
-                                  total, const Color(0xFFA1A1AA), isDark),
-                              const SizedBox(height: 12),
-                              _buildProgressBarRow('Offering', offering, total,
-                                  const Color(0xFFD4D4D8), isDark),
-                              const SizedBox(height: 12),
-                              _buildProgressBarRow(
-                                  'Accepted',
-                                  accepted,
-                                  total,
-                                  isDark
-                                      ? Colors.white
-                                      : const Color(0xFF18181B),
-                                  isDark),
-                              const SizedBox(height: 12),
-                              _buildProgressBarRow('Rejected', rejected, total,
-                                  const Color(0xFF52525B), isDark),
-                              const SizedBox(height: 12),
-                              _buildProgressBarRow('No Response', noResponse,
-                                  total, const Color(0xFF3F3F46), isDark),
-                            ],
-                          ),
-                        ),
-                      ] else ...[
-                        // Work System Distribution Card
-                        NotchedCard(
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Distribusi Sistem Kerja',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
-                                  color: isDark
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              if (byWorkSystem.isEmpty)
-                                Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: Text(
-                                      'Belum ada data sistem kerja',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: isDark
-                                              ? AppColors.textHintDark
-                                              : AppColors.textHint),
-                                    ),
-                                  ),
-                                )
-                              else
-                                ...byWorkSystem.entries.map((entry) {
-                                  final count = entry.value as int;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: _buildProgressBarRow(
-                                      entry.key,
-                                      count,
-                                      total,
-                                      isDark
-                                          ? Colors.white
-                                          : const Color(0xFF18181B),
-                                      isDark,
-                                    ),
-                                  );
-                                }),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        // Portal Breakdown Card
-                        NotchedCard(
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Sumber Portal Lowongan',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
-                                  color: isDark
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              if (byPortal.isEmpty)
-                                Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: Text(
-                                      'Belum ada data portal lowongan',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: isDark
-                                              ? AppColors.textHintDark
-                                              : AppColors.textHint),
-                                    ),
-                                  ),
-                                )
-                              else
-                                ...byPortal.entries.map((entry) {
-                                  final count = entry.value as int;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: _buildProgressBarRow(
-                                      entry.key,
-                                      count,
-                                      total,
-                                      isDark
-                                          ? Colors.white
-                                          : const Color(0xFF18181B),
-                                      isDark,
-                                    ),
-                                  );
-                                }),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
+                      ),
+                    ),
                   ),
-                ),
+                ],
+              ),
+            ),
+
+            // Notched Pill Selector (Directly under Header, exactly aligned with other screens)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+              child: NotchedPillCard<int>(
+                items: const [
+                  NotchedPillItem(
+                    value: 0,
+                    label: 'Kategori Status',
+                    icon: CupertinoIcons.chart_pie_fill,
+                  ),
+                  NotchedPillItem(
+                    value: 1,
+                    label: 'Sistem & Portal',
+                    icon: CupertinoIcons.chart_bar_alt_fill,
+                  ),
+                ],
+                selectedValue: _selectedTab,
+                onValueChanged: (val) => setState(() => _selectedTab = val),
+              ),
+            ),
+
+            // Content Area
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 60),
+                        child: AppliqLoading(),
+                      ),
+                    )
+                  : total == 0
+                      ? RefreshIndicator(
+                          onRefresh: () => _loadStats(forceRefresh: true),
+                          child: EmptyStateView(
+                            icon: CupertinoIcons.chart_bar_alt_fill,
+                            title: 'Belum Ada Data Statistik',
+                            message:
+                                'Statistik, rasio panggilan interview, dan efektivitas portal loker akan dihitung otomatis saat kamu mulai mencatat lamaran.',
+                            action: ElevatedButton.icon(
+                              onPressed: () async {
+                                final added = await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ApplicationFormScreen(
+                                        repository: widget.repository),
+                                  ),
+                                );
+                                if (added == true) _loadStats();
+                              },
+                              icon: Icon(
+                                CupertinoIcons.plus,
+                                size: 16,
+                                color: isDark
+                                    ? const Color(0xFF18181B)
+                                    : Colors.white,
+                              ),
+                              label: Text(
+                                'Catat Lamaran Pertama',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  color: isDark
+                                      ? const Color(0xFF18181B)
+                                      : Colors.white,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF18181B),
+                                foregroundColor: isDark
+                                    ? const Color(0xFF18181B)
+                                    : Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100)),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 22, vertical: 13),
+                              ),
+                            ),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => _loadStats(forceRefresh: true),
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(
+                                parent: BouncingScrollPhysics()),
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 130),
+                            children: [
+                              if (_selectedTab == 0) ...[
+                                // Hero Conversion Rate Card (Monochrome Style)
+                                Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF1E1E22)
+                                        : const Color(0xFF18181B),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF323238)
+                                          : const Color(0x1F000000),
+                                      width: 0.8,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                            alpha: isDark ? 0.35 : 0.08),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Tingkat Keberhasilan Lamaran',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14.5,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  '$interviewRate%',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 26,
+                                                    fontWeight: FontWeight.w800,
+                                                    letterSpacing: -0.8,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Panggilan Interview',
+                                                  style: TextStyle(
+                                                    color: Colors.white
+                                                        .withValues(
+                                                            alpha: 0.85),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 40,
+                                            width: 1,
+                                            color: Colors.white
+                                                .withValues(alpha: 0.25),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  '$successRate%',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 26,
+                                                    fontWeight: FontWeight.w800,
+                                                    letterSpacing: -0.8,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Diterima Kerja',
+                                                  style: TextStyle(
+                                                    color: Colors.white
+                                                        .withValues(
+                                                            alpha: 0.85),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                // KPI Bento Rows 2x2
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: MetricCard(
+                                        label: 'Total Lamaran',
+                                        value: '$total',
+                                        icon: CupertinoIcons.doc_text_fill,
+                                        accentColor: AppColors.primary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: MetricCard(
+                                        label: 'Tahap Interview',
+                                        value: '$interview',
+                                        icon: CupertinoIcons.mic_fill,
+                                        accentColor: AppColors.warning,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: MetricCard(
+                                        label: 'Offering',
+                                        value: '$offering',
+                                        icon: CupertinoIcons.gift_fill,
+                                        accentColor: AppColors.income,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: MetricCard(
+                                        label: 'Diterima Kerja',
+                                        value: '$accepted',
+                                        icon:
+                                            CupertinoIcons.checkmark_seal_fill,
+                                        accentColor: AppColors.statusAccepted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                // Status Breakdown Card
+                                NotchedCard(
+                                  padding: const EdgeInsets.all(18),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Distribusi Status Lamaran',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.3,
+                                          color: isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _buildProgressBarRow(
+                                          'Applied',
+                                          applied,
+                                          total,
+                                          const Color(0xFF71717A),
+                                          isDark),
+                                      const SizedBox(height: 12),
+                                      _buildProgressBarRow(
+                                          'Interview',
+                                          interview,
+                                          total,
+                                          const Color(0xFFA1A1AA),
+                                          isDark),
+                                      const SizedBox(height: 12),
+                                      _buildProgressBarRow(
+                                          'Offering',
+                                          offering,
+                                          total,
+                                          const Color(0xFFD4D4D8),
+                                          isDark),
+                                      const SizedBox(height: 12),
+                                      _buildProgressBarRow(
+                                          'Accepted',
+                                          accepted,
+                                          total,
+                                          isDark
+                                              ? Colors.white
+                                              : const Color(0xFF18181B),
+                                          isDark),
+                                      const SizedBox(height: 12),
+                                      _buildProgressBarRow(
+                                          'Rejected',
+                                          rejected,
+                                          total,
+                                          const Color(0xFF52525B),
+                                          isDark),
+                                      const SizedBox(height: 12),
+                                      _buildProgressBarRow(
+                                          'No Response',
+                                          noResponse,
+                                          total,
+                                          const Color(0xFF3F3F46),
+                                          isDark),
+                                    ],
+                                  ),
+                                ),
+                              ] else ...[
+                                // Work System Distribution Card
+                                NotchedCard(
+                                  padding: const EdgeInsets.all(18),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Distribusi Sistem Kerja',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.3,
+                                          color: isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      if (byWorkSystem.isEmpty)
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 12),
+                                            child: Text(
+                                              'Belum ada data sistem kerja',
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: isDark
+                                                      ? AppColors.textHintDark
+                                                      : AppColors.textHint),
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        ...byWorkSystem.entries.map((entry) {
+                                          final count = entry.value as int;
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 10),
+                                            child: _buildProgressBarRow(
+                                              entry.key,
+                                              count,
+                                              total,
+                                              isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF18181B),
+                                              isDark,
+                                            ),
+                                          );
+                                        }),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                // Portal Breakdown Card
+                                NotchedCard(
+                                  padding: const EdgeInsets.all(18),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Sumber Portal Lowongan',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.3,
+                                          color: isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      if (byPortal.isEmpty)
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 12),
+                                            child: Text(
+                                              'Belum ada data portal lowongan',
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: isDark
+                                                      ? AppColors.textHintDark
+                                                      : AppColors.textHint),
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        ...byPortal.entries.map((entry) {
+                                          final count = entry.value as int;
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 10),
+                                            child: _buildProgressBarRow(
+                                              entry.key,
+                                              count,
+                                              total,
+                                              isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF18181B),
+                                              isDark,
+                                            ),
+                                          );
+                                        }),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

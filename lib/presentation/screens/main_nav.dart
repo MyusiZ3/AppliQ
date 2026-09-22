@@ -59,6 +59,11 @@ class _MainNavState extends State<MainNav> {
   void _onTabTapped(int index) {
     if (index < 0 || index >= _screenBuilders.length) return;
     HapticFeedback.selectionClick();
+    if (_currentIndex == 1 && index != 1) {
+      try {
+        (_listKey.currentState as dynamic)?.closeSearch();
+      } catch (_) {}
+    }
     setState(() => _currentIndex = index);
   }
 

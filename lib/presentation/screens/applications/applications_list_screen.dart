@@ -99,6 +99,16 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     return list;
   }
 
+  void closeSearch() {
+    if (_isSearchOpen && mounted) {
+      setState(() {
+        _isSearchOpen = false;
+        _searchQuery = '';
+        _searchController.clear();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -106,79 +116,67 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
-      appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleSpacing: 20,
-        title: Text(
-          'Pelacak Lamaran',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-            letterSpacing: -0.5,
-          ),
-        ),
-        actions: [
-          // Search Toggle Button (Circular Pill as in reference image)
-          _buildCircleActionButton(
-            icon: _isSearchOpen ? CupertinoIcons.xmark : CupertinoIcons.search,
-            isDark: isDark,
-            isActive: _isSearchOpen,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              setState(() {
-                _isSearchOpen = !_isSearchOpen;
-                if (!_isSearchOpen) {
-                  _searchQuery = '';
-                  _searchController.clear();
-                }
-              });
-            },
-          ),
-          const SizedBox(width: 8),
-
-          // Add Application Button (Circular Pill as in reference image)
-          _buildCircleActionButton(
-            icon: CupertinoIcons.plus,
-            isDark: isDark,
-            onTap: () async {
-              HapticFeedback.lightImpact();
-              final added = await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ApplicationFormScreen(repository: widget.repository),
-                ),
-              );
-              if (added == true) _loadApplications();
-            },
-          ),
-          const SizedBox(width: 8),
-
-          // Sort Button (Circular Pill)
-          PopupMenuButton<String>(
-            tooltip: 'Urutkan',
-            initialValue: _sortBy,
-            onSelected: (val) => setState(() => _sortBy = val),
-            offset: const Offset(0, 44),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            color: isDark ? const Color(0xFF27272A) : Colors.white,
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'newest', child: Text('Tanggal Terbaru')),
-              const PopupMenuItem(value: 'oldest', child: Text('Tanggal Terlama')),
-              const PopupMenuItem(value: 'name', child: Text('Nama Perusahaan (A-Z)')),
-            ],
-            child: _buildCircleActionButton(
-              icon: CupertinoIcons.arrow_up_arrow_down,
-              isDark: isDark,
-              onTap: null,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // Standardized Top Header Row
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              color: isDark ? AppColors.backgroundDark : AppColors.background,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Pelacak Lamaran',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                        letterSpacing: -0.7,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCircleActionButton(
+                        icon: _isSearchOpen ? CupertinoIcons.xmark : CupertinoIcons.search,
+                        isDark: isDark,
+                        isActive: _isSearchOpen,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _isSearchOpen = !_isSearchOpen;
+                            if (!_isSearchOpen) {
+                              _searchQuery = '';
+                              _searchController.clear();
+                            }
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      _buildCircleActionButton(
+                        icon: CupertinoIcons.plus,
+                        isDark: isDark,
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          closeSearch();
+                          final added = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ApplicationFormScreen(repository: widget.repository),
+                            ),
+                          );
+                          if (added == true) _loadApplications();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
-      body: Column(
-        children: [
           // Collapsible Search Bar (Only appears when search icon is clicked)
           if (_isSearchOpen)
             Padding(
@@ -284,7 +282,26 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
             ),
           ),
 
-          const SizedBox(height: 6),
+          // Sub-header Toolbar: Application Count & Moved Sort Button
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${filtered.length} Lamaran',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                  ),
+                ),
+                _buildSortButton(isDark),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 4),
 
           // Content List / Kanban View
           Expanded(
@@ -309,6 +326,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                                 return ApplicationCard(
                                   application: app,
                                   onTap: () async {
+                                    closeSearch();
                                     final updated = await Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) => ApplicationDetailScreen(
@@ -327,6 +345,66 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
           ),
         ],
       ),
+    ),
+  );
+}
+
+  Widget _buildSortButton(bool isDark) {
+    String sortLabel = 'Terbaru';
+    if (_sortBy == 'oldest') sortLabel = 'Terlama';
+    if (_sortBy == 'name') sortLabel = 'Nama A-Z';
+
+    return PopupMenuButton<String>(
+      tooltip: 'Urutkan',
+      initialValue: _sortBy,
+      onSelected: (val) {
+        HapticFeedback.selectionClick();
+        setState(() => _sortBy = val);
+      },
+      offset: const Offset(0, 36),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: isDark ? const Color(0xFF27272A) : Colors.white,
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'newest', child: Text('Tanggal Terbaru')),
+        const PopupMenuItem(value: 'oldest', child: Text('Tanggal Terlama')),
+        const PopupMenuItem(value: 'name', child: Text('Nama Perusahaan (A-Z)')),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(
+            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.arrow_up_arrow_down,
+              size: 12,
+              color: isDark ? Colors.white70 : const Color(0xFF52525B),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              sortLabel,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 3),
+            Icon(
+              CupertinoIcons.chevron_down,
+              size: 10,
+              color: isDark ? AppColors.textHintDark : AppColors.textHint,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -339,8 +417,8 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 38,
-        height: 38,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: isActive
               ? (isDark ? Colors.white : const Color(0xFF18181B))
@@ -356,7 +434,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         child: Center(
           child: Icon(
             icon,
-            size: 17,
+            size: 18,
             color: isActive
                 ? (isDark ? const Color(0xFF18181B) : Colors.white)
                 : (isDark ? Colors.white : const Color(0xFF18181B)),
@@ -465,6 +543,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                             return ApplicationCard(
                               application: app,
                               onTap: () async {
+                                closeSearch();
                                 final updated = await Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => ApplicationDetailScreen(

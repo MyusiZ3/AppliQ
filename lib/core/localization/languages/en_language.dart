@@ -658,6 +658,171 @@ class EnLanguage implements BaseLanguage {
   @override
   String welcomeUser(String name) => 'Welcome, $name!';
 
+  // Status Feedback Text
+  @override
+  String get feedbackSubmittedToday => 'Submitted today';
+  @override
+  String feedbackSubmittedDaysAgo(int days) => 'Submitted $days day${days == 1 ? '' : 's'} ago';
+  @override
+  String get feedbackNoResponse30Days => 'No response > 30 days';
+  @override
+  String get feedbackStayMotivated => 'Keep going, more opportunities ahead';
+  @override
+  String feedbackCurrentStage(String stageName) => 'You are currently in the $stageName stage';
+
+  // Legal (Terms of Service & Privacy Policy Modals)
+  @override
+  String get termsModalTitle => 'Terms of Service';
+  @override
+  String get termsModalSubtitle => 'Official AppliQ Terms';
+  @override
+  List<Map<String, String>> get termsCards => [
+    {
+      'title': '1. Acceptance of Terms',
+      'content': 'By signing in, accessing, or utilizing the AppliQ application platform, you agree to be bound by these Terms of Service. If you do not agree with any clause in these terms, please refrain from continuing use of our services.',
+    },
+    {
+      'title': '2. User Accounts & Security',
+      'content': 'You are solely responsible for maintaining the confidentiality of your Google account authentication credentials. All activities occurring under your account are your personal responsibility. AppliQ is not liable for losses arising from compromised access.',
+    },
+    {
+      'title': '3. Job Tracking & Management Services',
+      'content': 'AppliQ provides an integrated job application tracking tool (Job Tracker), interview scheduling, conversion rate statistics calculation, and career management records. This service is provided "as is" to assist your job hunting productivity.',
+    },
+    {
+      'title': '4. Intellectual Property Rights',
+      'content': 'All interface elements, graphic designs, AppliQ logos, source code, and associated documentation are protected by copyright and intellectual property laws. Reproduction, redistribution, or reverse engineering without prior written consent is strictly prohibited.',
+    },
+    {
+      'title': '5. Limitation of Liability & Warranties',
+      'content': 'AppliQ does not guarantee employment offers or hiring outcomes at any target companies. We make every effort to maintain server reliability and data synchronization, but are not liable for third-party network disruptions.',
+    },
+    {
+      'title': '6. Modifications to Terms',
+      'content': 'We reserve the right to revise these Terms of Service at any time to comply with regulatory standards or when introducing new features. Updates will be published on this page with the corresponding effective date.',
+    },
+  ];
+
+  @override
+  String get privacyModalTitle => 'User Privacy Policy';
+  @override
+  String get privacyModalSubtitle => 'Encrypted Privacy';
+  @override
+  List<Map<String, String>> get privacyCards => [
+    {
+      'title': '1. Information We Collect',
+      'content': 'We collect information you provide directly while using AppliQ, including: Google profile details (name, email address, avatar photo URL), job application entries (company name, position, status, compensation, interview notes), and local preference settings.',
+    },
+    {
+      'title': '2. How We Use Your Information',
+      'content': 'Your information is used strictly to power job tracking features: syncing with Supabase cloud database, scheduling interview reminders, generating personal analytics, and optimizing your user interface experience.',
+    },
+    {
+      'title': '3. Encryption & Database Security',
+      'content': 'All data transmissions are protected via TLS/HTTPS encryption and stored in Supabase with Row-Level Security (RLS). Only your authenticated account has permissions to read and modify your application records.',
+    },
+    {
+      'title': '4. No Third-Party Data Selling',
+      'content': 'AppliQ pledges never to sell, rent, or share your application history or personal information with advertisers or any third parties without your explicit authorization.',
+    },
+    {
+      'title': '5. Total Account Control & Deletion',
+      'content': 'You retain full rights to update your profile, export your career data records, or permanently delete your account along with all associated database records via the "Delete Account" option in Edit Profile.',
+    },
+  ];
+
+  @override
+  List<Map<String, String>> get faqList => [
+    {
+      'q': 'What is AppliQ and how does it work?',
+      'a': 'AppliQ is a smart job application tracker designed to help you log applications, organize interview stages, set reminders, and analyze career conversion rates in real-time.',
+    },
+    {
+      'q': 'How do I set up interview reminder notifications?',
+      'a': 'When adding or editing an interview stage in Application Details, specify the date and time. Ensure the "Notifications & Reminders" toggle in Settings is enabled so you receive timely alerts.',
+    },
+    {
+      'q': 'Are my salary figures and application records secure?',
+      'a': 'Extremely secure. AppliQ enforces Row-Level Security (RLS) on Supabase with TLS encryption. No other user or external entity can view your private application history.',
+    },
+    {
+      'q': 'How do I search and filter through my applications?',
+      'a': 'Go to the Applications or Schedule tab. Use the search bar at the top to filter by company name or role, or tap status filters (Applied, Interview, Offering, Rejected).',
+    },
+    {
+      'q': 'Can I export my job application records?',
+      'a': 'Yes. The Export feature lets you download your career history summaries in clean PDF reports or CSV spreadsheets anytime.',
+    },
+  ];
+
+  // Settings & Bottom Sheets
+  @override
+  String get generalSettingsTitle => 'General Settings';
+  @override
+  String get generalSettingsSubtitle => 'Customize application appearance & preferences';
+  @override
+  String get appearanceSection => 'APPEARANCE';
+  @override
+  String get darkModeTitle => 'Dark Mode';
+  @override
+  String get darkModeDesc => 'Switch between dark and light themes';
+  @override
+  String get monochromeTitle => 'Monochrome Mode';
+  @override
+  String get monochromeDesc => 'Use minimalist black and white theme';
+  @override
+  String get preferencesFormatSection => 'PREFERENCES & FORMAT';
+  @override
+  String get appLanguageTitle => 'App Language';
+  @override
+  String get appLanguageDesc => 'Choose interface language';
+  @override
+  String get defaultCurrencyTitle => 'Default Currency';
+  @override
+  String get defaultCurrencyDesc => 'Currency format for compensation';
+  @override
+  String get dateFormatTitle => 'Date Format';
+  @override
+  String get dateFormatDesc => 'Date format displayed throughout app';
+  @override
+  String get feedbackHapticSection => 'INTERACTION & SORTING';
+  @override
+  String get hapticTitle => 'Haptic Feedback';
+  @override
+  String get hapticDesc => 'Vibrate upon tapping buttons and actions';
+  @override
+  String get defaultSortTitle => 'Default Application Sort';
+  @override
+  String get defaultSortDesc => 'Automatic sorting for application list';
+  @override
+  String get sortPickerTitle => 'Default Sort Order';
+  @override
+  String get sortPickerSubtitle => 'Choose default order for job applications';
+  @override
+  String get sortOptionNewest => 'Newest Applied';
+  @override
+  String get sortOptionNewestDesc => 'Displays most recently added applications on top';
+  @override
+  String get sortOptionClosest => 'Nearest Deadline';
+  @override
+  String get sortOptionClosestDesc => 'Prioritizes applications with upcoming deadlines';
+  @override
+  String get sortOptionCompanyAZ => 'Company Name A-Z';
+  @override
+  String get sortOptionCompanyAZDesc => 'Sorts alphabetically by company name';
+  @override
+  String get sortOptionSalary => 'Highest Salary';
+  @override
+  String get sortOptionSalaryDesc => 'Displays applications with highest compensation first';
+  @override
+  String get securitySettingsTitle => 'Security & Authentication';
+  @override
+  String get securitySettingsSubtitle => 'Protect your Google account and cloud database';
+  @override
+  String get cloudSyncTitle => 'Google Drive Cloud Sync';
+  @override
+  String get cloudSyncSubtitle => 'Storage for attached resumes and portfolio files';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

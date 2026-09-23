@@ -659,6 +659,171 @@ class KoLanguage implements BaseLanguage {
   @override
   String welcomeUser(String name) => '환영합니다, $name님!';
 
+  // Status Feedback Text
+  @override
+  String get feedbackSubmittedToday => '오늘 지원 완료';
+  @override
+  String feedbackSubmittedDaysAgo(int days) => '$days 일 전 지원 완료';
+  @override
+  String get feedbackNoResponse30Days => '30일 이상 미응답';
+  @override
+  String get feedbackStayMotivated => '힘내세요! 더 좋은 기회가 기다리고 있습니다';
+  @override
+  String feedbackCurrentStage(String stageName) => '현재 [$stageName] 전형 단계입니다';
+
+  // Legal (Terms of Service & Privacy Policy Modals)
+  @override
+  String get termsModalTitle => '서비스 이용약관';
+  @override
+  String get termsModalSubtitle => 'AppliQ 공식 이용약관';
+  @override
+  List<Map<String, String>> get termsCards => [
+    {
+      'title': '1. 약관 동의 (Acceptance of Terms)',
+      'content': 'AppliQ 플랫폼에 가입, 접속 또는 이용함으로써 귀하는 본 서비스 이용약관에 구속되는 데 동의합니다. 본 약관의 조항에 동의하지 않는 경우 서비스 이용을 중단해주시기 바랍니다.',
+    },
+    {
+      'title': '2. 사용자 계정 및 보안 책임',
+      'content': '귀하는 Google 계정 인증 정보의 기밀성을 유지할 전적인 책임이 있습니다. 귀하의 계정 하에서 발생하는 모든 활동은 본인의 책임이며, AppliQ는 계정 관리 소홀로 인한 손실에 대해 책임을 지지 않습니다.',
+    },
+    {
+      'title': '3. 지원 내역 관리 및 트래커 서비스',
+      'content': 'AppliQ는 입사 지원 내역 기록(Job Tracker), 면접 일정 관리, 전형 합격률 통계 계산 및 커리어 관리 기능을 제공합니다. 본 서비스는 취업 활동의 생산성을 지원하기 위해 "있는 그대로(as is)" 제공됩니다.',
+    },
+    {
+      'title': '4. 지식재산권 보호',
+      'content': '사용자 인터페이스, 그래픽 디자인, AppliQ 로고, 소스 코드 및 관련 문서는 저작권 및 지식재산권 법률에 의해 보호됩니다. 사전 서면 승인 없는 무단 복제, 재배포 또는 리버스 엔지니어링은 엄격히 금지됩니다.',
+    },
+    {
+      'title': '5. 책임의 한계 및 보증의 부인',
+      'content': 'AppliQ는 특정 기업의 채용 또는 합격 결과를 보장하지 않습니다. 서버 안정성과 데이터 동기화를 위해 최선을 다하나, 제3자 네트워크 장애로 인한 손실에 대해서는 책임을 지지 않습니다.',
+    },
+    {
+      'title': '6. 이용약관의 변경',
+      'content': '당사는 관련 법령 준수 또는 신규 기능 추가에 따라 본 이용약관을 수시로 개정할 수 있습니다. 변경 사항은 본 페이지에 시행일자와 함께 공지됩니다.',
+    },
+  ];
+
+  @override
+  String get privacyModalTitle => '개인정보 처리방침';
+  @override
+  String get privacyModalSubtitle => '암호화된 개인정보 보호';
+  @override
+  List<Map<String, String>> get privacyCards => [
+    {
+      'title': '1. 수집하는 개인정보 항목',
+      'content': 'AppliQ 이용 시 다음과 같은 정보를 수집합니다: Google 프로필 정보 (이름, 이메일 주소, 프로필 사진 URL), 입사 지원 데이터 (회사명, 직무, 진행 상태, 급여 정보, 면접 메모) 및 앱 환경설정.',
+    },
+    {
+      'title': '2. 개인정보의 이용 목적',
+      'content': '수집된 정보는 입사 지원 관리 기능 제공 (Supabase 클라우드 데이터베이스 동기화, 면접 알림 전송, 개인 커리어 분석 통계 생성, UI 최적화) 목적으로만 활용됩니다.',
+    },
+    {
+      'title': '3. 암호화 및 데이터베이스 보안',
+      'content': '모든 데이터 전송은 TLS/HTTPS 암호화로 보호되며, Supabase의 행 수준 보안 (Row-Level Security, RLS)을 통해 안전하게 저장됩니다. 인증된 본인 계정만 데이터에 접근하고 수정할 수 있습니다.',
+    },
+    {
+      'title': '4. 제3자 데이터 판매 금지',
+      'content': 'AppliQ는 귀하의 지원 내역 및 개인정보를 광고주나 제3자에게 판매, 대여 또는 공유하지 않습니다.',
+    },
+    {
+      'title': '5. 계정 영구 삭제 및 데이터 통제권',
+      'content': '귀하는 언제든지 프로필 정보를 수정하거나, 지원 내역을 내보내거나, [프로필 수정] 내 "계정 삭제"를 통해 모든 데이터를 영구적으로 삭제할 권리가 있습니다.',
+    },
+  ];
+
+  @override
+  List<Map<String, String>> get faqList => [
+    {
+      'q': 'AppliQ는 어떤 앱인가요?',
+      'a': 'AppliQ는 입사 지원 내역을 체계적으로 기록하고, 면접 일정을 관리하며, 서류 통과율과 전환율을 실시간으로 분석해주는 스마트 구직 관리 플랫폼입니다.',
+    },
+    {
+      'q': '면접 일정 알림은 어떻게 설정하나요?',
+      'a': '지원 상세 화면에서 전형 단계를 추가하거나 수정할 때 날짜와 시간을 입력하세요. 설정 화면에서 "알림 및 리마인더"가 켜져 있는지 확인해주시기 바랍니다.',
+    },
+    {
+      'q': '희망 연봉과 지원 기록의 보안은 안전한가요?',
+      'a': '매우 안전합니다. AppliQ는 Supabase의 행 수준 보안(RLS)과 TLS 암호화를 적용하여 본인 외에는 누구도 지원 기록과 급여 정보를 열람할 수 없습니다.',
+    },
+    {
+      'q': '지원 내역 검색과 필터링은 어떻게 하나요?',
+      'a': '[지원] 또는 [일정] 탭 상단 검색창에서 회사명이나 직무를 검색할 수 있으며, 상태 필터(지원 완료, 면접 진행, 최종 합격, 불합격)를 통해 빠르게 분류할 수 있습니다.',
+    },
+    {
+      'q': '지원 기록 데이터를 외부로 내보낼 수 있나요?',
+      'a': '네. [데이터 내보내기] 기능을 통해 PDF 리포트 또는 CSV 스프레드시트 형태로 언제든지 다운로드할 수 있습니다.',
+    },
+  ];
+
+  // Settings & Bottom Sheets
+  @override
+  String get generalSettingsTitle => '일반 설정';
+  @override
+  String get generalSettingsSubtitle => '화면 테마 및 앱 환경설정 맞춤 변경';
+  @override
+  String get appearanceSection => '화면 테마';
+  @override
+  String get darkModeTitle => '다크 모드';
+  @override
+  String get darkModeDesc => '다크 테마와 라이트 테마 전환';
+  @override
+  String get monochromeTitle => '모노크롬 모드';
+  @override
+  String get monochromeDesc => '미니멀한 흑백 톤 디자인 적용';
+  @override
+  String get preferencesFormatSection => '환경설정 & 형식';
+  @override
+  String get appLanguageTitle => '앱 표시 언어 (Language)';
+  @override
+  String get appLanguageDesc => '인터페이스 언어 선택';
+  @override
+  String get defaultCurrencyTitle => '기본 통화';
+  @override
+  String get defaultCurrencyDesc => '급여 표시 통화 단위 포맷';
+  @override
+  String get dateFormatTitle => '날짜 표시 형식';
+  @override
+  String get dateFormatDesc => '앱 전반의 날짜 표기 형식';
+  @override
+  String get feedbackHapticSection => '인터랙션 & 정렬';
+  @override
+  String get hapticTitle => '햅틱 진동 피드백';
+  @override
+  String get hapticDesc => '버튼 탭 시 가벼운 진동 반응';
+  @override
+  String get defaultSortTitle => '기본 정렬 방식';
+  @override
+  String get defaultSortDesc => '지원 목록의 자동 정렬 기준';
+  @override
+  String get sortPickerTitle => '지원 목록 정렬 선택';
+  @override
+  String get sortPickerSubtitle => '지원 내역 자동 정렬 기준 설정';
+  @override
+  String get sortOptionNewest => '최신 지원순';
+  @override
+  String get sortOptionNewestDesc => '가장 최근에 등록한 지원서를 상단에 표시';
+  @override
+  String get sortOptionClosest => '마감 / 일정 임박순';
+  @override
+  String get sortOptionClosestDesc => '가까운 일정이 있는 지원 내역을 우선 표시';
+  @override
+  String get sortOptionCompanyAZ => '회사명 (가나다 / A-Z)';
+  @override
+  String get sortOptionCompanyAZDesc => '회사명 알파벳 및 가나다순 정렬';
+  @override
+  String get sortOptionSalary => '희망 급여 높은순';
+  @override
+  String get sortOptionSalaryDesc => '제시 또는 희망 급여가 높은 순서대로 표시';
+  @override
+  String get securitySettingsTitle => '보안 및 계정 인증';
+  @override
+  String get securitySettingsSubtitle => 'Google 계정 및 클라우드 데이터베이스 보호';
+  @override
+  String get cloudSyncTitle => 'Google 드라이브 클라우드 동기화';
+  @override
+  String get cloudSyncSubtitle => '이력서, 포트폴리오 첨부 파일 클라우드 보관';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

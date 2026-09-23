@@ -375,6 +375,57 @@ class AppStrings {
   static String get privacyContent => current.privacyContent;
   static String welcomeUser(String name) => current.welcomeUser(name);
 
+  // Status Feedback Text
+  static String get feedbackSubmittedToday => current.feedbackSubmittedToday;
+  static String feedbackSubmittedDaysAgo(int days) => current.feedbackSubmittedDaysAgo(days);
+  static String get feedbackNoResponse30Days => current.feedbackNoResponse30Days;
+  static String get feedbackStayMotivated => current.feedbackStayMotivated;
+  static String feedbackCurrentStage(String stageName) => current.feedbackCurrentStage(stageName);
+
+  // Legal (Terms of Service & Privacy Policy Modals)
+  static String get termsModalTitle => current.termsModalTitle;
+  static String get termsModalSubtitle => current.termsModalSubtitle;
+  static List<Map<String, String>> get termsCards => current.termsCards;
+  static String get privacyModalTitle => current.privacyModalTitle;
+  static String get privacyModalSubtitle => current.privacyModalSubtitle;
+  static List<Map<String, String>> get privacyCards => current.privacyCards;
+  static List<Map<String, String>> get faqList => current.faqList;
+
+  // Settings & Bottom Sheets
+  static String get generalSettingsTitle => current.generalSettingsTitle;
+  static String get generalSettingsSubtitle => current.generalSettingsSubtitle;
+  static String get appearanceSection => current.appearanceSection;
+  static String get darkModeTitle => current.darkModeTitle;
+  static String get darkModeDesc => current.darkModeDesc;
+  static String get monochromeTitle => current.monochromeTitle;
+  static String get monochromeDesc => current.monochromeDesc;
+  static String get preferencesFormatSection => current.preferencesFormatSection;
+  static String get appLanguageTitle => current.appLanguageTitle;
+  static String get appLanguageDesc => current.appLanguageDesc;
+  static String get defaultCurrencyTitle => current.defaultCurrencyTitle;
+  static String get defaultCurrencyDesc => current.defaultCurrencyDesc;
+  static String get dateFormatTitle => current.dateFormatTitle;
+  static String get dateFormatDesc => current.dateFormatDesc;
+  static String get feedbackHapticSection => current.feedbackHapticSection;
+  static String get hapticTitle => current.hapticTitle;
+  static String get hapticDesc => current.hapticDesc;
+  static String get defaultSortTitle => current.defaultSortTitle;
+  static String get defaultSortDesc => current.defaultSortDesc;
+  static String get sortPickerTitle => current.sortPickerTitle;
+  static String get sortPickerSubtitle => current.sortPickerSubtitle;
+  static String get sortOptionNewest => current.sortOptionNewest;
+  static String get sortOptionNewestDesc => current.sortOptionNewestDesc;
+  static String get sortOptionClosest => current.sortOptionClosest;
+  static String get sortOptionClosestDesc => current.sortOptionClosestDesc;
+  static String get sortOptionCompanyAZ => current.sortOptionCompanyAZ;
+  static String get sortOptionCompanyAZDesc => current.sortOptionCompanyAZDesc;
+  static String get sortOptionSalary => current.sortOptionSalary;
+  static String get sortOptionSalaryDesc => current.sortOptionSalaryDesc;
+  static String get securitySettingsTitle => current.securitySettingsTitle;
+  static String get securitySettingsSubtitle => current.securitySettingsSubtitle;
+  static String get cloudSyncTitle => current.cloudSyncTitle;
+  static String get cloudSyncSubtitle => current.cloudSyncSubtitle;
+
   // Helper methods for enums
   static String localizedEmploymentType(EmploymentType type) => current.localizedEmploymentType(type);
   static String localizedWorkSystem(WorkSystem system) => current.localizedWorkSystem(system);

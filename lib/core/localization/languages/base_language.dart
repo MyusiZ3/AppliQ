@@ -347,6 +347,57 @@ abstract class BaseLanguage {
   String get privacyContent;
   String welcomeUser(String name);
 
+  // Status Feedback Text
+  String get feedbackSubmittedToday;
+  String feedbackSubmittedDaysAgo(int days);
+  String get feedbackNoResponse30Days;
+  String get feedbackStayMotivated;
+  String feedbackCurrentStage(String stageName);
+
+  // Legal (Terms of Service & Privacy Policy Modals)
+  String get termsModalTitle;
+  String get termsModalSubtitle;
+  List<Map<String, String>> get termsCards;
+  String get privacyModalTitle;
+  String get privacyModalSubtitle;
+  List<Map<String, String>> get privacyCards;
+  List<Map<String, String>> get faqList;
+
+  // Settings & Bottom Sheets
+  String get generalSettingsTitle;
+  String get generalSettingsSubtitle;
+  String get appearanceSection;
+  String get darkModeTitle;
+  String get darkModeDesc;
+  String get monochromeTitle;
+  String get monochromeDesc;
+  String get preferencesFormatSection;
+  String get appLanguageTitle;
+  String get appLanguageDesc;
+  String get defaultCurrencyTitle;
+  String get defaultCurrencyDesc;
+  String get dateFormatTitle;
+  String get dateFormatDesc;
+  String get feedbackHapticSection;
+  String get hapticTitle;
+  String get hapticDesc;
+  String get defaultSortTitle;
+  String get defaultSortDesc;
+  String get sortPickerTitle;
+  String get sortPickerSubtitle;
+  String get sortOptionNewest;
+  String get sortOptionNewestDesc;
+  String get sortOptionClosest;
+  String get sortOptionClosestDesc;
+  String get sortOptionCompanyAZ;
+  String get sortOptionCompanyAZDesc;
+  String get sortOptionSalary;
+  String get sortOptionSalaryDesc;
+  String get securitySettingsTitle;
+  String get securitySettingsSubtitle;
+  String get cloudSyncTitle;
+  String get cloudSyncSubtitle;
+
   // Enums & Dynamic Values
   String localizedEmploymentType(EmploymentType type);
   String localizedWorkSystem(WorkSystem system);

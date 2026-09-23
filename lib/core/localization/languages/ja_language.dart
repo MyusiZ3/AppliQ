@@ -659,6 +659,171 @@ class JaLanguage implements BaseLanguage {
   @override
   String welcomeUser(String name) => 'ようこそ、$name さん！';
 
+  // Status Feedback Text
+  @override
+  String get feedbackSubmittedToday => '本日応募済み';
+  @override
+  String feedbackSubmittedDaysAgo(int days) => '$days 日前に応募済み';
+  @override
+  String get feedbackNoResponse30Days => '30日以上連絡なし';
+  @override
+  String get feedbackStayMotivated => '次のチャンスに向けて前進しましょう';
+  @override
+  String feedbackCurrentStage(String stageName) => '現在「$stageName」の段階です';
+
+  // Legal (Terms of Service & Privacy Policy Modals)
+  @override
+  String get termsModalTitle => '利用規約';
+  @override
+  String get termsModalSubtitle => 'AppliQ 公式利用規約';
+  @override
+  List<Map<String, String>> get termsCards => [
+    {
+      'title': '1. 規約への同意 (Acceptance of Terms)',
+      'content': 'AppliQ の登録、アクセス、または利用を開始することにより、お客様は本利用規約に拘束されることに同意したものとみなされます。本規約のいずれかの条項に同意いただけない場合は、サービスのご利用をお控えください。',
+    },
+    {
+      'title': '2. アカウントとセキュリティ',
+      'content': 'お客様は、ご自身のGoogleアカウント認証情報の機密性を維持する全責任を負います。アカウント配下で行われるすべての活動はお客様自身の責任となります。不正アクセス等に起因する損害について、AppliQは一切の責任を負いません。',
+    },
+    {
+      'title': '3. 求人管理・トラッキングサービス',
+      'content': 'AppliQ は、求人応募の記録、面接日程の管理、選考通過率の統計分析、および就職活動データの整理機能を提供します。本サービスは、転職・就職活動の生産性向上を支援するために「現状有姿 (as is)」で提供されます。',
+    },
+    {
+      'title': '4. 知的財産権',
+      'content': 'ユーザーインターフェース、グラフィックデザイン、AppliQのロゴ、ソースコード、および関連ドキュメントに関するすべての権利は、著作権および知的財産権法によって保護されています。事前の書面による許可なく複製、再配布、リバースエンジニアリングを行うことを固く禁じます。',
+    },
+    {
+      'title': '5. 免責事項・非保証',
+      'content': 'AppliQ は特定の企業からの採用・内定を保証するものではありません。サーバーの安定稼働とデータ同期の維持に最大限努めますが、外部ネットワークや第三者サービスの障害による損害については責任を負いません。',
+    },
+    {
+      'title': '6. 利用規約の変更',
+      'content': '法令遵守や新機能追加に伴い、本利用規約を随時改定する権利を留保します。改定後の規約は発効日とともに本画面上に掲載されます。',
+    },
+  ];
+
+  @override
+  String get privacyModalTitle => 'プライバシーポリシー';
+  @override
+  String get privacyModalSubtitle => '暗号化されたプライバシー保護';
+  @override
+  List<Map<String, String>> get privacyCards => [
+    {
+      'title': '1. 収集する情報',
+      'content': 'AppliQ の利用において、以下の情報を収集します：Googleプロファイル情報（氏名、メールアドレス、プロフィール画像URL）、求人応募データ（企業名、ポジション、選考ステータス、給与、面接メモ）、および端末設定の環境設定。',
+    },
+    {
+      'title': '2. 情報の利用目的',
+      'content': '収集した情報は、就職活動トラッキング機能の提供（Supabaseクラウドデータベース同期、面接リマインダー通知、個人分析レポート作成、UI改善）のみに使用されます。',
+    },
+    {
+      'title': '3. 暗号化とデータベースセキュリティ',
+      'content': 'すべての通信は TLS/HTTPS 暗号化により保護され、Supabaseデータベース上の 行レベルセキュリティ (RLS) により厳重に管理されます。認証されたご自身のアカウントのみがデータへのアクセスおよび変更を行えます。',
+    },
+    {
+      'title': '4. 第三者へのデータ非売却',
+      'content': 'AppliQ は、お客様の応募履歴や個人情報を広告主や第三者に販売、貸与、共有することは一切ありません。',
+    },
+    {
+      'title': '5. アカウントの完全削除と自己管理権',
+      'content': 'お客様はいつでもプロフィールの更新、応募履歴のエクスポート、または「プロフィール編集」内の「アカウント削除」ボタンからすべての関連データを完全に削除する権利を有します。',
+    },
+  ];
+
+  @override
+  List<Map<String, String>> get faqList => [
+    {
+      'q': 'AppliQ とは何ですか？どのように使いますか？',
+      'a': 'AppliQ は、日々の求人応募の記録、面接日程の管理、選考ステップの追跡、および選考通過率のリアルタイム分析ができるスマートな就職活動管理ツールです。',
+    },
+    {
+      'q': '面接リマインダー通知はどのように設定しますか？',
+      'a': '応募詳細から選考ステップを追加・編集する際に日時を設定してください。設定画面の「通知 & リマインダー」がONになっていることをご確認ください。',
+    },
+    {
+      'q': '希望給与や応募データのプライバシーは保護されていますか？',
+      'a': '万全に保護されています。AppliQ は Supabase の 行レベルセキュリティ (RLS) と TLS 暗号化を採用しており、他のユーザーがあなたのデータにアクセスすることはできません。',
+    },
+    {
+      'q': '応募一覧の検索や絞り込みはどのように行いますか？',
+      'a': '「応募」または「日程」タブ上部の検索バーで企業名や職種を検索できます。また、ステータス（応募済み、面接中、内定、不通過）による絞り込みも可能です。',
+    },
+    {
+      'q': '就職活動データをエクスポートできますか？',
+      'a': 'はい。エクスポート機能から、PDF形式のレポートやCSVスプレッドシートとしていつでも就活記録をダウンロードできます。',
+    },
+  ];
+
+  // Settings & Bottom Sheets
+  @override
+  String get generalSettingsTitle => '一般設定';
+  @override
+  String get generalSettingsSubtitle => '外観およびアプリの環境設定をカスタマイズ';
+  @override
+  String get appearanceSection => '外観・テーマ';
+  @override
+  String get darkModeTitle => 'ダークモード';
+  @override
+  String get darkModeDesc => 'ダークテーマとライトテーマを切り替えます';
+  @override
+  String get monochromeTitle => 'モノクロモード';
+  @override
+  String get monochromeDesc => 'ミニマルなモノトーン配色を適用します';
+  @override
+  String get preferencesFormatSection => '環境設定・表示形式';
+  @override
+  String get appLanguageTitle => '表示言語 (Language)';
+  @override
+  String get appLanguageDesc => 'インターフェース言語を選択';
+  @override
+  String get defaultCurrencyTitle => 'デフォルト通貨';
+  @override
+  String get defaultCurrencyDesc => '給与表示の通貨単位フォーマット';
+  @override
+  String get dateFormatTitle => '日付の表示形式';
+  @override
+  String get dateFormatDesc => 'アプリ全体の日付フォーマット';
+  @override
+  String get feedbackHapticSection => '操作フィードバック & 並び順';
+  @override
+  String get hapticTitle => '触覚フィードバック (振動)';
+  @override
+  String get hapticDesc => 'ボタン操作時の軽いバイブレーション';
+  @override
+  String get defaultSortTitle => 'デフォルトの並び順';
+  @override
+  String get defaultSortDesc => '応募リストの自動並び替え設定';
+  @override
+  String get sortPickerTitle => '並び替え順の選択';
+  @override
+  String get sortPickerSubtitle => '求人応募リストの自動並び順';
+  @override
+  String get sortOptionNewest => '応募日が新しい順';
+  @override
+  String get sortOptionNewestDesc => '最新の応募をリストの最上部に表示します';
+  @override
+  String get sortOptionClosest => '締切・日程が近い順';
+  @override
+  String get sortOptionClosestDesc => '直近に予定がある応募を優先して表示します';
+  @override
+  String get sortOptionCompanyAZ => '企業名 (昇順 A-Z / 五十音)';
+  @override
+  String get sortOptionCompanyAZDesc => '企業名の五十音・アルファベット順に並べ替えます';
+  @override
+  String get sortOptionSalary => '給与が高い順';
+  @override
+  String get sortOptionSalaryDesc => '提示給与・希望給与が高い順に表示します';
+  @override
+  String get securitySettingsTitle => 'セキュリティ & 認証';
+  @override
+  String get securitySettingsSubtitle => 'Google アカウントとクラウドデータベースの保護';
+  @override
+  String get cloudSyncTitle => 'Google ドライブ クラウド同期';
+  @override
+  String get cloudSyncSubtitle => '履歴書・職務経歴書・ポートフォリオのクラウド保管';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

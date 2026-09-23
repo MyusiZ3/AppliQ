@@ -364,7 +364,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
-    final isEn = LanguageManager.isEnglish;
 
     showModalBottomSheet(
       context: context,
@@ -409,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isEn ? 'General Preferences' : 'General Settings',
+                                AppStrings.generalSettingsTitle,
                                 style: TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
@@ -419,9 +418,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                isEn 
-                                    ? 'Customize tracking preferences & formatting' 
-                                    : 'Kustomisasi pengalaman & preferensi pelacakan',
+                                AppStrings.generalSettingsSubtitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -446,7 +443,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         // Section 1: Preferensi Format
                         _buildSectionHeader(
-                            isEn ? 'FORMAT & VALUE PREFERENCES' : 'PREFERENSI FORMAT & NILAI', 
+                            AppStrings.preferencesFormatSection, 
                             isDark),
                         Container(
                           decoration: BoxDecoration(
@@ -471,7 +468,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                                 title: Text(
-                                  isEn ? 'Default Currency' : 'Mata Uang Default', 
+                                  AppStrings.defaultCurrencyTitle, 
                                   style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
                                 ),
                                 subtitle: Text(_defaultCurrency, style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textHintDark : AppColors.textHint)),
@@ -494,7 +491,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                                 title: Text(
-                                  isEn ? 'Date Format' : 'Format Tanggal', 
+                                  AppStrings.dateFormatTitle, 
                                   style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
                                 ),
                                 subtitle: Text(_dateFormat, style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textHintDark : AppColors.textHint)),
@@ -517,7 +514,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                                 title: Text(
-                                  isEn ? 'Default Application Sort' : 'Urutan Lamaran Default', 
+                                  AppStrings.defaultSortTitle, 
                                   style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
                                 ),
                                 subtitle: Text(_defaultSortOption, style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textHintDark : AppColors.textHint)),
@@ -532,7 +529,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                         // Section: Penyimpanan & Cache
                         _buildSectionHeader(
-                            isEn ? 'STORAGE & CACHE' : 'PENYIMPANAN & CACHE', 
+                            'STORAGE & CACHE', 
                             isDark),
                         Container(
                           decoration: BoxDecoration(
@@ -555,15 +552,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: Color(0xFFEF4444),
                                   ),
                                 ),
-                                title: Text(
-                                  isEn ? 'Clear Local Cache' : 'Bersihkan Cache Lokal', 
-                                  style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: Color(0xFFEF4444)),
+                                title: const Text(
+                                  'Clear Local Cache', 
+                                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: Color(0xFFEF4444)),
                                 ),
-                                subtitle: Text(
-                                  isEn 
-                                      ? 'Clear cached images & temporary memory files' 
-                                      : 'Mengosongkan cache gambar & temporary memory files', 
-                                  style: const TextStyle(fontSize: 12),
+                                subtitle: const Text(
+                                  'Clear cached images & temporary memory files', 
+                                  style: TextStyle(fontSize: 12),
                                 ),
                                 onTap: () async {
                                   _triggerHaptic();
@@ -573,9 +568,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Navigator.pop(context);
                                     UIHelper.showSuccessSnackBar(
                                       context, 
-                                      isEn 
-                                          ? 'Image cache and temporary data cleared successfully!' 
-                                          : 'Cache gambar dan data sementara berhasil dibersihkan!',
+                                      'Image cache and temporary data cleared successfully!',
                                     );
                                   }
                                 },
@@ -1006,38 +999,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showSortOptionPicker(StateSetter setModalState) {
-    final isEn = LanguageManager.isEnglish;
     final options = [
       {
         'id': 'Terbaru Ditambahkan',
-        'label': isEn ? 'Newest Added' : 'Terbaru Ditambahkan',
-        'desc': isEn 
-            ? 'Show your most recently added jobs at the top' 
-            : 'Menampilkan lamaran yang paling baru Anda tambahkan di posisi paling atas',
+        'label': AppStrings.sortOptionNewest,
+        'desc': AppStrings.sortOptionNewestDesc,
         'icon': CupertinoIcons.sparkles,
       },
       {
         'id': 'Deadline Terdekat',
-        'label': isEn ? 'Closest Schedule' : 'Deadline Terdekat',
-        'desc': isEn 
-            ? 'Prioritize applications with upcoming interview schedules' 
-            : 'Memprioritaskan lamaran dengan batas waktu & jadwal terdekat',
+        'label': AppStrings.sortOptionClosest,
+        'desc': AppStrings.sortOptionClosestDesc,
         'icon': CupertinoIcons.clock_fill,
       },
       {
         'id': 'Nama Perusahaan A-Z',
-        'label': isEn ? 'Company (A to Z)' : 'Nama Perusahaan A-Z',
-        'desc': isEn 
-            ? 'Sort all applications alphabetically by company name' 
-            : 'Mengurutkan seluruh lamaran secara alfabetis nama perusahaan',
+        'label': AppStrings.sortOptionCompanyAZ,
+        'desc': AppStrings.sortOptionCompanyAZDesc,
         'icon': CupertinoIcons.textformat_abc,
       },
       {
         'id': 'Gaji Tertinggi',
-        'label': isEn ? 'Highest Salary' : 'Gaji Tertinggi',
-        'desc': isEn 
-            ? 'Display career opportunities with highest compensation first' 
-            : 'Menampilkan peluang karir dengan penawaran gaji tertinggi lebih dulu',
+        'label': AppStrings.sortOptionSalary,
+        'desc': AppStrings.sortOptionSalaryDesc,
         'icon': CupertinoIcons.money_dollar_circle_fill,
       },
     ];
@@ -1062,7 +1046,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isEn ? 'Default Application Sort' : 'Urutan Lamaran Default',
+                        AppStrings.sortPickerTitle,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -1072,9 +1056,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        isEn 
-                            ? 'Automatic sorting method for applications list' 
-                            : 'Metode pengurutan otomatis daftar lamaran',
+                        AppStrings.sortPickerSubtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -1202,6 +1184,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final icons = [
+      CupertinoIcons.checkmark_shield_fill,
+      CupertinoIcons.lock_shield_fill,
+      CupertinoIcons.briefcase_fill,
+      CupertinoIcons.star_circle_fill,
+      CupertinoIcons.exclamationmark_triangle_fill,
+      CupertinoIcons.arrow_2_circlepath_circle_fill,
+    ];
 
     showModalBottomSheet(
       context: context,
@@ -1243,7 +1233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Terms of Service',
+                              AppStrings.termsModalTitle,
                               style: TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
@@ -1269,7 +1259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'Ketentuan Resmi AppliQ',
+                                  AppStrings.termsModalSubtitle,
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     color: isDark ? AppColors.textHintDark : AppColors.textHint,
@@ -1289,69 +1279,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 Expanded(
-                  child: ListView(
+                  child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                    children: [
-                      _buildLegalCard(
-                        title: '1. Penerimaan Ketentuan (Acceptance of Terms)',
-                        content:
-                            'Dengan mendaftar, mengakses, atau menggunakan platform aplikasi AppliQ, Anda menyatakan setuju untuk terikat oleh Ketentuan Layanan ini. Jika Anda tidak menyetujui salah satu klausul dalam ketentuan ini, Anda disarankan untuk tidak melanjutkan penggunaan layanan kami.',
-                        icon: CupertinoIcons.checkmark_shield_fill,
+                    itemCount: AppStrings.termsCards.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final card = AppStrings.termsCards[index];
+                      return _buildLegalCard(
+                        title: card['title'] ?? '',
+                        content: card['content'] ?? '',
+                        icon: icons[index % icons.length],
                         cardBg: cardBg,
                         borderColor: borderColor,
                         isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '2. Akun & Keamanan Data Pengguna',
-                        content:
-                            'Anda bertanggung jawab penuh untuk menjaga kerahasiaan kredensial autentikasi akun Google Anda. Seluruh aktivitas yang terjadi di bawah akun Anda merupakan tanggung jawab Anda pribadi. AppliQ tidak bertanggung jawab atas kerugian yang timbul akibat kelalaian dalam menjaga akses akun.',
-                        icon: CupertinoIcons.lock_shield_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '3. Layanan Pelacak & Manajemen Lamaran',
-                        content:
-                            'AppliQ menyediakan perangkat lunak pelacak lamaran kerja terpadu (Job Tracker), pencatatan jadwal interview, kalkulasi statistik tingkat konversi, serta penyimpanan data pendukung karir. Layanan ini disediakan sebagaimana adanya ("as is") untuk membantu produktivitas pencarian kerja Anda.',
-                        icon: CupertinoIcons.briefcase_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '4. Hak Kekayaan Intelektual (Intellectual Property)',
-                        content:
-                            'Seluruh elemen antarmuka, desain grafis, logo AppliQ, kode sumber, dan dokumentasi terkait dilindungi oleh hak cipta dan hukum kekayaan intelektual. Anda dilarang mereproduksi, mendistribusikan ulang, atau merekayasa balik (reverse-engineer) tanpa izin tertulis.',
-                        icon: CupertinoIcons.star_circle_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '5. Batasan Tanggung Jawab & Jaminan',
-                        content:
-                            'AppliQ tidak menjamin hasil penerimaan kerja atau proses rekrutmen di perusahaan target mana pun. Kami berupaya maksimal menjaga keandalan server dan sinkronisasi data, namun tidak bertanggung jawab atas gangguan konektivitas jaringan pihak ketiga atau kendala teknis di luar kendali kami.',
-                        icon: CupertinoIcons.exclamationmark_triangle_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '6. Perubahan Ketentuan Layanan',
-                        content:
-                            'Kami berhak memperbarui Ketentuan Layanan ini sewaktu-waktu guna mematuhi perkembangan regulasi atau penambahan fitur baru. Pembaruan akan ditampilkan melalui halaman ini dengan tanggal efektif yang tertera.',
-                        icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ],
@@ -1366,6 +1308,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final icons = [
+      CupertinoIcons.person_badge_plus_fill,
+      CupertinoIcons.gear_alt_fill,
+      CupertinoIcons.lock_shield_fill,
+      CupertinoIcons.hand_raised_fill,
+      CupertinoIcons.trash_circle_fill,
+    ];
 
     showModalBottomSheet(
       context: context,
@@ -1407,7 +1356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'User Privacy Policy',
+                              AppStrings.privacyModalTitle,
                               style: TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
@@ -1433,7 +1382,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'Privasi Terenkripsi',
+                                  AppStrings.privacyModalSubtitle,
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     color: isDark ? AppColors.textHintDark : AppColors.textHint,
@@ -1453,59 +1402,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 Expanded(
-                  child: ListView(
+                  child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                    children: [
-                      _buildLegalCard(
-                        title: '1. Informasi yang Kami Kumpulkan',
-                        content:
-                            'Kami mengumpulkan informasi yang Anda berikan secara langsung saat menggunakan AppliQ, meliputi: data profil Google (nama, alamat email, URL foto avatar), data entri lamaran kerja (nama perusahaan, posisi, status, gaji, catatan tahapan interview), serta preferensi pengaturan lokal.',
-                        icon: CupertinoIcons.person_badge_plus_fill,
+                    itemCount: AppStrings.privacyCards.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final card = AppStrings.privacyCards[index];
+                      return _buildLegalCard(
+                        title: card['title'] ?? '',
+                        content: card['content'] ?? '',
+                        icon: icons[index % icons.length],
                         cardBg: cardBg,
                         borderColor: borderColor,
                         isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '2. Cara Kami Menggunakan Informasi Anda',
-                        content:
-                            'Informasi Anda hanya digunakan untuk memfungsikan fitur pelacak lamaran: sinkronisasi database cloud Supabase, penjadwalan reminder interview, pembuatan statistik analitik pribadi, serta pengoptimalan pengalaman antarmuka aplikasi.',
-                        icon: CupertinoIcons.gear_alt_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '3. Enkripsi & Keamanan Database',
-                        content:
-                            'Seluruh data ditransmisikan menggunakan enkripsi TLS/HTTPS dan disimpan di database Supabase dengan pengamanan Row-Level Security (RLS). Hanya akun terautentikasi Anda yang memiliki izin membaca dan mengubah data lamaran Anda sendiri.',
-                        icon: CupertinoIcons.lock_shield_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '4. Tidak Ada Penjualan Data ke Pihak Ketiga',
-                        content:
-                            'AppliQ berjanji tidak akan pernah menjual, menyewakan, atau membagikan data riwayat lamaran dan data pribadi Anda kepada pengiklan atau pihak ketiga mana pun tanpa persetujuan eksplisit dari Anda.',
-                        icon: CupertinoIcons.hand_raised_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildLegalCard(
-                        title: '5. Hak Kontrol & Penghapusan Akun Total',
-                        content:
-                            'Anda berhak setiap saat untuk memperbarui informasi profil, mengekspor riwayat lamaran, atau menghapus seluruh akun beserta database terkait secara permanen melalui tombol "Delete Account" di menu Edit Profil.',
-                        icon: CupertinoIcons.trash_circle_fill,
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ],
@@ -1520,83 +1431,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
-
-    final isEn = AppStrings.isEn;
-    final List<Map<String, String>> faqs = isEn
-        ? [
-            {
-              'q': 'What is AppliQ and how does it work?',
-              'a':
-                  'AppliQ is a smart job application tracker that helps you record every application, schedule interviews, track hiring stages, and analyze career opportunity conversions in real-time.',
-            },
-            {
-              'q': 'How do I schedule interview reminder notifications?',
-              'a':
-                  'When adding or editing an interview stage in the application details, set the date and time. Make sure "Reminder Notifications" toggle in Settings is active so the app can send you timely notifications.',
-            },
-            {
-              'q': 'Is my application data and salary history secure?',
-              'a':
-                  'Extremely secure. AppliQ enforces Row-Level Security (RLS) in Supabase and TLS encrypted transport. No other user can access your position, salary, or interview notes.',
-            },
-            {
-              'q': 'How do I search and filter existing applications?',
-              'a':
-                  'Open the Applications or Schedule tab. Use the Search Bar at the top to search by company or role name, and filter by status (Applied, Interview, Offered, Rejected).',
-            },
-            {
-              'q': 'Can I export my application history data?',
-              'a':
-                  'Yes. The export feature allows you to download your career history summary as a professional PDF report or CSV spreadsheet.',
-            },
-            {
-              'q': 'How do I change the app theme and profile picture?',
-              'a':
-                  'You can activate Dark Mode or Monochrome Mode directly in this Settings page. Your profile picture automatically synchronizes with your Google account.',
-            },
-            {
-              'q': 'How do I delete my account permanently?',
-              'a':
-                  'Go to Edit Profile (click the top profile card) and select "Delete Account" at the bottom. All your applications, stages, and preferences will be permanently wiped from the server.',
-            },
-          ]
-        : [
-            {
-              'q': 'Apa itu AppliQ dan bagaimana cara kerjanya?',
-              'a':
-                  'AppliQ adalah aplikasi pelacak lamaran kerja (Job Tracker) pintar yang membantu Anda mencatat setiap lamaran, menjadwalkan interview, melacak tahapan rekrutmen, hingga menganalisis konversi peluang karir secara real-time.',
-            },
-            {
-              'q': 'Bagaimana cara menjadwalkan notifikasi reminder interview?',
-              'a':
-                  'Saat menambahkan atau mengedit tahapan interview pada detail lamaran, tentukan tanggal dan waktu jadwal. Pastikan tombol toggle "Notifikasi Pengingat" di menu Settings aktif agar aplikasi dapat mengirimkan reminder tepat waktu.',
-            },
-            {
-              'q': 'Apakah data lamaran dan riwayat gaji saya aman?',
-              'a':
-                  'Sangat aman. AppliQ menerapkan standar Row-Level Security (RLS) di Supabase dan transmisi TLS terenkripsi. Tidak ada pengguna lain yang dapat melihat data posisi, gaji, maupun catatan interview Anda.',
-            },
-            {
-              'q': 'Bagaimana cara mencari dan memfilter lamaran yang sudah ada?',
-              'a':
-                  'Buka menu Pelacak Lamaran atau Jadwal Agenda. Anda dapat menggunakan Search Bar di bagian atas untuk mencari berdasarkan nama perusahaan atau posisi, serta memfilter berdasarkan status (Terkirim, Interview, Diterima, Ditolak).',
-            },
-            {
-              'q': 'Apakah saya bisa mengekspor data riwayat lamaran?',
-              'a':
-                  'Bisa. Fitur ekspor laporan tersedia untuk mengunduh rekapitulasi data lamaran kerja ke dalam format PDF profesional atau spreadsheet Excel.',
-            },
-            {
-              'q': 'Bagaimana cara mengubah tema aplikasi dan foto profil?',
-              'a':
-                  'Anda dapat mengaktifkan Dark Mode atau Monochrome Mode langsung dari halaman Settings ini. Foto profil Anda disinkronkan secara otomatis dan elegan dari akun Google Anda.',
-            },
-            {
-              'q': 'Bagaimana cara menghapus akun secara permanen?',
-              'a':
-                  'Masuk ke Edit Profile (klik kartu profil paling atas) lalu pilih "Delete Account" di bagian bawah. Seluruh data lamaran, riwayat interview, dan preferensi akun Anda akan dihapus permanen dari server.',
-            },
-          ];
+    final faqs = AppStrings.faqList;
 
     showModalBottomSheet(
       context: context,
@@ -1648,7 +1483,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              isEn ? 'General questions & guide on using AppliQ' : 'Pertanyaan umum & panduan penggunaan AppliQ',
+                              AppStrings.generalSettingsSubtitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -1972,7 +1807,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           // General Settings Tile
                           _buildTile(
                             icon: CupertinoIcons.slider_horizontal_3,
-                            title: LanguageManager.isEnglish ? 'General preferences' : 'Pengaturan umum',
+                            title: AppStrings.generalSettingsTitle,
                             isDark: isDark,
                             showChevron: true,
                             onTap: () {
@@ -1991,7 +1826,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                               return _buildTile(
                                 icon: CupertinoIcons.moon,
-                                title: LanguageManager.isEnglish ? 'Dark mode' : 'Mode gelap',
+                                title: AppStrings.darkModeTitle,
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
                                   value: isDarkModeActive,
@@ -2015,7 +1850,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               final isMonochrome = accentMode == AccentThemeMode.monochrome;
                               return _buildTile(
                                 icon: CupertinoIcons.circle_righthalf_fill,
-                                title: LanguageManager.isEnglish ? 'Monochrome mode' : 'Mode monokrom',
+                                title: AppStrings.monochromeTitle,
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
                                   value: isMonochrome,
@@ -2072,7 +1907,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _buildDivider(borderColor),
                           _buildTile(
                             icon: CupertinoIcons.info_circle,
-                            title: LanguageManager.isEnglish ? 'Terms of service' : 'Syarat & ketentuan',
+                            title: AppStrings.termsOfService,
                             isDark: isDark,
                             showChevron: true,
                             onTap: () {
@@ -2083,7 +1918,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _buildDivider(borderColor),
                           _buildTile(
                             icon: CupertinoIcons.shield,
-                            title: LanguageManager.isEnglish ? 'Privacy policy' : 'Kebijakan privasi',
+                            title: AppStrings.privacyPolicy,
                             isDark: isDark,
                             showChevron: true,
                             onTap: () {

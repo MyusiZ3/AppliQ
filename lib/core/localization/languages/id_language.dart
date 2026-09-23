@@ -658,6 +658,171 @@ class IdLanguage implements BaseLanguage {
   @override
   String welcomeUser(String name) => 'Selamat datang, $name!';
 
+  // Status Feedback Text
+  @override
+  String get feedbackSubmittedToday => 'Dikirim hari ini';
+  @override
+  String feedbackSubmittedDaysAgo(int days) => 'Dikirim $days hari yang lalu';
+  @override
+  String get feedbackNoResponse30Days => 'Tidak ada respon > 30 hari';
+  @override
+  String get feedbackStayMotivated => 'Semangat, masih ada kesempatan lainnya';
+  @override
+  String feedbackCurrentStage(String stageName) => 'Kamu sedang dalam tahap $stageName';
+
+  // Legal (Terms of Service & Privacy Policy Modals)
+  @override
+  String get termsModalTitle => 'Ketentuan Layanan';
+  @override
+  String get termsModalSubtitle => 'Ketentuan Resmi AppliQ';
+  @override
+  List<Map<String, String>> get termsCards => [
+    {
+      'title': '1. Penerimaan Ketentuan (Acceptance of Terms)',
+      'content': 'Dengan mendaftar, mengakses, atau menggunakan platform aplikasi AppliQ, Anda menyatakan setuju untuk terikat oleh Ketentuan Layanan ini. Jika Anda tidak menyetujui salah satu klausul dalam ketentuan ini, Anda disarankan untuk tidak melanjutkan penggunaan layanan kami.',
+    },
+    {
+      'title': '2. Akun & Keamanan Data Pengguna',
+      'content': 'Anda bertanggung jawab penuh untuk menjaga kerahasiaan kredensial autentikasi akun Google Anda. Seluruh aktivitas yang terjadi di bawah akun Anda merupakan tanggung jawab Anda pribadi. AppliQ tidak bertanggung jawab atas kerugian yang timbul akibat kelalaian dalam menjaga akses akun.',
+    },
+    {
+      'title': '3. Layanan Pelacak & Manajemen Lamaran',
+      'content': 'AppliQ menyediakan perangkat lunak pelacak lamaran kerja terpadu (Job Tracker), pencatatan jadwal interview, kalkulasi statistik tingkat konversi, serta penyimpanan data pendukung karir. Layanan ini disediakan sebagaimana adanya ("as is") untuk membantu produktivitas pencarian kerja Anda.',
+    },
+    {
+      'title': '4. Hak Kekayaan Intelektual',
+      'content': 'Seluruh elemen antarmuka, desain grafis, logo AppliQ, kode sumber, dan dokumentasi terkait dilindungi oleh hak cipta dan hukum kekayaan intelektual. Anda dilarang mereproduksi, mendistribusikan ulang, atau merekayasa balik tanpa izin tertulis.',
+    },
+    {
+      'title': '5. Batasan Tanggung Jawab & Jaminan',
+      'content': 'AppliQ tidak menjamin hasil penerimaan kerja di perusahaan target mana pun. Kami berupaya maksimal menjaga keandalan server dan sinkronisasi data, namun tidak bertanggung jawab atas gangguan konektivitas pihak ketiga.',
+    },
+    {
+      'title': '6. Perubahan Ketentuan Layanan',
+      'content': 'Kami berhak memperbarui Ketentuan Layanan ini sewaktu-waktu guna mematuhi regulasi atau penambahan fitur baru. Pembaruan akan ditampilkan melalui halaman ini dengan tanggal efektif yang tertera.',
+    },
+  ];
+
+  @override
+  String get privacyModalTitle => 'Kebijakan Privasi Pengguna';
+  @override
+  String get privacyModalSubtitle => 'Privasi Terenkripsi';
+  @override
+  List<Map<String, String>> get privacyCards => [
+    {
+      'title': '1. Informasi yang Kami Kumpulkan',
+      'content': 'Kami mengumpulkan informasi yang Anda berikan secara langsung saat menggunakan AppliQ, meliputi: data profil Google (nama, alamat email, URL foto avatar), data entri lamaran kerja (nama perusahaan, posisi, status, gaji, catatan tahapan interview), serta preferensi pengaturan lokal.',
+    },
+    {
+      'title': '2. Cara Kami Menggunakan Informasi Anda',
+      'content': 'Informasi Anda hanya digunakan untuk memfungsikan fitur pelacak lamaran: sinkronisasi database cloud Supabase, penjadwalan reminder interview, pembuatan statistik analitik pribadi, serta pengoptimalan pengalaman antarmuka aplikasi.',
+    },
+    {
+      'title': '3. Enkripsi & Keamanan Database',
+      'content': 'Seluruh data ditransmisikan menggunakan enkripsi TLS/HTTPS dan disimpan di database Supabase dengan pengamanan Row-Level Security (RLS). Hanya akun terautentikasi Anda yang memiliki izin membaca dan mengubah data lamaran Anda sendiri.',
+    },
+    {
+      'title': '4. Tidak Ada Penjualan Data ke Pihak Ketiga',
+      'content': 'AppliQ berjanji tidak akan pernah menjual, menyewakan, atau membagikan data riwayat lamaran dan data pribadi Anda kepada pengiklan atau pihak ketiga mana pun tanpa persetujuan eksplisit dari Anda.',
+    },
+    {
+      'title': '5. Hak Kontrol & Penghapusan Akun Total',
+      'content': 'Anda berhak setiap saat untuk memperbarui informasi profil, mengekspor riwayat lamaran, atau menghapus seluruh akun beserta database terkait secara permanen melalui tombol "Delete Account" di menu Edit Profil.',
+    },
+  ];
+
+  @override
+  List<Map<String, String>> get faqList => [
+    {
+      'q': 'Apa itu AppliQ dan bagaimana cara kerjanya?',
+      'a': 'AppliQ adalah platform pelacak lamaran kerja pintar yang membantu Anda mencatat setiap lamaran, menjadwalkan interview, memantau tahapan seleksi, dan menganalisis tingkat keberhasilan karir secara real-time.',
+    },
+    {
+      'q': 'Bagaimana cara mengatur notifikasi pengingat interview?',
+      'a': 'Saat menambah atau mengedit tahapan interview di detail lamaran, tentukan tanggal dan jamnya. Pastikan toggle "Notifikasi Pengingat" di Pengaturan aktif agar sistem dapat mengirimkan notifikasi tepat waktu.',
+    },
+    {
+      'q': 'Apakah data riwayat gaji dan lamaran saya aman?',
+      'a': 'Sangat aman. AppliQ menerapkan Row-Level Security (RLS) di Supabase dan enkripsi TLS. Tidak ada pengguna lain yang dapat mengakses riwayat lamaran dan catatan gaji Anda.',
+    },
+    {
+      'q': 'Bagaimana cara mencari dan memfilter lamaran?',
+      'a': 'Buka tab Lamaran atau Jadwal. Gunakan Search Bar di bagian atas untuk mencari nama perusahaan atau posisi, dan filter berdasarkan status (Applied, Interview, Offering, Rejected).',
+    },
+    {
+      'q': 'Apakah saya bisa mengekspor data riwayat lamaran?',
+      'a': 'Ya. Fitur Ekspor memungkinkan Anda mengunduh rangkuman riwayat karir dalam format laporan PDF atau spreadsheet CSV.',
+    },
+  ];
+
+  // Settings & Bottom Sheets
+  @override
+  String get generalSettingsTitle => 'Pengaturan Umum';
+  @override
+  String get generalSettingsSubtitle => 'Kustomisasi tampilan & preferensi aplikasi';
+  @override
+  String get appearanceSection => 'TAMPILAN';
+  @override
+  String get darkModeTitle => 'Mode Gelap';
+  @override
+  String get darkModeDesc => 'Beralih antara tema gelap dan terang';
+  @override
+  String get monochromeTitle => 'Mode Monokrom';
+  @override
+  String get monochromeDesc => 'Gunakan tema hitam-putih minimalis';
+  @override
+  String get preferencesFormatSection => 'PREFERENSI & FORMAT';
+  @override
+  String get appLanguageTitle => 'Bahasa Aplikasi';
+  @override
+  String get appLanguageDesc => 'Pilih bahasa antarmuka';
+  @override
+  String get defaultCurrencyTitle => 'Mata Uang Default';
+  @override
+  String get defaultCurrencyDesc => 'Format mata uang untuk gaji';
+  @override
+  String get dateFormatTitle => 'Format Tanggal';
+  @override
+  String get dateFormatDesc => 'Tampilan tanggal di seluruh aplikasi';
+  @override
+  String get feedbackHapticSection => 'INTERAKSI & URUTAN';
+  @override
+  String get hapticTitle => 'Getaran Haptic Feedback';
+  @override
+  String get hapticDesc => 'Umpan balik getar saat mengetuk tombol aksi';
+  @override
+  String get defaultSortTitle => 'Urutan Lamaran Default';
+  @override
+  String get defaultSortDesc => 'Pengurutan otomatis daftar lamaran';
+  @override
+  String get sortPickerTitle => 'Urutan Lamaran Default';
+  @override
+  String get sortPickerSubtitle => 'Metode pengurutan otomatis daftar lamaran';
+  @override
+  String get sortOptionNewest => 'Terbaru Ditambahkan';
+  @override
+  String get sortOptionNewestDesc => 'Menampilkan lamaran paling baru di posisi teratas';
+  @override
+  String get sortOptionClosest => 'Deadline Terdekat';
+  @override
+  String get sortOptionClosestDesc => 'Memprioritaskan lamaran dengan jadwal terdekat';
+  @override
+  String get sortOptionCompanyAZ => 'Nama Perusahaan A-Z';
+  @override
+  String get sortOptionCompanyAZDesc => 'Mengurutkan secara alfabetis nama perusahaan';
+  @override
+  String get sortOptionSalary => 'Gaji Tertinggi';
+  @override
+  String get sortOptionSalaryDesc => 'Menampilkan tawaran gaji tertinggi lebih dulu';
+  @override
+  String get securitySettingsTitle => 'Keamanan & Autentikasi';
+  @override
+  String get securitySettingsSubtitle => 'Perlindungan akun Google & database cloud';
+  @override
+  String get cloudSyncTitle => 'Google Drive Cloud Sync';
+  @override
+  String get cloudSyncSubtitle => 'Penyimpanan lampiran berkas resume & portofolio';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) => type.label;

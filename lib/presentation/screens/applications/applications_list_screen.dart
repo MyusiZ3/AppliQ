@@ -82,16 +82,30 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     }
   }
 
+  String _lastFilterQuery = '';
+  ApplicationStatus? _lastFilterStatus;
+  bool _lastFilterOnlyFav = false;
+  String _lastFilterSortBy = '';
+  int _lastFilterAppHash = 0;
+  List<JobApplication> _cachedFilteredApps = [];
+
   List<JobApplication> get _filteredApplications {
+    final currentHash = Object.hash(_applications.length, _applications.isNotEmpty ? _applications.first.id : 0);
+    if (_cachedFilteredApps.isNotEmpty &&
+        _lastFilterQuery == _searchQuery &&
+        _lastFilterStatus == _selectedStatusFilter &&
+        _lastFilterOnlyFav == _onlyFavorites &&
+        _lastFilterSortBy == _sortBy &&
+        _lastFilterAppHash == currentHash) {
+      return _cachedFilteredApps;
+    }
+
+    final query = _searchQuery.trim().toLowerCase();
     var list = _applications.where((app) {
-      final matchesSearch = app.companyName
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
-          app.positionTitle
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
-          (app.location?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
-              false);
+      final matchesSearch = query.isEmpty ||
+          app.companyName.toLowerCase().contains(query) ||
+          app.positionTitle.toLowerCase().contains(query) ||
+          (app.location?.toLowerCase().contains(query) ?? false);
 
       final matchesFavorite = !_onlyFavorites || app.isFavorite;
 
@@ -116,6 +130,13 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
       list.sort((a, b) =>
           a.companyName.toLowerCase().compareTo(b.companyName.toLowerCase()));
     }
+
+    _lastFilterQuery = _searchQuery;
+    _lastFilterStatus = _selectedStatusFilter;
+    _lastFilterOnlyFav = _onlyFavorites;
+    _lastFilterSortBy = _sortBy;
+    _lastFilterAppHash = currentHash;
+    _cachedFilteredApps = list;
 
     return list;
   }
@@ -271,12 +292,12 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                 items: [
                   NotchedPillItem(
                     value: false,
-                    label: LanguageManager.isEnglish ? 'List View' : 'Tampilan List',
+                    label: AppStrings.listView,
                     icon: CupertinoIcons.list_bullet,
                   ),
                   NotchedPillItem(
                     value: true,
-                    label: LanguageManager.isEnglish ? 'Kanban Board' : 'Papan Kanban',
+                    label: AppStrings.kanbanBoard,
                     icon: CupertinoIcons.square_grid_2x2,
                   ),
                 ],
@@ -321,7 +342,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                     ),
                     const SizedBox(width: 8),
                     _buildPill(
-                      label: LanguageManager.isEnglish ? 'Starred' : 'Ditandai',
+                      label: AppStrings.starred,
                       isSelected: _onlyFavorites,
                       onTap: () {
                         setState(() {

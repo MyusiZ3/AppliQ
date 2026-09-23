@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../utils/language_manager.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_enums.dart';
 import '../localization/app_strings.dart';
 
 class StatusHelper {
   static String getFeedbackText(ApplicationStatus status, DateTime appliedDate) {
-    final isEn = LanguageManager.isEnglish;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final applied = DateTime(appliedDate.year, appliedDate.month, appliedDate.day);
@@ -14,18 +12,16 @@ class StatusHelper {
 
     if (status == ApplicationStatus.applied) {
       if (diffDays <= 0) {
-        return isEn ? 'Submitted today' : 'Dikirim hari ini';
+        return AppStrings.feedbackSubmittedToday;
       } else if (diffDays <= 30) {
-        return isEn ? 'Submitted $diffDays day${diffDays > 1 ? 's' : ''} ago' : 'Dikirim $diffDays hari yang lalu';
+        return AppStrings.feedbackSubmittedDaysAgo(diffDays);
       } else {
-        return isEn ? 'No response for > 30 days' : 'Tidak ada respon > 30 hari';
+        return AppStrings.feedbackNoResponse30Days;
       }
     } else if (status == ApplicationStatus.rejected || status == ApplicationStatus.noResponse) {
-      return isEn ? 'Stay motivated, more opportunities await!' : 'Semangat, masih ada kesempatan lainnya';
+      return AppStrings.feedbackStayMotivated;
     } else {
-      return isEn 
-          ? 'You are currently in ${AppStrings.localizedStatus(status)} stage' 
-          : 'Kamu sedang dalam tahap ${status.label}';
+      return AppStrings.feedbackCurrentStage(AppStrings.localizedStatus(status));
     }
   }
 

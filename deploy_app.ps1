@@ -63,11 +63,43 @@ if (Test-Path "public") {
 
 $apkSource = "build\app\outputs\flutter-apk\app-release.apk"
 
-# 4. Sinkronisasi Git Commit ke GitHub
+# 4. Sinkronisasi Versi di Landing Page (public\index.html)
+Write-Host "--- Sinkronisasi Versi di Landing Page ---" -ForegroundColor Yellow
+$indexPath = "public\index.html"
+if (Test-Path $indexPath) {
+    $content = Get-Content $indexPath -Raw
+    $newContent = $content
+    
+    # Ganti {{VERSION}} jika ada
+    $newContent = $newContent -replace '\{\{VERSION\}\}', $versionName
+    
+    # Ganti link download rilis APK ke vX.X.X
+    $newContent = $newContent -replace 'releases/download/v[^/]+/app-release\.apk', "releases/download/v$versionName/app-release.apk"
+    
+    # Ganti teks versi di button badge, button text, dan QR card footer
+    $newContent = $newContent -replace '<span>v[0-9]+\.[0-9]+\.[0-9]+</span>', "<span>v$versionName</span>"
+    $newContent = $newContent -replace '<span>v\{\{VERSION\}\}</span>', "<span>v$versionName</span>"
+    $newContent = $newContent -replace '<span>v[0-9]+\.[0-9]+\.[0-9]+(\+[0-9]+)?\s+RELEASE</span>', "<span>v$versionName RELEASE</span>"
+    $newContent = $newContent -replace '<span>v\{\{VERSION\}\}\s+RELEASE</span>', "<span>v$versionName RELEASE</span>"
+    $newContent = $newContent -replace 'Download (Free )?APK \(v[0-9]+\.[0-9]+\.[0-9]+\)', "Download APK (v$versionName)"
+    $newContent = $newContent -replace 'Download (Free )?APK \(v\{\{VERSION\}\}\)', "Download APK (v$versionName)"
+    $newContent = $newContent -replace 'aria-label="Download AppliQ version [^"]+"', "aria-label=""Download AppliQ version $versionName"""
+
+    if ($newContent -ne $content) {
+        $newContent | Set-Content $indexPath -NoNewline
+        Write-Host "[OK] Versi di public\index.html berhasil diperbarui ke v$versionName" -ForegroundColor Green
+        git add public/index.html
+        git commit -m "chore(web): update landing page version to v$versionName" 2>$null
+    } else {
+        Write-Host "[INFO] Versi di public\index.html sudah sesuai (v$versionName)." -ForegroundColor Gray
+    }
+}
+
+# 5. Sinkronisasi Git Commit ke GitHub
 Write-Host "--- Mengunggah Commit ke GitHub ---" -ForegroundColor Yellow
 git push origin main
 
-# 5. Buat GitHub Release dan Upload File APK
+# 6. Buat GitHub Release dan Upload File APK
 Write-Host "--- Membuat GitHub Release (v$versionName) ---" -ForegroundColor Yellow
 
 $ghCmd = Get-Command gh -ErrorAction SilentlyContinue
@@ -103,4 +135,5 @@ if ($ghPath -and (Test-Path $ghPath)) {
 }
 
 Write-Host "`n[OK] Selesai! Versi AppliQ v$versionName siap." -ForegroundColor DarkGreen
+Write-Host "Link Web Landing Page  : https://myusiz3.github.io/AppliQ/" -ForegroundColor Cyan
 Write-Host "Link Download APK Rilis: https://github.com/MyusiZ3/AppliQ/releases/download/v$versionName/app-release.apk" -ForegroundColor Cyan

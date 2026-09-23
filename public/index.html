@@ -230,7 +230,7 @@
           rel="noopener noreferrer"
           class="bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black px-3.5 py-1.5 rounded-full text-xs font-extrabold tracking-wide transition-transform active:scale-95 flex items-center gap-1.5"
         >
-          <span>v1.0.2</span>
+          <span>v{{VERSION}}</span>
         </a>
       </div>
     </header>
@@ -261,11 +261,11 @@
 
             <div class="flex flex-wrap items-center gap-3">
               <a
-                href="https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.2/app-release.apk"
+                href="https://github.com/MyusiZ3/AppliQ/releases/download/v{{VERSION}}/app-release.apk"
                 class="bg-white text-black px-6 py-3.5 rounded-2xl no-underline font-extrabold inline-flex items-center gap-2.5 transition-all hover:bg-zinc-100 hover:scale-105 active:scale-95 shadow-xl shadow-white/10 text-xs sm:text-sm"
-                aria-label="Download AppliQ version 1.0.2"
+                aria-label="Download AppliQ version {{VERSION}}"
               >
-                <span>Download Free APK (v1.0.2)</span>
+                <span>Download APK (v{{VERSION}})</span>
                 <svg
                   width="16"
                   height="16"
@@ -310,46 +310,38 @@
           </div>
         </article>
 
-        <!-- Metric Stat Card (1 Col) -->
+        <!-- Quick Install QR Card (1 Col) -->
         <article
-          class="lg:col-span-1 bento-card bg-zinc-950 text-white border-zinc-800 flex flex-col justify-between"
+          class="lg:col-span-1 bento-card bg-black dark:bg-[#0f0f12] text-white border-zinc-800/80 flex flex-col items-center justify-between p-6 sm:p-7 text-center shadow-xl min-h-[380px]"
         >
-          <div>
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-xl bg-zinc-800 text-white flex items-center justify-center border border-zinc-700 shrink-0">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="w-5 h-5 text-zinc-100"
-                >
-                  <path d="M18 20V10M12 20V4M6 20v-4" />
-                </svg>
-              </div>
-              <h2 class="text-base font-bold text-white tracking-tight">
-                Conversion Insights
-              </h2>
-            </div>
-            <p class="text-xs text-zinc-400 font-normal leading-relaxed">
-              Track your application-to-interview conversion rates and monitor how many applications turn into job offers.
-            </p>
+          <div class="flex flex-col items-center">
+            <span class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-zinc-400 mb-1">
+              QUICK INSTALL
+            </span>
+            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+              Connect Now
+            </h2>
           </div>
-          
-          <div class="mt-5 p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800">
-            <div class="flex justify-between text-xs font-bold mb-1.5 text-zinc-300">
-              <span>Interview Rate</span>
-              <span class="text-white">42.8%</span>
-            </div>
-            <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <div class="bg-white h-full rounded-full w-[42.8%]"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-zinc-500 font-medium mt-2">
-              <span>35 Applications</span>
-              <span>15 Interviews</span>
-            </div>
+
+          <!-- QR Code Container -->
+          <a
+            href="https://github.com/MyusiZ3/AppliQ/releases/download/v{{VERSION}}/app-release.apk"
+            class="group my-auto p-3.5 bg-white rounded-3xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center relative"
+            title="Scan or click to download AppliQ APK"
+            aria-label="Scan QR code to install AppliQ APK"
+          >
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=https://github.com/MyusiZ3/AppliQ/releases/download/v{{VERSION}}/app-release.apk"
+              alt="Scan QR code to install AppliQ APK"
+              class="w-36 h-36 sm:w-40 sm:h-40 rounded-2xl object-contain select-none"
+              loading="lazy"
+            />
+          </a>
+
+          <!-- Version Footer -->
+          <div class="flex items-center gap-1.5 text-zinc-400 font-extrabold text-[11px] tracking-widest uppercase">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>v{{VERSION}} RELEASE</span>
           </div>
         </article>
 

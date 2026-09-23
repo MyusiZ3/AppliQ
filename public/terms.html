@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Terms of Service — AppliQ</title>
-    <meta name="description" content="Official Terms of Service for AppliQ Job Application Tracker" />
+    <title>Terms of Service – Privacy &amp; Terms – AppliQ</title>
+    <meta name="description" content="Official Terms of Service for AppliQ Job Application Tracker. Learn about terms of use and account responsibilities." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://myusiz3.github.io/AppliQ/terms.html" />
     <link rel="icon" type="image/png" href="assets/appliq_logo.png" />
-    <meta name="theme-color" content="#09090b" />
+    <meta name="theme-color" content="#131314" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <script>
@@ -21,12 +21,55 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['"Plus Jakarta Sans"', "sans-serif"],
+              sans: ['"Plus Jakarta Sans"', "Inter", "sans-serif"],
+            },
+            colors: {
+              gdark: {
+                bg: "#131314",
+                surface: "#1e1f20",
+                card: "#28292a",
+                border: "#3c4043",
+                hover: "#333537",
+                primary: "#8ab4f8",
+                primaryHover: "#aecbfa",
+                text: "#e3e3e3",
+                muted: "#9aa0a6",
+              },
+              glight: {
+                bg: "#f8f9fa",
+                surface: "#ffffff",
+                card: "#f1f3f4",
+                border: "#dadce0",
+                hover: "#e8eaed",
+                primary: "#1a73e8",
+                primaryHover: "#155724",
+                text: "#202124",
+                muted: "#5f6368",
+              },
             },
           },
         },
       };
     </script>
+    <style>
+      * {
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #3c4043;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #5f6368;
+      }
+    </style>
     <script>
       function toggleTheme() {
         if (document.documentElement.classList.contains("dark")) {
@@ -52,84 +95,158 @@
       initTheme();
     </script>
   </head>
-  <body
-    class="bg-[#f4f4f5] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 px-4 sm:px-6 py-10 flex flex-col items-center min-h-screen selection:bg-indigo-500 selection:text-white"
-  >
-    <div class="max-w-[840px] w-full bg-white dark:bg-[#141417] p-7 sm:p-10 md:p-12 rounded-3xl border border-zinc-200 dark:border-white/10 shadow-lg shadow-black/5">
-      <!-- Top Navigation -->
-      <div class="flex justify-between items-center pb-6 border-b border-zinc-100 dark:border-white/10 mb-8">
-        <a href="index.html" class="flex items-center gap-2.5 font-bold text-sm text-zinc-800 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-          <img src="assets/appliq_logo.png" alt="Logo" class="w-6 h-6 rounded-md object-contain" />
-          <span>Back to Home</span>
+  <body class="bg-glight-bg dark:bg-gdark-bg text-glight-text dark:text-gdark-text font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+    <!-- Top Google-Style Navigation Header -->
+    <header class="sticky top-0 z-50 w-full bg-glight-surface/95 dark:bg-gdark-bg/95 backdrop-blur-md border-b border-glight-border dark:border-gdark-border">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between relative">
+        <!-- Brand & Logo (Left) -->
+        <a href="index.html" class="flex items-center gap-2.5 no-underline group shrink-0" aria-label="AppliQ Home">
+          <img src="assets/appliq_logo.png" alt="AppliQ Logo" class="w-8 h-8 rounded-lg object-contain" />
+          <span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">AppliQ</span>
         </a>
-        <div class="flex items-center gap-2">
-          <a href="privacy.html" class="text-xs font-semibold text-zinc-500 hover:text-black dark:hover:text-white mr-2 transition-colors">
-            Privacy Policy &rarr;
+
+        <!-- Center Navigation Tabs -->
+        <nav class="hidden sm:flex items-center gap-1.5 text-sm font-medium absolute left-1/2 -translate-x-1/2">
+          <a
+            href="privacy.html"
+            class="px-4 py-1.5 rounded-full text-glight-muted dark:text-gdark-muted hover:text-black dark:hover:text-white hover:bg-glight-card dark:hover:bg-gdark-hover transition-colors font-medium"
+          >
+            Privacy Policy
           </a>
+          <a
+            href="terms.html"
+            class="px-4 py-1.5 rounded-full bg-blue-50 dark:bg-[#1e2a38] text-blue-600 dark:text-gdark-primary font-semibold transition-colors"
+            aria-current="page"
+          >
+            Terms of Service
+          </a>
+        </nav>
+
+        <!-- Right Utilities (Theme Toggle & Back Link) -->
+        <div class="flex items-center gap-3 shrink-0">
           <button
             onclick="toggleTheme()"
-            class="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-sm transition-transform active:scale-95"
-            title="Toggle theme"
+            class="p-2 rounded-full text-glight-muted dark:text-gdark-muted hover:text-black dark:hover:text-white hover:bg-glight-card dark:hover:bg-gdark-hover transition-colors"
+            title="Toggle light / dark mode"
             aria-label="Toggle theme"
           >
-            <svg class="hidden dark:block w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 12.728l-.707-.707M6.343 17.657l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            <svg class="hidden dark:block w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 12.728l-.707-.707M6.343 17.657l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            <svg class="block dark:hidden w-4 h-4 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            <svg class="block dark:hidden w-5 h-5 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           </button>
+
+          <a
+            href="index.html"
+            class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-zinc-900 hover:bg-black text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-black transition-transform active:scale-95"
+          >
+            <span>Open AppliQ</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </a>
         </div>
       </div>
+    </header>
 
-      <header class="mb-8">
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-black dark:text-white">
-          Terms of Service
+    <!-- Main Container Single Column Clean Layout -->
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10 md:py-14 flex-1 w-full space-y-10">
+      <!-- Clean Header -->
+      <header class="border-b border-glight-border dark:border-gdark-border pb-6">
+        <div class="text-sm text-glight-muted dark:text-gdark-muted mb-3 flex flex-wrap items-center gap-2">
+          <span>Effective September 23, 2026</span>
+          <span class="text-zinc-400 dark:text-zinc-600 hidden sm:inline">&bull;</span>
+          <button onclick="window.print()" class="text-blue-600 dark:text-gdark-primary hover:underline font-medium inline-flex items-center gap-1">
+            <span>Download PDF version</span>
+          </button>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white mb-3">
+          AppliQ Terms of Service
         </h1>
-        <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Last updated: September 23, 2026</p>
+        <p class="text-base text-glight-muted dark:text-gdark-muted leading-relaxed">
+          We know it is tempting to skip Terms of Service, but it is important to establish what you can expect from us as you use AppliQ, and what we expect from you.
+        </p>
       </header>
 
-      <div class="space-y-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-        <section class="bg-zinc-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-zinc-100 dark:border-white/5">
-          <h2 class="text-base font-bold text-black dark:text-white mb-2">1. Terms of Use</h2>
-          <p>
-            By downloading, installing, or using <strong>AppliQ</strong>, you agree to use the application responsibly for its intended purpose as a personal job application tracker and career companion.
-          </p>
-        </section>
+      <!-- Section 1: Use -->
+      <section id="tos-use" class="space-y-4 pt-2">
+        <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          1. Terms of Use
+        </h2>
+        <p class="text-sm sm:text-base leading-relaxed text-zinc-700 dark:text-zinc-300">
+          By downloading, installing, or accessing <strong>AppliQ</strong>, you agree to comply with these Terms of Service. AppliQ is provided as a personal job search productivity and career management tool for lawful, responsible use.
+        </p>
+      </section>
 
-        <section>
-          <h2 class="text-base font-bold text-black dark:text-white mb-2">2. Account & Data Security</h2>
-          <p>
-            AppliQ uses official <strong>Google Sign-In</strong> for authentication. You are responsible for safeguarding your personal device. Your job applications, salary notes, and interview stages are stored securely in Supabase with strict <em>Row-Level Security (RLS)</em> policies, ensuring only you have access to your data.
-          </p>
-        </section>
+      <!-- Section 2: Account -->
+      <section id="tos-account" class="space-y-4 pt-2">
+        <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          2. Account &amp; Device Responsibility
+        </h2>
+        <p class="text-sm sm:text-base leading-relaxed text-zinc-700 dark:text-zinc-300">
+          Authentication in AppliQ is powered by official <strong>Google Sign-In</strong>. You are responsible for maintaining the security of your device and Google credentials. Your application pipeline is protected with database-level <em>Row-Level Security (RLS)</em> policies.
+        </p>
+      </section>
 
-        <section>
-          <h2 class="text-base font-bold text-black dark:text-white mb-2">3. Google Drive Integration</h2>
-          <p>
-            If you enable Google Drive integration, AppliQ requests restricted access only to upload, view, and delete resume or portfolio attachments that you explicitly choose within a designated application folder. AppliQ never reads, accesses, or modifies files outside this dedicated folder.
-          </p>
-        </section>
+      <!-- Section 3: Drive -->
+      <section id="tos-drive" class="space-y-4 pt-2">
+        <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          3. Google Drive Integration Permissions
+        </h2>
+        <p class="text-sm sm:text-base leading-relaxed text-zinc-700 dark:text-zinc-300">
+          When Google Drive integration is enabled, AppliQ requests restricted access solely to read, upload, and manage resume/portfolio documents within a designated application folder. AppliQ does not access or modify any files outside this dedicated directory.
+        </p>
+      </section>
 
-        <section>
-          <h2 class="text-base font-bold text-black dark:text-white mb-2">4. User Rights & Data Deletion</h2>
-          <p>
-            You have absolute ownership over your data. You can edit, export your job application history to PDF or CSV format, or permanently delete your account and all associated data at any time via <em>Profile &rarr; Edit Profile &rarr; Delete Account</em> inside the app.
-          </p>
-        </section>
+      <!-- Section 4: Rights -->
+      <section id="tos-rights" class="space-y-4 pt-2">
+        <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          4. User Rights &amp; Permanent Deletion
+        </h2>
+        <p class="text-sm sm:text-base leading-relaxed text-zinc-700 dark:text-zinc-300">
+          You maintain full intellectual property and privacy rights over your career data. You may export reports (PDF / CSV) or permanently delete your account directly through <strong>Profile &rarr; Edit Profile &rarr; Delete Account</strong> at any time without restriction.
+        </p>
+      </section>
 
-        <section>
-          <h2 class="text-base font-bold text-black dark:text-white mb-2">5. Contact & Support</h2>
-          <p>
-            If you have any questions or feedback regarding these terms, please contact us via email at <a href="mailto:support.appliq@gmail.com" class="text-indigo-600 dark:text-indigo-400 font-bold underline">support.appliq@gmail.com</a>.
-          </p>
-        </section>
+      <!-- Section 5: Disclaimer -->
+      <section id="tos-disclaimer" class="space-y-4 pt-2">
+        <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          5. Warranties &amp; Disclaimers
+        </h2>
+        <p class="text-sm sm:text-base leading-relaxed text-zinc-700 dark:text-zinc-300">
+          AppliQ is provided on an &ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo; basis. While we strive for maximum uptime and reliable interview notifications, we do not guarantee specific recruitment or hiring outcomes from prospective employers.
+        </p>
+      </section>
+
+      <!-- Section 6: Contact -->
+      <section id="tos-contact" class="space-y-4 pt-2">
+        <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          6. Contact &amp; Inquiries
+        </h2>
+        <p class="text-sm sm:text-base leading-relaxed text-zinc-700 dark:text-zinc-300">
+          For any questions regarding these Terms of Service, please contact us at:
+        </p>
+        <p class="text-sm font-semibold">
+          Email: <a href="mailto:support.appliq@gmail.com" class="text-blue-600 dark:text-gdark-primary hover:underline">support.appliq@gmail.com</a>
+        </p>
+      </section>
+    </main>
+
+    <!-- Google-Style Minimal Footer -->
+    <footer class="mt-auto border-t border-glight-border dark:border-gdark-border bg-glight-surface dark:bg-gdark-bg py-8">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-glight-muted dark:text-gdark-muted">
+        <div class="flex items-center gap-3">
+          <img src="assets/appliq_logo.png" alt="AppliQ" class="w-5 h-5 rounded object-contain" />
+          <span>&copy; 2026 AppliQ. All rights reserved.</span>
+        </div>
+        <div class="flex items-center gap-6 font-medium">
+          <a href="index.html" class="hover:text-black dark:hover:text-white transition-colors">AppliQ Home</a>
+          <a href="privacy.html" class="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</a>
+          <a href="terms.html" class="text-blue-600 dark:text-gdark-primary font-bold">Terms of Service</a>
+        </div>
       </div>
-
-      <footer class="mt-10 pt-6 border-t border-zinc-100 dark:border-white/10 flex justify-between items-center text-xs text-zinc-500">
-        <span>&copy; 2026 AppliQ. All rights reserved.</span>
-        <a href="index.html" class="font-bold text-black dark:text-white hover:underline">AppliQ Home</a>
-      </footer>
-    </div>
+    </footer>
   </body>
 </html>

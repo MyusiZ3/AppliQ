@@ -1,16 +1,18 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Privacy Policy — AppliQ</title>
-    <meta name="description" content="Kebijakan Privasi Aplikasi AppliQ (Privacy Policy)" />
+    <meta name="description" content="Official Privacy Policy for AppliQ Job Application Tracker" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://myusiz3.github.io/AppliQ/privacy.html" />
+    <link rel="icon" type="image/png" href="assets/appliq_logo.png" />
+    <meta name="theme-color" content="#09090b" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
     <script>
@@ -51,84 +53,85 @@
     </script>
   </head>
   <body
-    class="bg-[#f4f4f5] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 px-6 py-12 flex flex-col items-center min-h-screen"
+    class="bg-[#f4f4f5] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 px-4 sm:px-6 py-10 flex flex-col items-center min-h-screen selection:bg-indigo-500 selection:text-white"
   >
-    <div class="max-w-[800px] w-full bg-white dark:bg-[#18181b] p-8 md:p-12 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+    <div class="max-w-[840px] w-full bg-white dark:bg-[#141417] p-7 sm:p-10 md:p-12 rounded-3xl border border-zinc-200 dark:border-white/10 shadow-lg shadow-black/5">
       <!-- Top Navigation -->
-      <div class="flex justify-between items-center pb-6 border-b border-zinc-200 dark:border-zinc-800 mb-8">
-        <a href="index.html" class="flex items-center gap-2 font-bold text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          Kembali ke Beranda AppliQ
+      <div class="flex justify-between items-center pb-6 border-b border-zinc-100 dark:border-white/10 mb-8">
+        <a href="index.html" class="flex items-center gap-2.5 font-bold text-sm text-zinc-800 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <img src="assets/appliq_logo.png" alt="Logo" class="w-6 h-6 rounded-md object-contain" />
+          <span>Back to Home</span>
         </a>
-        <button
-          onclick="toggleTheme()"
-          class="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-sm"
-          title="Ubah Tema"
-        >
-          🌓
-        </button>
+        <div class="flex items-center gap-2">
+          <a href="terms.html" class="text-xs font-semibold text-zinc-500 hover:text-black dark:hover:text-white mr-2 transition-colors">
+            Terms of Service &rarr;
+          </a>
+          <button
+            onclick="toggleTheme()"
+            class="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-sm transition-transform active:scale-95"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+          >
+            <svg class="hidden dark:block w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 12.728l-.707-.707M6.343 17.657l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <svg class="block dark:hidden w-4 h-4 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <header class="mb-8">
-        <h1 class="text-3xl font-extrabold tracking-tight mb-2">Kebijakan Privasi (Privacy Policy)</h1>
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">Terakhir diperbarui: 23 September 2026</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-black dark:text-white">
+          Privacy Policy
+        </h1>
+        <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Last updated: September 23, 2026</p>
       </header>
 
       <div class="space-y-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-        <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">1. Pendahuluan</h2>
+        <section class="bg-zinc-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-zinc-100 dark:border-white/5">
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">1. Our Privacy Commitment</h2>
           <p>
-            Selamat datang di <strong>AppliQ</strong>. Kami sangat menghargai privasi Anda dan berkomitmen untuk melindungi data pribadi yang Anda percayakan kepada kami saat menggunakan aplikasi dan layanan pelacak lamaran kerja AppliQ.
+            At <strong>AppliQ</strong>, your job search privacy is our highest priority. Your application history, salary expectations, interview notes, and CV attachments are strictly confidential and <strong>never sold, rented, or shared with any third party</strong>.
           </p>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">2. Informasi yang Kami Kumpulkan</h2>
-          <p class="mb-2">Saat Anda menggunakan AppliQ dan masuk melalui <strong>Google Sign-In</strong>, kami mengumpulkan informasi terbatas yang diperlukan untuk fungsionalitas akun:</p>
-          <ul class="list-disc pl-5 space-y-1">
-            <li><strong>Informasi Profil Akun Google:</strong> Alamat email, nama lengkap, dan URL foto profil publik Anda.</li>
-            <li><strong>Data Lamaran Kerja:</strong> Posisi jabatan, nama perusahaan, rentang gaji, status tahapan lamaran (Applied, Interview, Offering, dll), dan catatan pribadi terkait proses rekrutmen Anda.</li>
-            <li><strong>Jadwal & Pengingat:</strong> Tanggal dan waktu wawancara kerja yang Anda jadwalkan untuk notifikasi lokal.</li>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">2. Information We Collect</h2>
+          <ul class="list-disc pl-5 space-y-1.5 mt-2">
+            <li><strong>Google Profile Data:</strong> Display name, email address, and profile photo synchronized during sign-in.</li>
+            <li><strong>Job Application Details:</strong> Job title, company name, salary range, progress status (Applied, Interview, Offering, etc.), and personal notes.</li>
+            <li><strong>Interview Schedules:</strong> Date, time, video call links, and interviewer notes for local notification alarms.</li>
+            <li><strong>Resume & Portfolio Files:</strong> Document links stored securely in your own Google Drive storage.</li>
           </ul>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">3. Penggunaan Informasi</h2>
-          <p class="mb-2">Data Anda digunakan secara eksklusif untuk:</p>
-          <ul class="list-disc pl-5 space-y-1">
-            <li>Menyediakan fitur sinkronisasi data lamaran kerja ke cloud melalui backend aman Supabase.</li>
-            <li>Menampilkan metrik statistik karir dan tingkat keberhasilan interview pribadi Anda.</li>
-            <li>Mengirimkan notifikasi pengingat jadwal wawancara langsung pada perangkat Anda.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">4. Keamanan & Penyimpanan Data</h2>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">3. Security & Data Protection</h2>
           <p>
-            Seluruh data Anda disimpan secara terenkripsi menggunakan infrastruktur backend <strong>Supabase</strong> dengan perlindungan tingkat baris (<em>Row-Level Security</em>). Kami <strong>TIDAK PERNAH</strong> menjual, menyewakan, atau membagikan data pribadi Anda kepada pihak ketiga atau pengiklan mana pun.
+            All data transmitted between the client application and server uses industry-standard HTTPS/TLS 1.3 encryption. Our cloud database enforces strict <em>Row-Level Security (RLS)</em> policies, ensuring only the authenticated account owner can read or write their records.
           </p>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">5. Hak Pengguna & Penghapusan Data</h2>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">4. User Rights & Account Deletion</h2>
           <p>
-            Anda memiliki kendali penuh atas data Anda. Kapan saja, Anda dapat memperbarui data profil atau menghapus seluruh akun dan data lamaran kerja secara permanen langsung melalui menu <em>Edit Profile &gt; Hapus Akun</em> di dalam aplikasi AppliQ.
+            You have the right to export or permanently delete your account and all related data at any time directly within the app (go to <em>Profile &rarr; Edit Profile &rarr; Delete Account</em>). Upon confirmation, your data is erased immediately and irreversibly.
           </p>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">6. Kontak Kami</h2>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">5. Privacy Inquiries</h2>
           <p>
-            Jika Anda memiliki pertanyaan mengenai kebijakan privasi ini, silakan hubungi tim kami melalui email:
-            <a href="mailto:support.appliq@gmail.com" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">support.appliq@gmail.com</a>.
+            If you have questions or concerns regarding this privacy policy or how your data is handled, reach out to us at <a href="mailto:support.appliq@gmail.com" class="text-indigo-600 dark:text-indigo-400 font-bold underline">support.appliq@gmail.com</a>.
           </p>
         </section>
       </div>
 
-      <footer class="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-400 text-center">
-        &copy; 2026 AppliQ. All rights reserved.
+      <footer class="mt-10 pt-6 border-t border-zinc-100 dark:border-white/10 flex justify-between items-center text-xs text-zinc-500">
+        <span>&copy; 2026 AppliQ. All rights reserved.</span>
+        <a href="index.html" class="font-bold text-black dark:text-white hover:underline">AppliQ Home</a>
       </footer>
     </div>
   </body>

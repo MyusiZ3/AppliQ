@@ -1,16 +1,18 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Terms of Service — AppliQ</title>
-    <meta name="description" content="Ketentuan Layanan Aplikasi AppliQ (Terms of Service)" />
+    <meta name="description" content="Official Terms of Service for AppliQ Job Application Tracker" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://myusiz3.github.io/AppliQ/terms.html" />
+    <link rel="icon" type="image/png" href="assets/appliq_logo.png" />
+    <meta name="theme-color" content="#09090b" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
     <script>
@@ -51,85 +53,82 @@
     </script>
   </head>
   <body
-    class="bg-[#f4f4f5] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 px-6 py-12 flex flex-col items-center min-h-screen"
+    class="bg-[#f4f4f5] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 px-4 sm:px-6 py-10 flex flex-col items-center min-h-screen selection:bg-indigo-500 selection:text-white"
   >
-    <div class="max-w-[800px] w-full bg-white dark:bg-[#18181b] p-8 md:p-12 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+    <div class="max-w-[840px] w-full bg-white dark:bg-[#141417] p-7 sm:p-10 md:p-12 rounded-3xl border border-zinc-200 dark:border-white/10 shadow-lg shadow-black/5">
       <!-- Top Navigation -->
-      <div class="flex justify-between items-center pb-6 border-b border-zinc-200 dark:border-zinc-800 mb-8">
-        <a href="index.html" class="flex items-center gap-2 font-bold text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          Kembali ke Beranda AppliQ
+      <div class="flex justify-between items-center pb-6 border-b border-zinc-100 dark:border-white/10 mb-8">
+        <a href="index.html" class="flex items-center gap-2.5 font-bold text-sm text-zinc-800 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <img src="assets/appliq_logo.png" alt="Logo" class="w-6 h-6 rounded-md object-contain" />
+          <span>Back to Home</span>
         </a>
-        <button
-          onclick="toggleTheme()"
-          class="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-sm"
-          title="Ubah Tema"
-        >
-          🌓
-        </button>
+        <div class="flex items-center gap-2">
+          <a href="privacy.html" class="text-xs font-semibold text-zinc-500 hover:text-black dark:hover:text-white mr-2 transition-colors">
+            Privacy Policy &rarr;
+          </a>
+          <button
+            onclick="toggleTheme()"
+            class="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-sm transition-transform active:scale-95"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+          >
+            <svg class="hidden dark:block w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 12.728l-.707-.707M6.343 17.657l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <svg class="block dark:hidden w-4 h-4 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <header class="mb-8">
-        <h1 class="text-3xl font-extrabold tracking-tight mb-2">Syarat dan Ketentuan Layanan (Terms of Service)</h1>
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">Terakhir diperbarui: 23 September 2026</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-black dark:text-white">
+          Terms of Service
+        </h1>
+        <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Last updated: September 23, 2026</p>
       </header>
 
       <div class="space-y-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-        <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">1. Penerimaan Ketentuan</h2>
+        <section class="bg-zinc-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-zinc-100 dark:border-white/5">
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">1. Terms of Use</h2>
           <p>
-            Dengan mengunduh, mengakses, atau menggunakan aplikasi mobile dan situs web <strong>AppliQ</strong>, Anda menyatakan bahwa Anda telah membaca, memahami, dan menyetujui untuk terikat oleh Syarat dan Ketentuan Layanan ini.
+            By downloading, installing, or using <strong>AppliQ</strong>, you agree to use the application responsibly for its intended purpose as a personal job application tracker and career companion.
           </p>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">2. Deskripsi Layanan</h2>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">2. Account & Data Security</h2>
           <p>
-            AppliQ adalah platform manajemen pelacakan lamaran kerja pribadi yang menyediakan fitur pencatatan pipeline lamaran, visualisasi rasio interview, template pesan HR, kalender jadwal interview, serta ekspor laporan karir.
+            AppliQ uses official <strong>Google Sign-In</strong> for authentication. You are responsible for safeguarding your personal device. Your job applications, salary notes, and interview stages are stored securely in Supabase with strict <em>Row-Level Security (RLS)</em> policies, ensuring only you have access to your data.
           </p>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">3. Akun Pengguna & Tanggung Jawab</h2>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">3. Google Drive Integration</h2>
           <p>
-            Anda bertanggung jawab untuk menjaga keamanan akun Google yang digunakan untuk masuk ke AppliQ. Anda setuju untuk menggunakan aplikasi hanya untuk tujuan yang sah dan tidak menyalahgunakan layanan untuk tindakan yang melanggar hukum.
+            If you enable Google Drive integration, AppliQ requests restricted access only to upload, view, and delete resume or portfolio attachments that you explicitly choose within a designated application folder. AppliQ never reads, accesses, or modifies files outside this dedicated folder.
           </p>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">4. Hak Kekayaan Intelektual</h2>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">4. User Rights & Data Deletion</h2>
           <p>
-            Seluruh desain antarmuka, aset grafis, logo AppliQ, dan kode sumber aplikasi dilindungi oleh hak cipta dan kekayaan intelektual milik pengembang AppliQ.
+            You have absolute ownership over your data. You can edit, export your job application history to PDF or CSV format, or permanently delete your account and all associated data at any time via <em>Profile &rarr; Edit Profile &rarr; Delete Account</em> inside the app.
           </p>
         </section>
 
         <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">5. Batasan Tanggung Jawab</h2>
+          <h2 class="text-base font-bold text-black dark:text-white mb-2">5. Contact & Support</h2>
           <p>
-            AppliQ disediakan atas dasar &quot;sebagaimana adanya&quot; (<em>as is</em>). Kami berupaya semaksimal mungkin memastikan reliabilitas dan stabilitas sistem, namun kami tidak bertanggung jawab atas kerugian atau ketidakakuratan data yang timbul di luar kendali teknis aplikasi.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">6. Perubahan Ketentuan</h2>
-          <p>
-            Kami dapat memperbarui Syarat dan Ketentuan Layanan ini sewaktu-waktu. Perubahan akan berlaku segera setelah dipublikasikan pada halaman ini.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">7. Informasi Kontak</h2>
-          <p>
-            Pertanyaan seputar Syarat dan Ketentuan ini dapat dikirimkan ke:
-            <a href="mailto:support.appliq@gmail.com" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">support.appliq@gmail.com</a>.
+            If you have any questions or feedback regarding these terms, please contact us via email at <a href="mailto:support.appliq@gmail.com" class="text-indigo-600 dark:text-indigo-400 font-bold underline">support.appliq@gmail.com</a>.
           </p>
         </section>
       </div>
 
-      <footer class="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-400 text-center">
-        &copy; 2026 AppliQ. All rights reserved.
+      <footer class="mt-10 pt-6 border-t border-zinc-100 dark:border-white/10 flex justify-between items-center text-xs text-zinc-500">
+        <span>&copy; 2026 AppliQ. All rights reserved.</span>
+        <a href="index.html" class="font-bold text-black dark:text-white hover:underline">AppliQ Home</a>
       </footer>
     </div>
   </body>

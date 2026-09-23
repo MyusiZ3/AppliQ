@@ -14,6 +14,7 @@ import '../../widgets/empty_state_view.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../../core/utils/status_helper.dart';
 import 'application_detail_screen.dart';
 import 'application_form_screen.dart';
 
@@ -597,10 +598,70 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     );
   }
 
+  Future<void> _onApplicationDropped(
+      JobApplication app, ApplicationStatus newStatus) async {
+    if (app.status == newStatus) return;
+
+    HapticFeedback.mediumImpact();
+    final oldStatus = app.status;
+    final updatedApp =
+        app.copyWith(status: newStatus, updatedAt: DateTime.now());
+
+    // Optimistic UI update
+    setState(() {
+      final index = _applications.indexWhere((a) => a.id == app.id);
+      if (index != -1) {
+        _applications[index] = updatedApp;
+      }
+    });
+
+    try {
+      await widget.repository.updateApplication(updatedApp);
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${app.companyName} ➔ ${newStatus.label}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'Undo',
+              textColor: const Color(0xFF6366F1),
+              onPressed: () async {
+                final revertedApp =
+                    app.copyWith(status: oldStatus, updatedAt: DateTime.now());
+                setState(() {
+                  final idx =
+                      _applications.indexWhere((a) => a.id == app.id);
+                  if (idx != -1) {
+                    _applications[idx] = revertedApp;
+                  }
+                });
+                await widget.repository.updateApplication(revertedApp);
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Revert on failure
+      setState(() {
+        final index = _applications.indexWhere((a) => a.id == app.id);
+        if (index != -1) {
+          _applications[index] = app;
+        }
+      });
+      if (mounted) UIHelper.handleError(context, e);
+    }
+  }
+
   Widget _buildKanbanView(bool isDark) {
     final statuses = ApplicationStatus.values;
     return ListView.builder(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       itemCount: statuses.length,
       itemBuilder: (context, colIndex) {
@@ -620,87 +681,166 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                   false);
           return a.status == status && matchesFavorite && matchesSearch;
         }).toList();
-        return RepaintBoundary(
-          child: Container(
-            width: 280,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.surfaceDark.withValues(alpha: 0.5)
-                  : AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                width: 0.8,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      StatusBadge(status: status, isCompact: true),
-                      Text(
-                        '${appsInStatus.length}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: isDark
-                              ? AppColors.textSecondaryDark
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+
+        final statusColor = StatusHelper.getStatusColor(status);
+
+        return DragTarget<JobApplication>(
+          onWillAcceptWithDetails: (details) => details.data.status != status,
+          onAcceptWithDetails: (details) =>
+              _onApplicationDropped(details.data, status),
+          builder: (context, candidateData, rejectedData) {
+            final isHovered = candidateData.isNotEmpty;
+
+            return RepaintBoundary(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 280,
+                margin: const EdgeInsets.symmetric(horizontal: 5),
+                decoration: BoxDecoration(
+                  color: isHovered
+                      ? (isDark
+                          ? statusColor.withValues(alpha: 0.15)
+                          : statusColor.withValues(alpha: 0.08))
+                      : (isDark
+                          ? AppColors.surfaceDark.withValues(alpha: 0.6)
+                          : AppColors.surfaceVariant),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isHovered
+                        ? statusColor
+                        : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                    width: isHovered ? 1.6 : 0.8,
                   ),
                 ),
-                Divider(
-                    height: 1,
-                    color:
-                        isDark ? AppColors.borderDark : AppColors.borderLight),
-                Expanded(
-                  child: appsInStatus.isEmpty
-                      ? Center(
-                          child: Text(
-                            LanguageManager.isEnglish ? 'Empty' : 'Kosong',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark
-                                  ? AppColors.textHintDark
-                                  : AppColors.textHint,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          StatusBadge(status: status, isCompact: true),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isHovered
+                                  ? statusColor
+                                  : (isDark
+                                      ? Colors.white12
+                                      : Colors.black.withValues(alpha: 0.06)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '${appsInStatus.length}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                                color: isHovered
+                                    ? Colors.white
+                                    : (isDark
+                                        ? AppColors.textSecondaryDark
+                                        : AppColors.textSecondary),
+                              ),
                             ),
                           ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          itemCount: appsInStatus.length,
-                          itemBuilder: (context, idx) {
-                            final app = appsInStatus[idx];
-                            return ApplicationCard(
-                              application: app,
-                              onTap: () async {
-                                closeSearch();
-                                final updated =
-                                    await Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => ApplicationDetailScreen(
-                                      applicationId: app.id,
-                                      repository: widget.repository,
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      color: isHovered
+                          ? statusColor.withValues(alpha: 0.4)
+                          : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                    ),
+                    Expanded(
+                      child: appsInStatus.isEmpty
+                          ? Center(
+                              child: Text(
+                                isHovered
+                                    ? AppStrings.dragToMove
+                                    : (LanguageManager.isEnglish
+                                        ? 'Empty'
+                                        : 'Kosong'),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: isHovered
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                  color: isHovered
+                                      ? statusColor
+                                      : (isDark
+                                          ? AppColors.textHintDark
+                                          : AppColors.textHint),
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 4),
+                              itemCount: appsInStatus.length,
+                              itemBuilder: (context, idx) {
+                                final app = appsInStatus[idx];
+
+                                return LongPressDraggable<JobApplication>(
+                                  data: app,
+                                  delay: const Duration(milliseconds: 200),
+                                  onDragStarted: () =>
+                                      HapticFeedback.mediumImpact(),
+                                  feedback: Material(
+                                    color: Colors.transparent,
+                                    child: SizedBox(
+                                      width: 270,
+                                      child: Opacity(
+                                        opacity: 0.95,
+                                        child: Transform.rotate(
+                                          angle: 0.03,
+                                          child: ApplicationCard(
+                                            application: app,
+                                            onTap: () {},
+                                            onToggleFavorite: () {},
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
+                                  childWhenDragging: Opacity(
+                                    opacity: 0.25,
+                                    child: ApplicationCard(
+                                      application: app,
+                                      onTap: () {},
+                                      onToggleFavorite: () {},
+                                    ),
+                                  ),
+                                  child: ApplicationCard(
+                                    application: app,
+                                    onTap: () async {
+                                      closeSearch();
+                                      final updated =
+                                          await Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ApplicationDetailScreen(
+                                            applicationId: app.id,
+                                            repository: widget.repository,
+                                          ),
+                                        ),
+                                      );
+                                      if (updated == true) _loadApplications();
+                                    },
+                                    onToggleFavorite: () =>
+                                        _toggleFavorite(app),
+                                  ),
                                 );
-                                if (updated == true) _loadApplications();
                               },
-                              onToggleFavorite: () => _toggleFavorite(app),
-                            );
-                          },
-                        ),
+                            ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

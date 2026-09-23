@@ -453,6 +453,14 @@ class EnLanguage implements BaseLanguage {
   String get interviewerPrefix => 'Interviewer: ';
   @override
   String get openMeetingRoom => 'Open Meeting Link';
+  @override
+  String get syncToCalendar => 'Sync to Calendar';
+  @override
+  String get calendarSyncSuccess => 'Opening Google Calendar...';
+  @override
+  String statusUpdatedTo(String status) => 'Status updated to $status';
+  @override
+  String get dragToMove => 'Hold & drag to change status';
 
   // Profile & Settings Screen
   @override

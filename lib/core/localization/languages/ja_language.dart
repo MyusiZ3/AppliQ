@@ -454,6 +454,14 @@ class JaLanguage implements BaseLanguage {
   String get interviewerPrefix => '面接官: ';
   @override
   String get openMeetingRoom => 'ミーティングに参加';
+  @override
+  String get syncToCalendar => 'カレンダーに同期';
+  @override
+  String get calendarSyncSuccess => 'Googleカレンダーを開いています...';
+  @override
+  String statusUpdatedTo(String status) => 'ステータスを$statusに更新しました';
+  @override
+  String get dragToMove => '長押し＆ドラッグでステータス変更';
 
   // Profile & Settings Screen
   @override

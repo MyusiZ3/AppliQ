@@ -453,6 +453,14 @@ class IdLanguage implements BaseLanguage {
   String get interviewerPrefix => 'Pewawancara: ';
   @override
   String get openMeetingRoom => 'Buka Link Pertemuan';
+  @override
+  String get syncToCalendar => 'Sync ke Kalender';
+  @override
+  String get calendarSyncSuccess => 'Membuka Google Calendar...';
+  @override
+  String statusUpdatedTo(String status) => 'Status diubah ke $status';
+  @override
+  String get dragToMove => 'Tahan & geser untuk ubah status';
 
   // Profile & Settings Screen
   @override

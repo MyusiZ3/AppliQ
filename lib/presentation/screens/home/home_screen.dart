@@ -24,6 +24,7 @@ import '../../widgets/notification_sheet.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
 import '../../widgets/app_avatar.dart';
+import '../../../core/utils/calendar_helper.dart';
 import '../../../services/notification_service.dart';
 import '../../../utils/theme_manager.dart';
 
@@ -580,43 +581,91 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (log.meetingLink != null && log.meetingLink!.isNotEmpty)
-                GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    final uri = Uri.parse(log.meetingLink!);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri,
-                          mode: LaunchMode.externalApplication);
-                    }
-                  },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (log.meetingLink != null && log.meetingLink!.isNotEmpty) ...[
+                    GestureDetector(
+                      onTap: () async {
+                        HapticFeedback.lightImpact();
+                        final uri = Uri.parse(log.meetingLink!);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri,
+                              mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(CupertinoIcons.videocam_fill,
+                                color: Color(0xFF18181B), size: 13),
+                            const SizedBox(width: 5),
+                            Text(
+                              AppStrings.openMeetingLink,
+                              style: const TextStyle(
+                                color: Color(0xFF18181B),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(CupertinoIcons.videocam_fill,
-                            color: Color(0xFF18181B), size: 14),
-                        const SizedBox(width: 6),
-                        Text(
-                          AppStrings.openMeetingLink,
-                          style: const TextStyle(
-                            color: Color(0xFF18181B),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                    const SizedBox(width: 6),
+                  ],
+                  if (log.scheduledAt != null)
+                    GestureDetector(
+                      onTap: () {
+                        CalendarHelper.syncScheduleToCalendar(
+                          context: context,
+                          companyName: app.companyName,
+                          positionTitle: app.positionTitle,
+                          stageName: log.stageName,
+                          scheduledAt: log.scheduledAt!,
+                          meetingLink: log.meetingLink,
+                          interviewer: log.interviewerName,
+                          notes: log.notes,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            width: 0.8,
                           ),
                         ),
-                      ],
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(CupertinoIcons.calendar_badge_plus,
+                                color: Colors.white, size: 13),
+                            SizedBox(width: 4),
+                            Text(
+                              'Sync',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                )
-              else
-                const SizedBox.shrink(),
+                ],
+              ),
               GestureDetector(
                 onTap: () {
                   Navigator.of(context)

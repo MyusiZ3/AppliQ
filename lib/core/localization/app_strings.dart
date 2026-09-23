@@ -264,6 +264,10 @@ class AppStrings {
   static String get sectionHistorySubtitle => current.sectionHistorySubtitle;
   static String get interviewerPrefix => current.interviewerPrefix;
   static String get openMeetingRoom => current.openMeetingRoom;
+  static String get syncToCalendar => current.syncToCalendar;
+  static String get calendarSyncSuccess => current.calendarSyncSuccess;
+  static String statusUpdatedTo(String status) => current.statusUpdatedTo(status);
+  static String get dragToMove => current.dragToMove;
 
   // Profile & Settings Screen
   static String get profileTitle => current.profileTitle;

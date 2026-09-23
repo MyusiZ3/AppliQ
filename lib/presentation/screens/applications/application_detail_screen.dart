@@ -15,6 +15,7 @@ import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../../core/utils/calendar_helper.dart';
 import 'application_form_screen.dart';
 
 class ApplicationDetailScreen extends StatefulWidget {
@@ -1890,31 +1891,97 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                       ),
                       if (log.scheduledAt != null) ...[
                         const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                CupertinoIcons.calendar,
-                                size: 13,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF27272A)
+                                    : const Color(0xFFF4F4F5),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${DateFormat('dd MMM yyyy, HH:mm').format(log.scheduledAt!)}${LanguageManager.isEnglish ? '' : ' WIB'}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.calendar,
+                                    size: 13,
+                                    color: isDark
+                                        ? AppColors.textSecondaryDark
+                                        : AppColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${DateFormat('dd MMM yyyy, HH:mm').format(log.scheduledAt!)}${LanguageManager.isEnglish ? '' : ' WIB'}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? AppColors.textSecondaryDark
+                                          : AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            if (_application != null)
+                              GestureDetector(
+                                onTap: () {
+                                  CalendarHelper.syncScheduleToCalendar(
+                                    context: context,
+                                    companyName: _application!.companyName,
+                                    positionTitle: _application!.positionTitle,
+                                    stageName: log.stageName,
+                                    scheduledAt: log.scheduledAt!,
+                                    meetingLink: log.meetingLink,
+                                    interviewer: log.interviewerName,
+                                    notes: log.notes,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF4F4F5),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? AppColors.borderDark
+                                          : AppColors.borderLight,
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.calendar_badge_plus,
+                                        size: 13,
+                                        color: isDark
+                                            ? const Color(0xFFE4E4E7)
+                                            : const Color(0xFF18181B),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Sync',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? const Color(0xFFE4E4E7)
+                                              : const Color(0xFF18181B),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
+                          ],
                         ),
                       ],
                       if (log.interviewerName != null && log.interviewerName!.isNotEmpty) ...[

@@ -454,6 +454,14 @@ class KoLanguage implements BaseLanguage {
   String get interviewerPrefix => '면접관: ';
   @override
   String get openMeetingRoom => '회의실 입장';
+  @override
+  String get syncToCalendar => '캘린더에 동기화';
+  @override
+  String get calendarSyncSuccess => 'Google 캘린더를 여는 중...';
+  @override
+  String statusUpdatedTo(String status) => '상태가 $status(으)로 변경되었습니다';
+  @override
+  String get dragToMove => '길게 눌러 드래그하여 상태 변경';
 
   // Profile & Settings Screen
   @override

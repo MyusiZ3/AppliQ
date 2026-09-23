@@ -15,6 +15,7 @@ import '../applications/application_form_screen.dart';
 import '../../widgets/empty_state_view.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../../core/utils/calendar_helper.dart';
 
 class ScheduleScreen extends StatefulWidget {
   final JobRepository repository;
@@ -745,37 +746,98 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   ],
                 ),
               ],
-              if (log.meetingLink != null && log.meetingLink!.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => launchUrl(
-                    Uri.parse(log.meetingLink!),
-                    mode: LaunchMode.externalApplication,
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(100),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (log.meetingLink != null && log.meetingLink!.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => launchUrl(
+                        Uri.parse(log.meetingLink!),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(CupertinoIcons.video_camera_solid,
+                                size: 15, color: AppColors.primary),
+                            const SizedBox(width: 6),
+                            Text(
+                              AppStrings.openMeetingRoom,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(CupertinoIcons.video_camera_solid, size: 15, color: AppColors.primary),
-                        const SizedBox(width: 6),
-                        Text(
-                          AppStrings.openMeetingRoom,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                  if (log.scheduledAt != null)
+                    GestureDetector(
+                      onTap: () {
+                        CalendarHelper.syncScheduleToCalendar(
+                          context: context,
+                          companyName: app.companyName,
+                          positionTitle: app.positionTitle,
+                          stageName: log.stageName,
+                          scheduledAt: log.scheduledAt!,
+                          meetingLink: log.meetingLink,
+                          interviewer: log.interviewerName,
+                          notes: log.notes,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF27272A)
+                              : const Color(0xFFF4F4F5),
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
+                            width: 0.8,
                           ),
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.calendar_badge_plus,
+                              size: 14,
+                              color: isDark
+                                  ? const Color(0xFFE4E4E7)
+                                  : const Color(0xFF18181B),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              AppStrings.syncToCalendar,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? const Color(0xFFE4E4E7)
+                                    : const Color(0xFF18181B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ],
           ),
         ),

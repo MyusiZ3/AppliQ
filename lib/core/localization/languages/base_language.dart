@@ -236,6 +236,10 @@ abstract class BaseLanguage {
   String get sectionHistorySubtitle;
   String get interviewerPrefix;
   String get openMeetingRoom;
+  String get syncToCalendar;
+  String get calendarSyncSuccess;
+  String statusUpdatedTo(String status);
+  String get dragToMove;
 
   // Profile & Settings Screen
   String get profileTitle;

@@ -6,6 +6,8 @@ abstract class BaseLanguage {
   // Navigation
   String get navHome;
   String get navApplications;
+  String get navSchedule;
+  String get navStats;
   String get navAnalytics;
   String get navProfile;
 

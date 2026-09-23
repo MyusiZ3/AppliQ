@@ -8,6 +8,10 @@ class EnLanguage implements BaseLanguage {
   @override
   String get navApplications => 'Apply';
   @override
+  String get navSchedule => 'Schedule';
+  @override
+  String get navStats => 'Stats';
+  @override
   String get navAnalytics => 'Analytics';
   @override
   String get navProfile => 'Profile';

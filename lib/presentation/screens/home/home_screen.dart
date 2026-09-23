@@ -105,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final app = appMap[log.applicationId];
           if (app != null &&
               (app.status == ApplicationStatus.interview ||
-               app.status == ApplicationStatus.applied)) {
+                  app.status == ApplicationStatus.applied)) {
             upcoming.add({
               'app': app,
               'log': log,
@@ -124,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
       for (var item in upcoming) {
         final app = item['app'] as JobApplication;
         final log = item['log'] as ApplicationLog;
-        if (log.scheduledAt != null && log.scheduledAt!.isAfter(DateTime.now())) {
+        if (log.scheduledAt != null &&
+            log.scheduledAt!.isAfter(DateTime.now())) {
           NotificationService.instance.scheduleInterviewReminder(
             id: log.id.hashCode,
             company: app.companyName,
@@ -149,7 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bool hasNewAlert = false;
       for (var item in upcoming) {
         final log = item['log'] as ApplicationLog;
-        final timestamp = log.scheduledAt?.millisecondsSinceEpoch ?? log.createdAt.millisecondsSinceEpoch;
+        final timestamp = log.scheduledAt?.millisecondsSinceEpoch ??
+            log.createdAt.millisecondsSinceEpoch;
         if (timestamp > lastReadMs) {
           hasNewAlert = true;
           break;
@@ -157,7 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       if (!hasNewAlert) {
         for (var app in staleApps) {
-          final staleThresholdDate = app.appliedDate.add(const Duration(days: 14));
+          final staleThresholdDate =
+              app.appliedDate.add(const Duration(days: 14));
           if (staleThresholdDate.millisecondsSinceEpoch > lastReadMs) {
             hasNewAlert = true;
             break;
@@ -257,14 +260,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Scrollable Content
                       Expanded(
                         child: RefreshIndicator(
-                          onRefresh: () => _loadDashboardData(forceRefresh: true),
+                          onRefresh: () =>
+                              _loadDashboardData(forceRefresh: true),
                           child: ListView(
                             physics: const AlwaysScrollableScrollPhysics(
                                 parent: BouncingScrollPhysics()),
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
                             children: [
                               // Hero Analytics Card (MyDuit Signature Style)
-                              _buildHeroBanner(total, interview, offering, isDark, isMono),
+                              _buildHeroBanner(
+                                  total, interview, offering, isDark, isMono),
 
                               const SizedBox(height: 22),
 
@@ -280,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               // Smart Follow-Up Reminder Alert (If any stale applications)
                               if (!_isFollowUpDismissed &&
-                                   staleApplications.isNotEmpty) ...[
+                                  staleApplications.isNotEmpty) ...[
                                 const SizedBox(height: 18),
                                 _buildFollowUpAlert(staleApplications, isDark),
                               ],
@@ -463,8 +468,34 @@ class _HomeScreenState extends State<HomeScreen> {
           ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
           : ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
       final months = isEn
-          ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-          : ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+          ? [
+              'Jan',
+              'Feb',
+              'Mar',
+              'Apr',
+              'May',
+              'Jun',
+              'Jul',
+              'Aug',
+              'Sep',
+              'Oct',
+              'Nov',
+              'Dec'
+            ]
+          : [
+              'Jan',
+              'Feb',
+              'Mar',
+              'Apr',
+              'Mei',
+              'Jun',
+              'Jul',
+              'Agu',
+              'Sep',
+              'Okt',
+              'Nov',
+              'Des'
+            ];
       final dayName = days[(date.weekday - 1).clamp(0, 6)];
       final monthName = months[(date.month - 1).clamp(0, 11)];
       timeLabel = '$dayName, ${date.day} $monthName • $timeStr';
@@ -1089,7 +1120,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                     .then((_) => _loadDashboardData());
               },
-              icon: const Icon(CupertinoIcons.plus, size: 16),
               label: Text(AppStrings.addFirstApp),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
@@ -1142,172 +1172,175 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: Container(
           width: 215,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? AppColors.borderDark : AppColors.borderLight,
-            width: 0.8,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              width: 0.8,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Top Row: Logo, Title & Favorite
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF27272A)
-                        : const Color(0xFFF4F4F5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      companyInitial,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Top Row: Logo, Title & Favorite
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF27272A)
+                          : const Color(0xFFF4F4F5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        companyInitial,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF18181B),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        app.positionTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.3,
-                          color: isDark
-                              ? AppColors.textPrimaryDark
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        app.companyName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? AppColors.textSecondaryDark
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _toggleFavorite(app),
-                  child: Icon(
-                    app.isFavorite
-                        ? CupertinoIcons.heart_fill
-                        : CupertinoIcons.heart,
-                    size: 18,
-                    color: app.isFavorite
-                        ? AppColors.expense
-                        : (isDark
-                            ? AppColors.textHintDark
-                            : AppColors.textHint),
-                  ),
-                ),
-              ],
-            ),
-
-            // Chips / Tags (WorkSystem & Status)
-            Wrap(
-              spacing: 5,
-              runSpacing: 4,
-              children: [
-                _buildTag(AppStrings.localizedWorkSystem(app.workSystem), isDark),
-                _buildTag(AppStrings.localizedJobPortal(app.jobPortal), isDark),
-                _buildStatusTag(AppStrings.localizedStatus(app.status),
-                    StatusHelper.getStatusColor(app.status), isDark),
-              ],
-            ),
-
-            // Bottom Row: Location & Salary
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        CupertinoIcons.location_solid,
-                        size: 12,
-                        color: isDark
-                            ? AppColors.textHintDark
-                            : AppColors.textHint,
-                      ),
-                      const SizedBox(width: 3),
-                      Flexible(
-                        child: Text(
-                          app.location?.isNotEmpty == true
-                              ? app.location!
-                              : 'Indonesia',
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          app.positionTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
                             color: isDark
-                                ? AppColors.textHintDark
-                                : AppColors.textHint,
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimary,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  flex: 1,
-                  child: Text(
-                    _formatSalary(app.salaryOffered ?? app.salaryExpectation),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                      color: isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimary,
+                        const SizedBox(height: 1),
+                        Text(
+                          app.companyName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  GestureDetector(
+                    onTap: () => _toggleFavorite(app),
+                    child: Icon(
+                      app.isFavorite
+                          ? CupertinoIcons.heart_fill
+                          : CupertinoIcons.heart,
+                      size: 18,
+                      color: app.isFavorite
+                          ? AppColors.expense
+                          : (isDark
+                              ? AppColors.textHintDark
+                              : AppColors.textHint),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Chips / Tags (WorkSystem & Status)
+              Wrap(
+                spacing: 5,
+                runSpacing: 4,
+                children: [
+                  _buildTag(
+                      AppStrings.localizedWorkSystem(app.workSystem), isDark),
+                  _buildTag(
+                      AppStrings.localizedJobPortal(app.jobPortal), isDark),
+                  _buildStatusTag(AppStrings.localizedStatus(app.status),
+                      StatusHelper.getStatusColor(app.status), isDark),
+                ],
+              ),
+
+              // Bottom Row: Location & Salary
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.location_solid,
+                          size: 12,
+                          color: isDark
+                              ? AppColors.textHintDark
+                              : AppColors.textHint,
+                        ),
+                        const SizedBox(width: 3),
+                        Flexible(
+                          child: Text(
+                            app.location?.isNotEmpty == true
+                                ? app.location!
+                                : 'Indonesia',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark
+                                  ? AppColors.textHintDark
+                                  : AppColors.textHint,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    flex: 1,
+                    child: Text(
+                      _formatSalary(app.salaryOffered ?? app.salaryExpectation),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 
   Widget _buildTag(String text, bool isDark) {

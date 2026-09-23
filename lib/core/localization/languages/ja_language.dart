@@ -9,6 +9,10 @@ class JaLanguage implements BaseLanguage {
   @override
   String get navApplications => '応募一覧';
   @override
+  String get navSchedule => '日程';
+  @override
+  String get navStats => '統計';
+  @override
   String get navAnalytics => '分析';
   @override
   String get navProfile => 'プロフィール';

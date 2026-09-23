@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import '../../core/constants/app_colors.dart';
 import '../../data/repositories/job_repository.dart';
-import '../../utils/theme_manager.dart';
 import 'applications/application_form_screen.dart';
 import 'applications/applications_list_screen.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'home/home_screen.dart';
-import 'profile/profile_screen.dart';
 import 'schedule/schedule_screen.dart';
 
 import '../../core/localization/app_strings.dart';
-import '../../utils/language_manager.dart';
 
 class MainNav extends StatefulWidget {
   final JobRepository repository;
@@ -42,36 +38,30 @@ class _MainNavState extends State<MainNav> {
       case 1:
         return AppStrings.navApplications;
       case 2:
-        return LanguageManager.isEnglish ? 'Schedule' : 'Jadwal';
+        return AppStrings.navSchedule;
       case 3:
-        return LanguageManager.isEnglish ? 'Stats' : 'Statistik';
+        return AppStrings.navStats;
       default:
         return '';
     }
   }
 
-  static final List<_NavItemData> _navItems = [
+  static const List<_NavItemData> _navItems = [
     _NavItemData(
       label: 'Home',
-      customIcon: (color, isActive) => MyDuitHomeIcon(
-        color: color,
-        size: 21,
-      ),
+      icon: CupertinoIcons.house_fill,
     ),
     _NavItemData(
       label: 'Lamaran',
-      activeIcon: CupertinoIcons.briefcase_fill,
-      inactiveIcon: CupertinoIcons.briefcase,
+      icon: CupertinoIcons.briefcase_fill,
     ),
     _NavItemData(
       label: 'Jadwal',
-      activeIcon: CupertinoIcons.calendar_today,
-      inactiveIcon: CupertinoIcons.calendar,
+      icon: CupertinoIcons.calendar,
     ),
     _NavItemData(
       label: 'Statistik',
-      activeIcon: CupertinoIcons.chart_bar_alt_fill,
-      inactiveIcon: CupertinoIcons.chart_bar_alt_fill,
+      icon: CupertinoIcons.chart_bar_alt_fill,
     ),
   ];
 
@@ -200,16 +190,11 @@ class _MainNavState extends State<MainNav> {
 
     final iconColor = isActive ? activeFg : inactiveFg;
 
-    Widget iconWidget;
-    if (item.customIcon != null) {
-      iconWidget = item.customIcon!(iconColor, isActive);
-    } else {
-      iconWidget = Icon(
-        isActive ? item.activeIcon! : item.inactiveIcon!,
-        size: isActive ? 20 : 21,
-        color: iconColor,
-      );
-    }
+    final iconWidget = Icon(
+      item.icon,
+      size: 20,
+      color: iconColor,
+    );
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -264,97 +249,10 @@ class _MainNavState extends State<MainNav> {
 
 class _NavItemData {
   final String label;
-  final IconData? activeIcon;
-  final IconData? inactiveIcon;
-  final Widget Function(Color color, bool isActive)? customIcon;
+  final IconData icon;
 
   const _NavItemData({
     required this.label,
-    this.activeIcon,
-    this.inactiveIcon,
-    this.customIcon,
+    required this.icon,
   });
-}
-
-class MyDuitHomeIcon extends StatelessWidget {
-  final double size;
-  final Color color;
-
-  const MyDuitHomeIcon({
-    super.key,
-    this.size = 20,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _MyDuitHomePainter(color: color),
-      ),
-    );
-  }
-}
-
-class _MyDuitHomePainter extends CustomPainter {
-  final Color color;
-
-  _MyDuitHomePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    
-    // Outer boundary (crisp optical proportions)
-    // Bottom-left
-    path.moveTo(w * 0.06, h * 0.92);
-    // Left vertical wall
-    path.lineTo(w * 0.06, h * 0.44);
-    // Left shoulder curve
-    path.quadraticBezierTo(w * 0.06, h * 0.39, w * 0.10, h * 0.35);
-    // Left roof slope
-    path.lineTo(w * 0.46, h * 0.06);
-    // Outer roof apex curve
-    path.quadraticBezierTo(w * 0.50, h * 0.02, w * 0.54, h * 0.06);
-    // Right roof slope
-    path.lineTo(w * 0.90, h * 0.35);
-    // Right shoulder curve
-    path.quadraticBezierTo(w * 0.94, h * 0.39, w * 0.94, h * 0.44);
-    // Right vertical wall
-    path.lineTo(w * 0.94, h * 0.92);
-
-    // Inner pitched doorway cutout (matching MyDuitGweh silhouette)
-    // Right leg bottom inner
-    path.lineTo(w * 0.67, h * 0.92);
-    // Right inner wall
-    path.lineTo(w * 0.67, h * 0.57);
-    // Right inner shoulder
-    path.quadraticBezierTo(w * 0.67, h * 0.53, w * 0.63, h * 0.50);
-    // Right inner ceiling slope
-    path.lineTo(w * 0.53, h * 0.41);
-    // Inner peak curve
-    path.quadraticBezierTo(w * 0.50, h * 0.38, w * 0.47, h * 0.41);
-    // Left inner ceiling slope
-    path.lineTo(w * 0.37, h * 0.50);
-    // Left inner shoulder
-    path.quadraticBezierTo(w * 0.33, h * 0.53, w * 0.33, h * 0.57);
-    // Left inner wall
-    path.lineTo(w * 0.33, h * 0.92);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MyDuitHomePainter oldDelegate) =>
-      oldDelegate.color != color;
 }

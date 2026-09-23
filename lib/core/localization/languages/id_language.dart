@@ -8,6 +8,10 @@ class IdLanguage implements BaseLanguage {
   @override
   String get navApplications => 'Lamaran';
   @override
+  String get navSchedule => 'Jadwal';
+  @override
+  String get navStats => 'Statistik';
+  @override
   String get navAnalytics => 'Analitik';
   @override
   String get navProfile => 'Profil';

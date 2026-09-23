@@ -34,6 +34,8 @@ class AppStrings {
   // Navigation
   static String get navHome => current.navHome;
   static String get navApplications => current.navApplications;
+  static String get navSchedule => current.navSchedule;
+  static String get navStats => current.navStats;
   static String get navAnalytics => current.navAnalytics;
   static String get navProfile => current.navProfile;
 

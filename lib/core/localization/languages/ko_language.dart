@@ -9,6 +9,10 @@ class KoLanguage implements BaseLanguage {
   @override
   String get navApplications => '지원 내역';
   @override
+  String get navSchedule => '일정';
+  @override
+  String get navStats => '통계';
+  @override
   String get navAnalytics => '통계 분석';
   @override
   String get navProfile => '프로필';

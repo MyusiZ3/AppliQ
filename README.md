@@ -6,15 +6,16 @@ AppliQ is a mobile application built with Flutter and Supabase designed to help 
 
 ## Key Features
 
-- **Recruitment Pipeline Tracking**: Record job applications with company details, position, work arrangement (Remote, Hybrid, On-site), application channel, expected salary, and current status (`Applied`, `Interview`, `Offering`, `Accepted`, `Rejected`, `No Response`).
-- **Cloud Synchronization & Row-Level Security**: Fully backed by Supabase PostgreSQL with strict Row Level Security (RLS) policies ensuring each authenticated user can only access their own data.
-- **Google Authentication**: Seamless authentication using Google Sign-In with automatic user profile provisioning.
-- **Google Drive CV Storage**: Attach and upload application documents directly to personal Google Drive folders organized by company and position name.
-- **Interview Calendar & Reminders**: Schedule upcoming interviews with integrated local notification alerts.
-- **Professional HR Templates**: Ready-to-copy communication formats for follow-ups, interview confirmations, salary inquiries, and offering negotiation.
-- **Career Analytics & Conversion Metrics**: Visual breakdown of application progress, stage duration indicators, and interview conversion ratios.
-- **Report Exporting**: Export comprehensive application records to formatted PDF summaries or copy raw CSV data for spreadsheet processing.
-- **Adaptive Theme System**: Integrated light and dark modes with a default monochrome aesthetic and optional accent modes.
+- **Interactive Kanban Pipeline & Tracking**: Manage recruitment workflows with drag-and-drop Kanban boards, stage duration indicators, and instant status updates (`Applied`, `Interview`, `Offering`, `Accepted`, `Rejected`, `No Response`).
+- **Instant ATS Resume / CV PDF Builder**: Create industry-standard ATS-friendly CVs with contact details, education, work experience, certifications, and skills, rendered and exported directly to PDF.
+- **Customizable Cover Letter Generator**: Generate formal job application letters (Indonesian & English) with real-time recipient customization, dynamic attachment lists, and digital signature integration.
+- **Calendar & Reminder Synchronization**: Sync interview schedules directly to device calendars and Google Calendar, accompanied by timely local push notification alerts.
+- **Cloud Synchronization & Row-Level Security**: Fully backed by Supabase PostgreSQL with strict Row Level Security (RLS) policies ensuring complete data privacy and isolation.
+- **Google Authentication & Drive Integration**: Seamless authentication via Google OAuth 2.0 with optional dedicated Google Drive folder backup.
+- **Multi-Language Support**: Complete localization covering Indonesian (🇮🇩), English (🇬🇧), Japanese (🇯🇵), and Korean (🇰🇷).
+- **Professional HR Templates**: Ready-to-copy communication templates for follow-ups, interview confirmations, salary negotiations, and thank-you notes.
+- **Career Analytics & Metrics**: Visual dashboards displaying application pipelines, conversion rates, and work system breakdowns.
+- **Adaptive Theme System**: Modern light and dark modes with customizable monochrome and accent palettes.
 
 ---
 

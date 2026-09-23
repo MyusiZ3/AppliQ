@@ -69,6 +69,37 @@
 | result                 : TEXT                                        |
 | created_at             : TIMESTAMPTZ                                 |
 +----------------------------------------------------------------------+
+
++----------------------------------+-----------------------------------+
+                                   | 1:1 (Unique User Profile Data)
+                                   v
++----------------------------------------------------------------------+
+|                        public.user_resumes                           |
+|----------------------------------------------------------------------|
+| id                     : UUID (PK, DEFAULT gen_random_uuid())        |
+| user_id                : UUID (FK -> public.profiles.id, UNIQUE)     |
+| full_name              : TEXT                                        |
+| city_country           : TEXT                                        |
+| phone_number           : TEXT                                        |
+| email                  : TEXT                                        |
+| linkedin_url           : TEXT                                        |
+| portfolio_url          : TEXT                                        |
+| summary                : TEXT                                        |
+| educations             : JSONB (List of EducationItem)               |
+| experiences            : JSONB (List of ExperienceItem)              |
+| certifications         : JSONB (List of CertificationItem)           |
+| technical_skills       : JSONB (List of String)                      |
+| soft_skills            : JSONB (List of String)                      |
+| birth_place_date       : TEXT                                        |
+| full_address           : TEXT                                        |
+| marital_status         : TEXT                                        |
+| citizenship            : TEXT                                        |
+| last_education         : TEXT                                        |
+| target_job_position    : TEXT                                        |
+| selected_attachments   : JSONB (List of String)                      |
+| created_at             : TIMESTAMPTZ                                 |
+| updated_at             : TIMESTAMPTZ                                 |
++----------------------------------------------------------------------+
 ```
 
 ---
@@ -165,6 +196,33 @@ CREATE TABLE IF NOT EXISTS public.application_logs (
   created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+-- 2.4 User Resumes & Cover Letter Builder Table
+CREATE TABLE IF NOT EXISTS public.user_resumes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
+  full_name TEXT NOT NULL DEFAULT '',
+  city_country TEXT NOT NULL DEFAULT '',
+  phone_number TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT '',
+  linkedin_url TEXT,
+  portfolio_url TEXT,
+  summary TEXT,
+  educations JSONB NOT NULL DEFAULT '[]'::jsonb,
+  experiences JSONB NOT NULL DEFAULT '[]'::jsonb,
+  certifications JSONB NOT NULL DEFAULT '[]'::jsonb,
+  technical_skills JSONB NOT NULL DEFAULT '[]'::jsonb,
+  soft_skills JSONB NOT NULL DEFAULT '[]'::jsonb,
+  birth_place_date TEXT,
+  full_address TEXT,
+  marital_status TEXT NOT NULL DEFAULT 'Belum Menikah',
+  citizenship TEXT NOT NULL DEFAULT 'Indonesia',
+  last_education TEXT,
+  target_job_position TEXT,
+  selected_attachments JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
 -- ====================================================================
 -- 3. INDEXING FOR PERFORMANCE
 -- ====================================================================
@@ -183,6 +241,9 @@ CREATE INDEX IF NOT EXISTS idx_application_logs_app_id
 
 CREATE INDEX IF NOT EXISTS idx_application_logs_user_id 
   ON public.application_logs(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_resumes_user_id 
+  ON public.user_resumes(user_id);
 
 -- ====================================================================
 -- 4. DATABASE TRIGGERS (AUTH SYNC & TIMESTAMP UPDATE)
@@ -205,6 +266,11 @@ CREATE TRIGGER trigger_update_profiles_timestamp
 DROP TRIGGER IF EXISTS trigger_update_job_applications_timestamp ON public.job_applications;
 CREATE TRIGGER trigger_update_job_applications_timestamp
   BEFORE UPDATE ON public.job_applications
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+DROP TRIGGER IF EXISTS trigger_update_user_resumes_timestamp ON public.user_resumes;
+CREATE TRIGGER trigger_update_user_resumes_timestamp
+  BEFORE UPDATE ON public.user_resumes
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 -- 4.2 Auto-create Profile from Google Auth Metadata
@@ -239,6 +305,7 @@ CREATE TRIGGER on_auth_user_created
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.job_applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.application_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_resumes ENABLE ROW LEVEL SECURITY;
 
 -- 5.1 Profiles Policies
 DROP POLICY IF EXISTS "Profiles: Users can view own profile" ON public.profiles;
@@ -291,6 +358,27 @@ CREATE POLICY "AppLogs: Users can update own logs"
 DROP POLICY IF EXISTS "AppLogs: Users can delete own logs" ON public.application_logs;
 CREATE POLICY "AppLogs: Users can delete own logs"
   ON public.application_logs FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- 5.4 User Resumes Policies
+DROP POLICY IF EXISTS "UserResumes: Users can view own resume" ON public.user_resumes;
+CREATE POLICY "UserResumes: Users can view own resume"
+  ON public.user_resumes FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "UserResumes: Users can insert own resume" ON public.user_resumes;
+CREATE POLICY "UserResumes: Users can insert own resume"
+  ON public.user_resumes FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "UserResumes: Users can update own resume" ON public.user_resumes;
+CREATE POLICY "UserResumes: Users can update own resume"
+  ON public.user_resumes FOR UPDATE
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "UserResumes: Users can delete own resume" ON public.user_resumes;
+CREATE POLICY "UserResumes: Users can delete own resume"
+  ON public.user_resumes FOR DELETE
   USING (auth.uid() = user_id);
 
 -- ====================================================================
@@ -390,3 +478,30 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 | `notes` | TEXT | YES | - | Catatan teknis, kisi-kisi, atau evaluasi. |
 | `result` | TEXT | YES | 'Waiting' | Hasil tahap: `Waiting`, `Passed`, `Failed`. |
 | `created_at` | TIMESTAMPTZ | NO | NOW() | Timestamp pembuatan log. |
+
+### Tabel `public.user_resumes`
+| Nama Kolom | Tipe Data | Nullable | Default | Keterangan |
+|---|---|---|---|---|
+| `id` | UUID | NO | gen_random_uuid() | Primary Key entri data resume & surat lamaran. |
+| `user_id` | UUID | NO | - | Foreign Key unik merujuk ke `public.profiles(id)`. |
+| `full_name` | TEXT | NO | '' | Nama lengkap & gelar profesional. |
+| `city_country` | TEXT | NO | '' | Domisili kota & negara. |
+| `phone_number` | TEXT | NO | '' | Nomor kontak WhatsApp / seluler. |
+| `email` | TEXT | NO | '' | Email aktif korespondensi. |
+| `linkedin_url` | TEXT | YES | - | Tautan profil LinkedIn. |
+| `portfolio_url` | TEXT | YES | - | Tautan website / portofolio / GitHub. |
+| `summary` | TEXT | YES | - | Ringkasan eksekutif profil profesional. |
+| `educations` | JSONB | NO | '[]'::jsonb | Array JSON riwayat pendidikan (`EducationItem`). |
+| `experiences` | JSONB | NO | '[]'::jsonb | Array JSON pengalaman kerja / magang (`ExperienceItem`). |
+| `certifications` | JSONB | NO | '[]'::jsonb | Array JSON sertifikasi & lisensi (`CertificationItem`). |
+| `technical_skills` | JSONB | NO | '[]'::jsonb | Array JSON daftar Hard Skills. |
+| `soft_skills` | JSONB | NO | '[]'::jsonb | Array JSON daftar Soft Skills. |
+| `birth_place_date` | TEXT | YES | - | Tempat, tanggal lahir untuk data surat lamaran resmi. |
+| `full_address` | TEXT | YES | - | Alamat lengkap domisili/KTP untuk surat lamaran. |
+| `marital_status` | TEXT | NO | 'Belum Menikah' | Status pernikahan (e.g. Belum Menikah, Menikah). |
+| `citizenship` | TEXT | NO | 'Indonesia' | Kewarganegaraan. |
+| `last_education` | TEXT | YES | - | Keterangan jenjang pendidikan terakhir lengkap. |
+| `target_job_position` | TEXT | YES | - | Posisi pekerjaan umum yang dituju. |
+| `selected_attachments` | JSONB | NO | '[]'::jsonb | Array JSON berkas lampiran standar cover letter. |
+| `created_at` | TIMESTAMPTZ | NO | NOW() | Timestamp pembuatan resume data. |
+| `updated_at` | TIMESTAMPTZ | NO | NOW() | Timestamp pembaruan resume data terakhir. |

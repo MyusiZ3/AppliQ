@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'public/**'
+      - 'pubspec.yaml'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -26,6 +27,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Inject Version from pubspec.yaml
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version:[[:space:]]*//' | cut -d'+' -f1 | tr -d '\r\n')
+          echo "Injecting version: $VERSION"
+          find ./public -type f -name "*.html" -exec sed -i "s/{{VERSION}}/$VERSION/g" {} +
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

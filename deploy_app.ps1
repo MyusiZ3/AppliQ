@@ -63,13 +63,20 @@ if (Test-Path "public") {
 
 $apkSource = "build\app\outputs\flutter-apk\app-release.apk"
 
-# 4. Buat GitHub Release dan Upload File APK
+# 4. Sinkronisasi Git Commit ke GitHub
+Write-Host "--- Mengunggah Commit ke GitHub ---" -ForegroundColor Yellow
+git push origin main
+
+# 5. Buat GitHub Release dan Upload File APK
 Write-Host "--- Membuat GitHub Release (v$versionName) ---" -ForegroundColor Yellow
 
-if (Get-Command gh -ErrorAction SilentlyContinue) {
-    $ghPath = "gh"
-} else {
+$ghCmd = Get-Command gh -ErrorAction SilentlyContinue
+if ($ghCmd) {
+    $ghPath = $ghCmd.Source
+} elseif (Test-Path "C:\Program Files\GitHub CLI\gh.exe") {
     $ghPath = "C:\Program Files\GitHub CLI\gh.exe"
+} else {
+    $ghPath = $null
 }
 
 $binSource = "build\app\outputs\flutter-apk\app.bin"
@@ -79,7 +86,7 @@ if (Test-Path $apkSource) {
 
 $notes = "AppliQ Release v$versionName`n- Build executed on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n- Modern Job Application Tracker & Interview Companion"
 
-if (Test-Path $ghPath) {
+if ($ghPath -and (Test-Path $ghPath)) {
     Write-Host "Menghapus tag lama (jika ada) via GitHub CLI..." -ForegroundColor Gray
     & $ghPath release delete "v$versionName" --cleanup-tag --yes 2>$null
 
@@ -92,7 +99,7 @@ if (Test-Path $ghPath) {
         Write-Host "[OK] Berhasil upload ke GitHub Releases!" -ForegroundColor Green
     }
 } else {
-    Write-Host "[WARN] GitHub CLI ($ghPath) tidak ditemukan. Melewati upload release." -ForegroundColor Yellow
+    Write-Host "[WARN] GitHub CLI tidak ditemukan. Melewati upload release." -ForegroundColor Yellow
 }
 
 Write-Host "`n[OK] Selesai! Versi AppliQ v$versionName siap." -ForegroundColor DarkGreen

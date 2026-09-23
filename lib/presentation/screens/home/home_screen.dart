@@ -1083,7 +1083,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             const AppliqLoading(
-              size: 64,
+              size: 88,
             ),
             const SizedBox(height: 12),
             Text(

@@ -771,7 +771,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ? _userProfile!.fullName
         : (LanguageManager.isEnglish ? 'Job Seeker' : 'Pencari Karir');
     final displayName =
-        rawName.length > 12 ? '${rawName.substring(0, 12)}...' : rawName;
+        rawName.length > 15 ? '${rawName.substring(0, 15)}...' : rawName;
     final greeting = _getDynamicGreeting();
     final hasAlerts = !_hasReadNotifications &&
         (_upcomingSchedules.isNotEmpty || staleApplications.isNotEmpty);

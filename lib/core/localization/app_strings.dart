@@ -432,6 +432,112 @@ class AppStrings {
   static String get cloudSyncTitle => current.cloudSyncTitle;
   static String get cloudSyncSubtitle => current.cloudSyncSubtitle;
 
+  static String get quickResume => current.quickResume;
+
+  // Experience, CV & Cover Letter
+  static String get menuExperienceTitle => current.menuExperienceTitle;
+  static String get menuExperienceSubtitle => current.menuExperienceSubtitle;
+  static String get resumeBuilderTitle => current.resumeBuilderTitle;
+  static String get previewCvAts => current.previewCvAts;
+  static String get coverLetterTitle => current.coverLetterTitle;
+  static String get documentPreviewTitle => current.documentPreviewTitle;
+  static String get customizeCoverLetter => current.customizeCoverLetter;
+  static String get digitalSignature => current.digitalSignature;
+  static String get uploadSignature => current.uploadSignature;
+  static String get changeSignature => current.changeSignature;
+  static String get signatureActive => current.signatureActive;
+  static String get applyChanges => current.applyChanges;
+  static String get saveResume => current.saveResume;
+
+  // Resume Builder Sections
+  static String get rbSectionContactTitle => current.rbSectionContactTitle;
+  static String get rbSectionContactSubtitle => current.rbSectionContactSubtitle;
+  static String get rbSectionSummaryTitle => current.rbSectionSummaryTitle;
+  static String get rbSectionSummarySubtitle => current.rbSectionSummarySubtitle;
+  static String get rbSectionEducationTitle => current.rbSectionEducationTitle;
+  static String rbSectionEducationSubtitle(int count) => current.rbSectionEducationSubtitle(count);
+  static String get rbSectionExperienceTitle => current.rbSectionExperienceTitle;
+  static String rbSectionExperienceSubtitle(int count) => current.rbSectionExperienceSubtitle(count);
+  static String get rbSectionCertificationTitle => current.rbSectionCertificationTitle;
+  static String rbSectionCertificationSubtitle(int count) => current.rbSectionCertificationSubtitle(count);
+  static String get rbSectionTechSkillsTitle => current.rbSectionTechSkillsTitle;
+  static String rbSectionTechSkillsSubtitle(int count) => current.rbSectionTechSkillsSubtitle(count);
+  static String get rbSectionSoftSkillsTitle => current.rbSectionSoftSkillsTitle;
+  static String rbSectionSoftSkillsSubtitle(int count) => current.rbSectionSoftSkillsSubtitle(count);
+  static String get rbSectionCoverLetterTitle => current.rbSectionCoverLetterTitle;
+  static String get rbSectionCoverLetterSubtitle => current.rbSectionCoverLetterSubtitle;
+
+  // Resume Builder Form Labels & Hints
+  static String get cityCountryLabel => current.cityCountryLabel;
+  static String get cityCountryHint => current.cityCountryHint;
+  static String get phoneNumberLabel => current.phoneNumberLabel;
+  static String get phoneNumberHint => current.phoneNumberHint;
+  static String get emailLabel => current.emailLabel;
+  static String get emailHint => current.emailHint;
+  static String get linkedinLabel => current.linkedinLabel;
+  static String get linkedinHint => current.linkedinHint;
+  static String get portfolioLabel => current.portfolioLabel;
+  static String get portfolioHint => current.portfolioHint;
+
+  static String get summaryLabel => current.summaryLabel;
+  static String get summaryHint => current.summaryHint;
+
+  static String get addEducationButton => current.addEducationButton;
+  static String get addExperienceButton => current.addExperienceButton;
+  static String get addCertificationButton => current.addCertificationButton;
+
+  static String get addTechSkillLabel => current.addTechSkillLabel;
+  static String get addTechSkillHint => current.addTechSkillHint;
+  static String get addSoftSkillLabel => current.addSoftSkillLabel;
+  static String get addSoftSkillHint => current.addSoftSkillHint;
+
+  static String get birthPlaceDateLabel => current.birthPlaceDateLabel;
+  static String get birthPlaceDateHint => current.birthPlaceDateHint;
+  static String get fullAddressLabel => current.fullAddressLabel;
+  static String get fullAddressHint => current.fullAddressHint;
+  static String get lastEducationLabel => current.lastEducationLabel;
+  static String get lastEducationHint => current.lastEducationHint;
+  static String get targetJobPositionLabel => current.targetJobPositionLabel;
+  static String get targetJobPositionHint => current.targetJobPositionHint;
+  static String get maritalStatusLabel => current.maritalStatusLabel;
+  static String get citizenshipLabel => current.citizenshipLabel;
+  static String get attachmentListLabel => current.attachmentListLabel;
+
+  // Resume Builder Dialogs
+  static String get addEducation => current.addEducation;
+  static String get editEducation => current.editEducation;
+  static String get institutionName => current.institutionName;
+  static String get institutionHint => current.institutionHint;
+  static String get degreeAndMajor => current.degreeAndMajor;
+  static String get degreeHint => current.degreeHint;
+  static String get educationPeriod => current.educationPeriod;
+  static String get educationPeriodHint => current.educationPeriodHint;
+  static String get gpaLabel => current.gpaLabel;
+  static String get gpaHint => current.gpaHint;
+  static String get institutionLocation => current.institutionLocation;
+  static String get institutionLocationHint => current.institutionLocationHint;
+  static String get educationActivities => current.educationActivities;
+  static String get educationActivitiesHint => current.educationActivitiesHint;
+  static String get resumeSavedSuccess => current.resumeSavedSuccess;
+
+  static String get addExperience => current.addExperience;
+  static String get editExperience => current.editExperience;
+  static String get positionLabel => current.positionLabel;
+  static String get positionHint => current.positionHint;
+  static String get workPeriod => current.workPeriod;
+  static String get workPeriodHint => current.workPeriodHint;
+  static String get responsibilitiesLabel => current.responsibilitiesLabel;
+  static String get responsibilitiesHint => current.responsibilitiesHint;
+
+  static String get addCertification => current.addCertification;
+  static String get editCertification => current.editCertification;
+  static String get certificateName => current.certificateName;
+  static String get certificateHint => current.certificateHint;
+  static String get issuerOrg => current.issuerOrg;
+  static String get issuerHint => current.issuerHint;
+  static String get obtainedYear => current.obtainedYear;
+  static String get yearHint => current.yearHint;
+
   // Helper methods for enums
   static String localizedEmploymentType(EmploymentType type) => current.localizedEmploymentType(type);
   static String localizedWorkSystem(WorkSystem system) => current.localizedWorkSystem(system);

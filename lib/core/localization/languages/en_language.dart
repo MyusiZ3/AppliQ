@@ -835,6 +835,202 @@ class EnLanguage implements BaseLanguage {
   @override
   String get cloudSyncSubtitle => 'Storage for attached resumes and portfolio files';
 
+  @override
+  String get quickResume => 'ATS Resume';
+
+  @override
+  String get menuExperienceTitle => 'Experience';
+  @override
+  String get menuExperienceSubtitle => 'ATS Resume & Cover Letter';
+  @override
+  String get resumeBuilderTitle => 'Experience & Resume';
+  @override
+  String get previewCvAts => 'Preview ATS CV';
+  @override
+  String get coverLetterTitle => 'Cover Letter';
+  @override
+  String get documentPreviewTitle => 'Document Preview';
+  @override
+  String get customizeCoverLetter => 'Customize Cover Letter';
+  @override
+  String get digitalSignature => 'Digital Signature';
+  @override
+  String get uploadSignature => 'Upload Signature';
+  @override
+  String get changeSignature => 'Change Signature';
+  @override
+  String get signatureActive => 'Signature active';
+  @override
+  String get applyChanges => 'Apply Changes';
+  @override
+  String get saveResume => 'Save Data';
+
+  // Resume Builder Sections
+  @override
+  String get rbSectionContactTitle => 'Contact & Header';
+  @override
+  String get rbSectionContactSubtitle => 'Full name, email, phone & social links';
+  @override
+  String get rbSectionSummaryTitle => 'Professional Summary';
+  @override
+  String get rbSectionSummarySubtitle => 'Brief overview of your background';
+  @override
+  String get rbSectionEducationTitle => 'Education History';
+  @override
+  String rbSectionEducationSubtitle(int count) => '$count recorded degrees';
+  @override
+  String get rbSectionExperienceTitle => 'Work & Project Experience';
+  @override
+  String rbSectionExperienceSubtitle(int count) => '$count experiences listed';
+  @override
+  String get rbSectionCertificationTitle => 'Certifications & Licenses';
+  @override
+  String rbSectionCertificationSubtitle(int count) => '$count certificates';
+  @override
+  String get rbSectionTechSkillsTitle => 'Technical Skills';
+  @override
+  String rbSectionTechSkillsSubtitle(int count) => '$count skills listed';
+  @override
+  String get rbSectionSoftSkillsTitle => 'Personal & Soft Skills';
+  @override
+  String rbSectionSoftSkillsSubtitle(int count) => '$count soft skills (3-column layout)';
+  @override
+  String get rbSectionCoverLetterTitle => 'Cover Letter Extra Data';
+  @override
+  String get rbSectionCoverLetterSubtitle => 'Birth date, address, attachments checklist';
+
+  // Resume Builder Form Labels & Hints
+  @override
+  String get cityCountryLabel => 'City, Country';
+  @override
+  String get cityCountryHint => 'e.g. San Francisco, USA';
+  @override
+  String get phoneNumberLabel => 'Phone Number / WhatsApp';
+  @override
+  String get phoneNumberHint => '+1 234 567 890';
+  @override
+  String get emailLabel => 'Email Address';
+  @override
+  String get emailHint => 'john.doe@email.com';
+  @override
+  String get linkedinLabel => 'LinkedIn URL (Optional)';
+  @override
+  String get linkedinHint => 'linkedin.com/in/johndoe';
+  @override
+  String get portfolioLabel => 'Portfolio / GitHub URL (Optional)';
+  @override
+  String get portfolioHint => 'github.com/johndoe';
+
+  @override
+  String get summaryLabel => 'Professional Summary';
+  @override
+  String get summaryHint => 'Brief overview of your background, core strengths, and achievements...';
+
+  @override
+  String get addEducationButton => '+ Add Education';
+  @override
+  String get addExperienceButton => '+ Add Experience';
+  @override
+  String get addCertificationButton => '+ Add Certification';
+
+  @override
+  String get addTechSkillLabel => 'Add Technical Skill';
+  @override
+  String get addTechSkillHint => 'e.g. Flutter, Python, SQL...';
+  @override
+  String get addSoftSkillLabel => 'Add Soft Skill';
+  @override
+  String get addSoftSkillHint => 'e.g. Problem Solving, Teamwork...';
+
+  @override
+  String get birthPlaceDateLabel => 'Place, Date of Birth';
+  @override
+  String get birthPlaceDateHint => 'e.g. New York, Jan 12, 2000';
+  @override
+  String get fullAddressLabel => 'Full Address / Domicile';
+  @override
+  String get fullAddressHint => 'e.g. 123 Main St, New York';
+  @override
+  String get lastEducationLabel => 'Highest Education (Complete)';
+  @override
+  String get lastEducationHint => 'e.g. B.S. in Computer Science - Tech University';
+  @override
+  String get targetJobPositionLabel => 'Target Job Position';
+  @override
+  String get targetJobPositionHint => 'e.g. Mobile Developer / Software Engineer';
+  @override
+  String get maritalStatusLabel => 'Marital Status';
+  @override
+  String get citizenshipLabel => 'Citizenship';
+  @override
+  String get attachmentListLabel => 'Enclosed Documents Checklist:';
+
+  // Resume Builder Dialogs
+  @override
+  String get addEducation => 'Add Education History';
+  @override
+  String get editEducation => 'Edit Education History';
+  @override
+  String get institutionName => 'Institution / University Name';
+  @override
+  String get institutionHint => 'e.g. Stanford University';
+  @override
+  String get degreeAndMajor => 'Degree & Major';
+  @override
+  String get degreeHint => 'e.g. B.S. in Computer Science';
+  @override
+  String get educationPeriod => 'Study Period';
+  @override
+  String get educationPeriodHint => 'e.g. 2020 - 2024';
+  @override
+  String get gpaLabel => 'GPA / Score (Optional)';
+  @override
+  String get gpaHint => 'e.g. 3.85 / 4.00';
+  @override
+  String get institutionLocation => 'Institution Location';
+  @override
+  String get institutionLocationHint => 'e.g. California, USA';
+  @override
+  String get educationActivities => 'Key Achievements / Activities (1 line per point)';
+  @override
+  String get educationActivitiesHint => 'e.g. 1st Place UI/UX Competition\nPresident of Student Association';
+  @override
+  String get resumeSavedSuccess => 'Resume & profile saved to cloud successfully!';
+
+  @override
+  String get addExperience => 'Add Work Experience';
+  @override
+  String get editExperience => 'Edit Work Experience';
+  @override
+  String get positionLabel => 'Position / Job Title';
+  @override
+  String get positionHint => 'e.g. Mobile Developer / Product Designer';
+  @override
+  String get workPeriod => 'Work Period';
+  @override
+  String get workPeriodHint => 'e.g. Sep 2023 - Present';
+  @override
+  String get responsibilitiesLabel => 'Key Responsibilities & Achievements (1 per line)';
+  @override
+  String get responsibilitiesHint => 'e.g. Developed 5 core features with Flutter\nBoosted user retention by 20%';
+
+  @override
+  String get addCertification => 'Add Certificate & License';
+  @override
+  String get editCertification => 'Edit Certificate & License';
+  @override
+  String get certificateName => 'Certificate / License Name';
+  @override
+  String get certificateHint => 'e.g. Google Cloud Associate Engineer';
+  @override
+  String get issuerOrg => 'Issuer / Organization';
+  @override
+  String get issuerHint => 'e.g. Google / Coursera / AWS';
+  @override
+  String get obtainedYear => 'Year Obtained';
+  @override
+  String get yearHint => 'e.g. 2024';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

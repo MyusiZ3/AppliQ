@@ -404,6 +404,112 @@ abstract class BaseLanguage {
   String get cloudSyncTitle;
   String get cloudSyncSubtitle;
 
+  String get quickResume;
+
+  // Experience, CV & Cover Letter
+  String get menuExperienceTitle;
+  String get menuExperienceSubtitle;
+  String get resumeBuilderTitle;
+  String get previewCvAts;
+  String get coverLetterTitle;
+  String get documentPreviewTitle;
+  String get customizeCoverLetter;
+  String get digitalSignature;
+  String get uploadSignature;
+  String get changeSignature;
+  String get signatureActive;
+  String get applyChanges;
+  String get saveResume;
+
+  // Resume Builder Sections
+  String get rbSectionContactTitle;
+  String get rbSectionContactSubtitle;
+  String get rbSectionSummaryTitle;
+  String get rbSectionSummarySubtitle;
+  String get rbSectionEducationTitle;
+  String rbSectionEducationSubtitle(int count);
+  String get rbSectionExperienceTitle;
+  String rbSectionExperienceSubtitle(int count);
+  String get rbSectionCertificationTitle;
+  String rbSectionCertificationSubtitle(int count);
+  String get rbSectionTechSkillsTitle;
+  String rbSectionTechSkillsSubtitle(int count);
+  String get rbSectionSoftSkillsTitle;
+  String rbSectionSoftSkillsSubtitle(int count);
+  String get rbSectionCoverLetterTitle;
+  String get rbSectionCoverLetterSubtitle;
+
+  // Resume Builder Form Labels & Hints
+  String get cityCountryLabel;
+  String get cityCountryHint;
+  String get phoneNumberLabel;
+  String get phoneNumberHint;
+  String get emailLabel;
+  String get emailHint;
+  String get linkedinLabel;
+  String get linkedinHint;
+  String get portfolioLabel;
+  String get portfolioHint;
+
+  String get summaryLabel;
+  String get summaryHint;
+
+  String get addEducationButton;
+  String get addExperienceButton;
+  String get addCertificationButton;
+
+  String get addTechSkillLabel;
+  String get addTechSkillHint;
+  String get addSoftSkillLabel;
+  String get addSoftSkillHint;
+
+  String get birthPlaceDateLabel;
+  String get birthPlaceDateHint;
+  String get fullAddressLabel;
+  String get fullAddressHint;
+  String get lastEducationLabel;
+  String get lastEducationHint;
+  String get targetJobPositionLabel;
+  String get targetJobPositionHint;
+  String get maritalStatusLabel;
+  String get citizenshipLabel;
+  String get attachmentListLabel;
+
+  // Resume Builder Dialogs
+  String get addEducation;
+  String get editEducation;
+  String get institutionName;
+  String get institutionHint;
+  String get degreeAndMajor;
+  String get degreeHint;
+  String get educationPeriod;
+  String get educationPeriodHint;
+  String get gpaLabel;
+  String get gpaHint;
+  String get institutionLocation;
+  String get institutionLocationHint;
+  String get educationActivities;
+  String get educationActivitiesHint;
+  String get resumeSavedSuccess;
+
+  String get addExperience;
+  String get editExperience;
+  String get positionLabel;
+  String get positionHint;
+  String get workPeriod;
+  String get workPeriodHint;
+  String get responsibilitiesLabel;
+  String get responsibilitiesHint;
+
+  String get addCertification;
+  String get editCertification;
+  String get certificateName;
+  String get certificateHint;
+  String get issuerOrg;
+  String get issuerHint;
+  String get obtainedYear;
+  String get yearHint;
+
   // Enums & Dynamic Values
   String localizedEmploymentType(EmploymentType type);
   String localizedWorkSystem(WorkSystem system);

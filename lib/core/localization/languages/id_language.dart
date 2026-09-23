@@ -835,6 +835,202 @@ class IdLanguage implements BaseLanguage {
   @override
   String get cloudSyncSubtitle => 'Penyimpanan lampiran berkas resume & portofolio';
 
+  @override
+  String get quickResume => 'CV ATS';
+
+  @override
+  String get menuExperienceTitle => 'Experience';
+  @override
+  String get menuExperienceSubtitle => 'CV ATS & Cover Letter';
+  @override
+  String get resumeBuilderTitle => 'Experience & Resume';
+  @override
+  String get previewCvAts => 'Preview CV ATS';
+  @override
+  String get coverLetterTitle => 'Cover Letter';
+  @override
+  String get documentPreviewTitle => 'Preview Dokumen';
+  @override
+  String get customizeCoverLetter => 'Sesuaikan Cover Letter';
+  @override
+  String get digitalSignature => 'Tanda Tangan Digital';
+  @override
+  String get uploadSignature => 'Upload Tanda Tangan';
+  @override
+  String get changeSignature => 'Ganti Tanda Tangan';
+  @override
+  String get signatureActive => 'Tanda tangan aktif';
+  @override
+  String get applyChanges => 'Terapkan Perubahan';
+  @override
+  String get saveResume => 'Simpan Data';
+
+  // Resume Builder Sections
+  @override
+  String get rbSectionContactTitle => 'Header & Kontak';
+  @override
+  String get rbSectionContactSubtitle => 'Nama, kontak, dan link profil profesional';
+  @override
+  String get rbSectionSummaryTitle => 'Profil Personal';
+  @override
+  String get rbSectionSummarySubtitle => 'Deskripsi singkat diri & keunggulan profesional';
+  @override
+  String get rbSectionEducationTitle => 'Riwayat Pendidikan';
+  @override
+  String rbSectionEducationSubtitle(int count) => '$count riwayat pendidikan tersimpan';
+  @override
+  String get rbSectionExperienceTitle => 'Pengalaman Kerja & Proyek';
+  @override
+  String rbSectionExperienceSubtitle(int count) => '$count pengalaman kerja tersimpan';
+  @override
+  String get rbSectionCertificationTitle => 'Sertifikasi & Pelatihan';
+  @override
+  String rbSectionCertificationSubtitle(int count) => '$count sertifikat tersimpan';
+  @override
+  String get rbSectionTechSkillsTitle => 'Kemampuan Teknis';
+  @override
+  String rbSectionTechSkillsSubtitle(int count) => '$count keahlian teknis';
+  @override
+  String get rbSectionSoftSkillsTitle => 'Kemampuan Personal';
+  @override
+  String rbSectionSoftSkillsSubtitle(int count) => '$count soft skills (layout 3 kolom)';
+  @override
+  String get rbSectionCoverLetterTitle => 'Data Khusus Cover Letter';
+  @override
+  String get rbSectionCoverLetterSubtitle => 'Tempat/tgl lahir, alamat, dan berkas lampiran';
+
+  // Resume Builder Form Labels & Hints
+  @override
+  String get cityCountryLabel => 'Kota & Negara (City, Country)';
+  @override
+  String get cityCountryHint => 'Contoh: Bandung, Indonesia';
+  @override
+  String get phoneNumberLabel => 'Nomor Telepon / WA';
+  @override
+  String get phoneNumberHint => '0812-3456-7890';
+  @override
+  String get emailLabel => 'Email';
+  @override
+  String get emailHint => 'fajar@email.com';
+  @override
+  String get linkedinLabel => 'LinkedIn URL (Opsional)';
+  @override
+  String get linkedinHint => 'linkedin.com/in/fajarpratama';
+  @override
+  String get portfolioLabel => 'Portofolio / GitHub URL (Opsional)';
+  @override
+  String get portfolioHint => 'github.com/fajarpratama';
+
+  @override
+  String get summaryLabel => 'Ringkasan Diri (Summary)';
+  @override
+  String get summaryHint => 'Jelaskan profil singkat, keahlian utama, dan pencapaian profesional kamu...';
+
+  @override
+  String get addEducationButton => '+ Tambah Pendidikan';
+  @override
+  String get addExperienceButton => '+ Tambah Pengalaman';
+  @override
+  String get addCertificationButton => '+ Tambah Sertifikasi';
+
+  @override
+  String get addTechSkillLabel => 'Tambah Hard Skill';
+  @override
+  String get addTechSkillHint => 'Misal: Flutter, Python, SQL...';
+  @override
+  String get addSoftSkillLabel => 'Tambah Soft Skill';
+  @override
+  String get addSoftSkillHint => 'Misal: Problem Solving, Teamwork...';
+
+  @override
+  String get birthPlaceDateLabel => 'Tempat, Tanggal Lahir';
+  @override
+  String get birthPlaceDateHint => 'Contoh: Bandung, 12 Januari 2002';
+  @override
+  String get fullAddressLabel => 'Alamat Lengkap KTP / Domisili';
+  @override
+  String get fullAddressHint => 'Contoh: Jl. Sukabirus No. 45, Bandung';
+  @override
+  String get lastEducationLabel => 'Pendidikan Terakhir (Lengkap)';
+  @override
+  String get lastEducationHint => 'Contoh: D4 Teknologi Rekayasa Multimedia - Universitas Telkom';
+  @override
+  String get targetJobPositionLabel => 'Posisi Pekerjaan Standar';
+  @override
+  String get targetJobPositionHint => 'Contoh: Mobile Developer / Software Engineer';
+  @override
+  String get maritalStatusLabel => 'Status Pernikahan';
+  @override
+  String get citizenshipLabel => 'Kewarganegaraan';
+  @override
+  String get attachmentListLabel => 'Daftar Berkas Lampiran Surat:';
+
+  // Resume Builder Dialogs
+  @override
+  String get addEducation => 'Tambah Riwayat Pendidikan';
+  @override
+  String get editEducation => 'Edit Riwayat Pendidikan';
+  @override
+  String get institutionName => 'Nama Institusi / Universitas';
+  @override
+  String get institutionHint => 'Contoh: Universitas Gadjah Mada';
+  @override
+  String get degreeAndMajor => 'Gelar & Jurusan';
+  @override
+  String get degreeHint => 'Contoh: S1 Ilmu Komputer';
+  @override
+  String get educationPeriod => 'Periode Pendidikan';
+  @override
+  String get educationPeriodHint => 'Contoh: 2020 - 2024';
+  @override
+  String get gpaLabel => 'IPK / GPA (Opsional)';
+  @override
+  String get gpaHint => 'Contoh: 3.85 / 4.00';
+  @override
+  String get institutionLocation => 'Lokasi Institusi';
+  @override
+  String get institutionLocationHint => 'Contoh: Yogyakarta, Indonesia';
+  @override
+  String get educationActivities => 'Pencapaian / Aktivitas (1 baris per poin)';
+  @override
+  String get educationActivitiesHint => 'Contoh: Juara 1 UI/UX Competition\nKetua Himpunan Mahasiswa';
+  @override
+  String get resumeSavedSuccess => 'Data resume dan profil berhasil disimpan ke cloud!';
+
+  @override
+  String get addExperience => 'Tambah Pengalaman Kerja';
+  @override
+  String get editExperience => 'Edit Pengalaman Kerja';
+  @override
+  String get positionLabel => 'Posisi / Jabatan';
+  @override
+  String get positionHint => 'Contoh: Mobile Developer / Product Designer';
+  @override
+  String get workPeriod => 'Periode Kerja';
+  @override
+  String get workPeriodHint => 'Contoh: Sep 2023 - Sekarang';
+  @override
+  String get responsibilitiesLabel => 'Tanggung Jawab & Prestasi (1 baris per poin)';
+  @override
+  String get responsibilitiesHint => 'Contoh: Membangun 5 fitur utama dengan Flutter\nMeningkatkan retensi pengguna sebesar 20%';
+
+  @override
+  String get addCertification => 'Tambah Sertifikasi & Lisensi';
+  @override
+  String get editCertification => 'Edit Sertifikasi & Lisensi';
+  @override
+  String get certificateName => 'Nama Sertifikat / Lisensi';
+  @override
+  String get certificateHint => 'Contoh: Google Cloud Associate Engineer';
+  @override
+  String get issuerOrg => 'Penerbit / Organisasi';
+  @override
+  String get issuerHint => 'Contoh: Google / Coursera / Dicoding';
+  @override
+  String get obtainedYear => 'Tahun Perolehan';
+  @override
+  String get yearHint => 'Contoh: 2024';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) => type.label;

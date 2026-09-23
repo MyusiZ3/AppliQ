@@ -836,6 +836,202 @@ class JaLanguage implements BaseLanguage {
   @override
   String get cloudSyncSubtitle => '履歴書・職務経歴書・ポートフォリオのクラウド保管';
 
+  @override
+  String get quickResume => '履歴書';
+
+  @override
+  String get menuExperienceTitle => '経歴・スキル';
+  @override
+  String get menuExperienceSubtitle => 'ATS履歴書・送付状';
+  @override
+  String get resumeBuilderTitle => '経歴と履歴書作成';
+  @override
+  String get previewCvAts => 'ATS履歴書プレビュー';
+  @override
+  String get coverLetterTitle => 'カバーレター';
+  @override
+  String get documentPreviewTitle => '書類プレビュー';
+  @override
+  String get customizeCoverLetter => 'カバーレター設定';
+  @override
+  String get digitalSignature => 'デジタル署名';
+  @override
+  String get uploadSignature => '署名をアップロード';
+  @override
+  String get changeSignature => '署名を変更';
+  @override
+  String get signatureActive => '署名が設定されています';
+  @override
+  String get applyChanges => '変更を適用';
+  @override
+  String get saveResume => '保存';
+
+  // Resume Builder Sections
+  @override
+  String get rbSectionContactTitle => '基本情報・連絡先';
+  @override
+  String get rbSectionContactSubtitle => '氏名、連絡先、SNS・ポートフォリオ';
+  @override
+  String get rbSectionSummaryTitle => '自己PR・サマリー';
+  @override
+  String get rbSectionSummarySubtitle => '経歴の概要と自身の強み';
+  @override
+  String get rbSectionEducationTitle => '学歴';
+  @override
+  String rbSectionEducationSubtitle(int count) => '$count 件の学歴';
+  @override
+  String get rbSectionExperienceTitle => '職歴・プロジェクト経験';
+  @override
+  String rbSectionExperienceSubtitle(int count) => '$count 件の職歴';
+  @override
+  String get rbSectionCertificationTitle => '資格・免許';
+  @override
+  String rbSectionCertificationSubtitle(int count) => '$count 件の資格';
+  @override
+  String get rbSectionTechSkillsTitle => '技術スキル';
+  @override
+  String rbSectionTechSkillsSubtitle(int count) => '$count 件のスキル';
+  @override
+  String get rbSectionSoftSkillsTitle => 'ソフトスキル';
+  @override
+  String rbSectionSoftSkillsSubtitle(int count) => '$count 件のスキル';
+  @override
+  String get rbSectionCoverLetterTitle => 'カバーレター詳細情報';
+  @override
+  String get rbSectionCoverLetterSubtitle => '生年月日、住所、添付書類チェックリスト';
+
+  // Resume Builder Form Labels & Hints
+  @override
+  String get cityCountryLabel => '居住地・国 (City, Country)';
+  @override
+  String get cityCountryHint => '例: 東京都, 日本';
+  @override
+  String get phoneNumberLabel => '電話番号 / WhatsApp';
+  @override
+  String get phoneNumberHint => '090-1234-5678';
+  @override
+  String get emailLabel => 'メールアドレス';
+  @override
+  String get emailHint => 'yamada@email.com';
+  @override
+  String get linkedinLabel => 'LinkedIn URL (任意)';
+  @override
+  String get linkedinHint => 'linkedin.com/in/yamada';
+  @override
+  String get portfolioLabel => 'ポートフォリオ / GitHub (任意)';
+  @override
+  String get portfolioHint => 'github.com/yamada';
+
+  @override
+  String get summaryLabel => '自己PR・職務要約 (Summary)';
+  @override
+  String get summaryHint => 'これまでの経歴、専門スキル、主な実績などを簡潔に記載してください...';
+
+  @override
+  String get addEducationButton => '+ 学歴を追加';
+  @override
+  String get addExperienceButton => '+ 職歴を追加';
+  @override
+  String get addCertificationButton => '+ 資格・免許を追加';
+
+  @override
+  String get addTechSkillLabel => '技術スキルの追加';
+  @override
+  String get addTechSkillHint => '例: Flutter, Python, SQL...';
+  @override
+  String get addSoftSkillLabel => 'ソフトスキルの追加';
+  @override
+  String get addSoftSkillHint => '例: 問題解決力, チームワーク...';
+
+  @override
+  String get birthPlaceDateLabel => '生年月日・出身地';
+  @override
+  String get birthPlaceDateHint => '例: 東京都, 2000年1月12日';
+  @override
+  String get fullAddressLabel => '現住所 (住民票/居住地)';
+  @override
+  String get fullAddressHint => '例: 東京都新宿区西新宿1-1-1';
+  @override
+  String get lastEducationLabel => '最終学歴 (学部・専攻)';
+  @override
+  String get lastEducationHint => '例: 東京大学 工学部 情報工学科';
+  @override
+  String get targetJobPositionLabel => '希望職種';
+  @override
+  String get targetJobPositionHint => '例: モバイルエンジニア / UIデザイナー';
+  @override
+  String get maritalStatusLabel => '配偶者・婚姻状況';
+  @override
+  String get citizenshipLabel => '国籍';
+  @override
+  String get attachmentListLabel => '添付書類一覧:';
+
+  // Resume Builder Dialogs
+  @override
+  String get addEducation => '学歴の追加';
+  @override
+  String get editEducation => '学歴の編集';
+  @override
+  String get institutionName => '学校名・教育機関名';
+  @override
+  String get institutionHint => '例: 東京大学';
+  @override
+  String get degreeAndMajor => '学位・専攻';
+  @override
+  String get degreeHint => '例: 学士 (情報工学)';
+  @override
+  String get educationPeriod => '在籍期間';
+  @override
+  String get educationPeriodHint => '例: 2020年4月 - 2024年3月';
+  @override
+  String get gpaLabel => 'GPA / 成績評価 (任意)';
+  @override
+  String get gpaHint => '例: 3.85 / 4.00';
+  @override
+  String get institutionLocation => '学校所在地';
+  @override
+  String get institutionLocationHint => '例: 東京都文京区';
+  @override
+  String get educationActivities => '主な実績・活動 (1行1項目)';
+  @override
+  String get educationActivitiesHint => '例: UI/UXコンペティション優勝\n学生自治会 会長';
+  @override
+  String get resumeSavedSuccess => '履歴書とプロフィールをクラウドに保存しました！';
+
+  @override
+  String get addExperience => '職歴・プロジェクト経験の追加';
+  @override
+  String get editExperience => '職歴・プロジェクト経験の編集';
+  @override
+  String get positionLabel => '役職・ポジション';
+  @override
+  String get positionHint => '例: モバイル開発エンジニア';
+  @override
+  String get workPeriod => '勤務期間';
+  @override
+  String get workPeriodHint => '例: 2023年4月 - 現在';
+  @override
+  String get responsibilitiesLabel => '主な業務内容・実績 (1行1項目)';
+  @override
+  String get responsibilitiesHint => '例: Flutterを用いた主要機能の設計と開発\nユーザー継続率を20%改善';
+
+  @override
+  String get addCertification => '資格・免許の追加';
+  @override
+  String get editCertification => '資格・免許の編集';
+  @override
+  String get certificateName => '資格・検定名';
+  @override
+  String get certificateHint => '例: 応用情報技術者試験 / Google Cloud 認定';
+  @override
+  String get issuerOrg => '発行機関・主催団体';
+  @override
+  String get issuerHint => '例: IPA / Google / AWS';
+  @override
+  String get obtainedYear => '取得年月';
+  @override
+  String get yearHint => '例: 2024年3月';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

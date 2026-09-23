@@ -836,6 +836,202 @@ class KoLanguage implements BaseLanguage {
   @override
   String get cloudSyncSubtitle => '이력서, 포트폴리오 첨부 파일 클라우드 보관';
 
+  @override
+  String get quickResume => '이력서';
+
+  @override
+  String get menuExperienceTitle => '경력 및 이력';
+  @override
+  String get menuExperienceSubtitle => 'ATS 이력서 및 자기소개서';
+  @override
+  String get resumeBuilderTitle => '경력 및 이력서 관리';
+  @override
+  String get previewCvAts => 'ATS 이력서 미리보기';
+  @override
+  String get coverLetterTitle => '자기소개서';
+  @override
+  String get documentPreviewTitle => '문서 미리보기';
+  @override
+  String get customizeCoverLetter => '자기소개서 설정';
+  @override
+  String get digitalSignature => '디지털 서명';
+  @override
+  String get uploadSignature => '서명 업로드';
+  @override
+  String get changeSignature => '서명 변경';
+  @override
+  String get signatureActive => '서명 활성화됨';
+  @override
+  String get applyChanges => '변경사항 적용';
+  @override
+  String get saveResume => '데이터 저장';
+
+  // Resume Builder Sections
+  @override
+  String get rbSectionContactTitle => '기본 정보 및 연락처';
+  @override
+  String get rbSectionContactSubtitle => '이름, 연락처, SNS 및 프로필 링크';
+  @override
+  String get rbSectionSummaryTitle => '자기소개 및 요약';
+  @override
+  String get rbSectionSummarySubtitle => '경력 개요 및 핵심 역량 요약';
+  @override
+  String get rbSectionEducationTitle => '학력 사항';
+  @override
+  String rbSectionEducationSubtitle(int count) => '$count 건의 학력';
+  @override
+  String get rbSectionExperienceTitle => '경력 및 프로젝트';
+  @override
+  String rbSectionExperienceSubtitle(int count) => '$count 건의 경력';
+  @override
+  String get rbSectionCertificationTitle => '자격증 및 수료';
+  @override
+  String rbSectionCertificationSubtitle(int count) => '$count 건의 자격증';
+  @override
+  String get rbSectionTechSkillsTitle => '기술 스택 (Hard Skills)';
+  @override
+  String rbSectionTechSkillsSubtitle(int count) => '$count 건의 기술';
+  @override
+  String get rbSectionSoftSkillsTitle => '소프트 스킬 / 개인 역량';
+  @override
+  String rbSectionSoftSkillsSubtitle(int count) => '$count 건의 역량 (3열 배치)';
+  @override
+  String get rbSectionCoverLetterTitle => '자기소개서 세부정보';
+  @override
+  String get rbSectionCoverLetterSubtitle => '생년월일, 주소, 첨부 서류 체크리스트';
+
+  // Resume Builder Form Labels & Hints
+  @override
+  String get cityCountryLabel => '거주지・국가 (City, Country)';
+  @override
+  String get cityCountryHint => '예: 서울특별시, 대한민국';
+  @override
+  String get phoneNumberLabel => '연락처 / WhatsApp';
+  @override
+  String get phoneNumberHint => '010-1234-5678';
+  @override
+  String get emailLabel => '이메일 주소';
+  @override
+  String get emailHint => 'hong@email.com';
+  @override
+  String get linkedinLabel => 'LinkedIn URL (선택)';
+  @override
+  String get linkedinHint => 'linkedin.com/in/hong';
+  @override
+  String get portfolioLabel => '포트폴리오 / GitHub (선택)';
+  @override
+  String get portfolioHint => 'github.com/hong';
+
+  @override
+  String get summaryLabel => '자기소개 및 요약 (Summary)';
+  @override
+  String get summaryHint => '자신의 경력 개요, 핵심 역량 및 주요 성과를 간략히 요약해 주세요...';
+
+  @override
+  String get addEducationButton => '+ 학력 추가';
+  @override
+  String get addExperienceButton => '+ 경력 추가';
+  @override
+  String get addCertificationButton => '+ 자격증 추가';
+
+  @override
+  String get addTechSkillLabel => '기술 스택 추가';
+  @override
+  String get addTechSkillHint => '예: Flutter, Python, SQL...';
+  @override
+  String get addSoftSkillLabel => '소프트 스킬 추가';
+  @override
+  String get addSoftSkillHint => '예: 문제 해결력, 팀워크...';
+
+  @override
+  String get birthPlaceDateLabel => '생년월일・출생지';
+  @override
+  String get birthPlaceDateHint => '예: 서울특별시, 2000년 1월 12일';
+  @override
+  String get fullAddressLabel => '상세 주소 (주민등록/실거주지)';
+  @override
+  String get fullAddressHint => '예: 서울특별시 강남구 테헤란로 123';
+  @override
+  String get lastEducationLabel => '최종 학력 (전공 및 학교)';
+  @override
+  String get lastEducationHint => '예: 서울대학교 컴퓨터공학부 학사';
+  @override
+  String get targetJobPositionLabel => '희망 직무 / 포지션';
+  @override
+  String get targetJobPositionHint => '예: 모바일 개발자 / 소프트웨어 엔지니어';
+  @override
+  String get maritalStatusLabel => '결혼 여부';
+  @override
+  String get citizenshipLabel => '국적';
+  @override
+  String get attachmentListLabel => '첨부 서류 목록:';
+
+  // Resume Builder Dialogs
+  @override
+  String get addEducation => '학력 사항 추가';
+  @override
+  String get editEducation => '학력 사항 수정';
+  @override
+  String get institutionName => '학교 / 교육기관명';
+  @override
+  String get institutionHint => '예: 서울대학교';
+  @override
+  String get degreeAndMajor => '학위 및 전공';
+  @override
+  String get degreeHint => '예: 컴퓨터공학 학사';
+  @override
+  String get educationPeriod => '재학 기간';
+  @override
+  String get educationPeriodHint => '예: 2020년 3월 - 2024년 2월';
+  @override
+  String get gpaLabel => '학점 / 성적 (선택)';
+  @override
+  String get gpaHint => '예: 3.85 / 4.50';
+  @override
+  String get institutionLocation => '학교 소재지';
+  @override
+  String get institutionLocationHint => '예: 서울특별시 관악구';
+  @override
+  String get educationActivities => '주요 활동 및 성과 (줄당 1개)';
+  @override
+  String get educationActivitiesHint => '예: UI/UX 공모전 대상 수상\n학생회장 활동';
+  @override
+  String get resumeSavedSuccess => '이력서 및 프로필이 클라우드에 저장되었습니다!';
+
+  @override
+  String get addExperience => '경력 / 프로젝트 추가';
+  @override
+  String get editExperience => '경력 / 프로젝트 수정';
+  @override
+  String get positionLabel => '직책 / 역할';
+  @override
+  String get positionHint => '예: 모바일 앱 개발자';
+  @override
+  String get workPeriod => '근무 기간';
+  @override
+  String get workPeriodHint => '예: 2023년 3월 - 현재';
+  @override
+  String get responsibilitiesLabel => '주요 업무 및 성과 (줄당 1개)';
+  @override
+  String get responsibilitiesHint => '예: Flutter 기반 핵심 서비스 5개 개발\n사용자 유지율 20% 향상';
+
+  @override
+  String get addCertification => '자격증 및 수료 추가';
+  @override
+  String get editCertification => '자격증 및 수료 수정';
+  @override
+  String get certificateName => '자격증 / 수료증 명칭';
+  @override
+  String get certificateHint => '예: 정보처리기사 / Google Cloud Associate';
+  @override
+  String get issuerOrg => '발급 기관';
+  @override
+  String get issuerHint => '예: 한국산업인력공단 / Google / AWS';
+  @override
+  String get obtainedYear => '취득 연월';
+  @override
+  String get yearHint => '예: 2024년';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

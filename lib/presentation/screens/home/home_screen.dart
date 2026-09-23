@@ -18,6 +18,7 @@ import '../../../utils/ui_helper.dart';
 import '../applications/application_detail_screen.dart';
 import '../applications/application_form_screen.dart';
 import '../profile/profile_screen.dart';
+import '../profile/resume_builder_screen.dart';
 import '../../widgets/hr_templates_sheet.dart';
 import '../../widgets/export_sheet.dart';
 import '../../widgets/notification_sheet.dart';
@@ -362,11 +363,17 @@ class _HomeScreenState extends State<HomeScreen> {
             isDark: isDark,
           ),
           _buildQuickActionItem(
-            icon: CupertinoIcons.calendar,
-            label: AppStrings.quickSchedule,
+            icon: CupertinoIcons.doc_person_fill,
+            label: AppStrings.quickResume,
             onTap: () {
               HapticFeedback.lightImpact();
-              widget.onNavigateToTab?.call(2);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ResumeBuilderScreen(
+                    repository: widget.repository,
+                  ),
+                ),
+              );
             },
             isDark: isDark,
           ),

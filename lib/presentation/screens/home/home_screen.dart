@@ -1088,21 +1088,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final companyInitial =
         app.companyName.isNotEmpty ? app.companyName[0].toUpperCase() : 'J';
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context)
-            .push(
-              MaterialPageRoute(
-                builder: (_) => ApplicationDetailScreen(
-                  applicationId: app.id,
-                  repository: widget.repository,
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context)
+              .push(
+                MaterialPageRoute(
+                  builder: (_) => ApplicationDetailScreen(
+                    applicationId: app.id,
+                    repository: widget.repository,
+                  ),
                 ),
-              ),
-            )
-            .then((_) => _loadDashboardData(isSilent: true));
-      },
-      child: Container(
-        width: 215,
+              )
+              .then((_) => _loadDashboardData(isSilent: true));
+        },
+        child: Container(
+          width: 215,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? AppColors.surfaceDark : AppColors.surface,
@@ -1267,7 +1268,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildTag(String text, bool isDark) {

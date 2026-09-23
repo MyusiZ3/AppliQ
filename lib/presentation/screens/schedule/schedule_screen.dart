@@ -109,12 +109,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final now = DateTime.now();
+  String _lastScheduleQuery = '';
+  bool _lastUpcomingOnly = true;
+  int _lastScheduleHash = 0;
+  List<Map<String, dynamic>> _cachedFilteredSchedules = [];
 
-    final filteredItems = _scheduleItems.where((item) {
+  List<Map<String, dynamic>> _getFilteredSchedules(DateTime now) {
+    final currentHash = Object.hash(_scheduleItems.length, _scheduleItems.isNotEmpty ? _scheduleItems.first['app'] : 0);
+    if (_cachedFilteredSchedules.isNotEmpty &&
+        _lastScheduleQuery == _searchQuery &&
+        _lastUpcomingOnly == _upcomingOnly &&
+        _lastScheduleHash == currentHash) {
+      return _cachedFilteredSchedules;
+    }
+
+    final query = _searchQuery.trim().toLowerCase();
+    final list = _scheduleItems.where((item) {
       final app = item['app'] as JobApplication;
       final log = item['log'] as ApplicationLog;
 
@@ -125,8 +135,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         }
       }
 
-      if (_searchQuery.isNotEmpty) {
-        final query = _searchQuery.toLowerCase();
+      if (query.isNotEmpty) {
         final matchesCompany = app.companyName.toLowerCase().contains(query);
         final matchesPosition = app.positionTitle.toLowerCase().contains(query);
         final matchesStage = log.stageName.toLowerCase().contains(query);
@@ -146,6 +155,20 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
       return true;
     }).toList();
+
+    _lastScheduleQuery = _searchQuery;
+    _lastUpcomingOnly = _upcomingOnly;
+    _lastScheduleHash = currentHash;
+    _cachedFilteredSchedules = list;
+
+    return list;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final now = DateTime.now();
+    final filteredItems = _getFilteredSchedules(now);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,

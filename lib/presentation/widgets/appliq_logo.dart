@@ -32,6 +32,7 @@ class AppliqLogo extends StatelessWidget {
       'assets/images/appliq_logo.png',
       width: effectiveWidth,
       height: effectiveHeight,
+      cacheWidth: (effectiveWidth * 2).round().clamp(64, 512),
       fit: BoxFit.contain,
     );
 

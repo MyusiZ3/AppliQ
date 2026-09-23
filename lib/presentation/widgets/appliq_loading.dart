@@ -69,54 +69,53 @@ class _AppliqLoadingState extends State<AppliqLoading>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final logoAndElements = Container(
-      width: widget.size,
-      height: widget.size,
-      padding: widget.hasWhiteBackground ? EdgeInsets.all(widget.size * 0.04) : EdgeInsets.zero,
-      decoration: widget.hasWhiteBackground
-          ? BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(widget.size * 0.28),
-              border: Border.all(
-                color: const Color(0xFFE4E4E7),
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
+    final logoAndElements = RepaintBoundary(
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        padding: widget.hasWhiteBackground ? EdgeInsets.all(widget.size * 0.04) : EdgeInsets.zero,
+        decoration: widget.hasWhiteBackground
+            ? BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(widget.size * 0.28),
+                border: Border.all(
+                  color: const Color(0xFFE4E4E7),
+                  width: 1.0,
                 ),
-              ],
-            )
-          : null,
-      child: Stack(
-        alignment: Alignment.center,
-        fit: StackFit.expand,
-        children: [
-          // 1. Maskot Utama (Kucing 3D Hitam CV)
-          Image.asset(
-            'assets/images/appliq_logo.png',
-            fit: BoxFit.contain,
-          ),
-
-          // 2. Elemen 3D yang Berkedip/Pulsing di Sekitar Kucing (Briefcase & Notes)
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Opacity(
-                opacity: _opacityAnimation.value,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: Image.asset(
-                    'assets/images/appliq_element.png',
-                    fit: BoxFit.contain,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
                   ),
+                ],
+              )
+            : null,
+        child: Stack(
+          alignment: Alignment.center,
+          fit: StackFit.expand,
+          children: [
+            // 1. Maskot Utama (Kucing 3D Hitam CV)
+            Image.asset(
+              'assets/images/appliq_logo.png',
+              cacheWidth: (widget.size * 2).round().clamp(100, 600),
+              fit: BoxFit.contain,
+            ),
+
+            // 2. Elemen 3D yang Berkedip/Pulsing (FadeTransition + ScaleTransition tanpa rebuild)
+            FadeTransition(
+              opacity: _opacityAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Image.asset(
+                  'assets/images/appliq_element.png',
+                  cacheWidth: (widget.size * 2).round().clamp(100, 600),
+                  fit: BoxFit.contain,
                 ),
-              );
-            },
-          ),
-        ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
 

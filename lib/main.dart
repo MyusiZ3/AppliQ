@@ -20,22 +20,21 @@ void main() async {
   // Load environment & configuration
   await AppConfig.initialize();
 
-  // Initialize ThemeManager & LanguageManager from SharedPreferences
-  await ThemeManager.init();
-  await LanguageManager.init();
-
-  // Initialize Local Push Notifications
-  await NotificationService.instance.init();
-
-  // Initialize Supabase if configured
-  if (AppConfig.isSupabaseConfigured) {
-    try {
-      await Supabase.initialize(
-        url: AppConfig.supabaseUrl,
-        anonKey: AppConfig.supabaseAnonKey,
-      );
-    } catch (_) {}
-  }
+  // Parallel asynchronous initialization (Theme, Language, Notifications, Supabase)
+  await Future.wait([
+    ThemeManager.init(),
+    LanguageManager.init(),
+    NotificationService.instance.init(),
+    if (AppConfig.isSupabaseConfigured)
+      () async {
+        try {
+          await Supabase.initialize(
+            url: AppConfig.supabaseUrl,
+            anonKey: AppConfig.supabaseAnonKey,
+          );
+        } catch (_) {}
+      }(),
+  ]);
 
   final JobRepository repository = SupabaseJobRepository();
 

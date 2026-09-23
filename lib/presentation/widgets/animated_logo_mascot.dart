@@ -59,45 +59,48 @@ class _AnimatedLogoMascotState extends State<AnimatedLogoMascot> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: SizedBox(
-        width: widget.size,
-        height: widget.size,
-        child: AnimatedOpacity(
-          opacity: _entryOpacity,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeIn,
-          child: AnimatedSwitcher(
-            duration: _fadeTransitionDuration,
-            reverseDuration: const Duration(milliseconds: 400),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-            child: _phase == _MascotPhase.animation
-                ? Image.asset(
-                    'assets/images/logo_cat_anim.webp',
-                    key: const ValueKey('mascot_intro_anim'),
-                    width: widget.size,
-                    height: widget.size,
-                    fit: BoxFit.contain,
-                  )
-                : Stack(
-                    key: const ValueKey('appliq_static_logo'),
-                    alignment: Alignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/appliq_logo.png',
-                        width: widget.size,
-                        height: widget.size,
-                        fit: BoxFit.contain,
-                      ),
-                      _PulsingElement(size: widget.size),
-                    ],
-                  ),
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: AnimatedOpacity(
+            opacity: _entryOpacity,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeIn,
+            child: AnimatedSwitcher(
+              duration: _fadeTransitionDuration,
+              reverseDuration: const Duration(milliseconds: 400),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+              child: _phase == _MascotPhase.animation
+                  ? Image.asset(
+                      'assets/images/logo_cat_anim.webp',
+                      key: const ValueKey('mascot_intro_anim'),
+                      width: widget.size,
+                      height: widget.size,
+                      fit: BoxFit.contain,
+                    )
+                  : Stack(
+                      key: const ValueKey('appliq_static_logo'),
+                      alignment: Alignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/images/appliq_logo.png',
+                          width: widget.size,
+                          height: widget.size,
+                          cacheWidth: (widget.size * 2).round().clamp(100, 600),
+                          fit: BoxFit.contain,
+                        ),
+                        _PulsingElement(size: widget.size),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),
@@ -143,18 +146,13 @@ class _PulsingElementState extends State<_PulsingElement>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _pulseAnimation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _pulseAnimation.value,
-          child: child,
-        );
-      },
+    return FadeTransition(
+      opacity: _pulseAnimation,
       child: Image.asset(
         'assets/images/appliq_element.png',
         width: widget.size,
         height: widget.size,
+        cacheWidth: (widget.size * 2).round().clamp(100, 600),
         fit: BoxFit.contain,
       ),
     );

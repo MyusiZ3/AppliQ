@@ -138,9 +138,10 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
-      // Periksa riwayat pembacaan notifikasi tersimpan
+      // Periksa riwayat ID notifikasi yang sudah dibaca
       final prefs = await SharedPreferences.getInstance();
-      final lastReadMs = prefs.getInt('last_read_notifications_timestamp') ?? 0;
+      final readIds =
+          (prefs.getStringList('read_notification_ids') ?? []).toSet();
 
       final staleApps = apps.where((app) {
         if (app.status != ApplicationStatus.applied) return false;
@@ -148,26 +149,18 @@ class _HomeScreenState extends State<HomeScreen> {
         return days >= 14;
       }).toList();
 
-      bool hasNewAlert = false;
+      final currentAlertIds = <String>{};
       for (var item in upcoming) {
         final log = item['log'] as ApplicationLog;
-        final timestamp = log.scheduledAt?.millisecondsSinceEpoch ??
-            log.createdAt.millisecondsSinceEpoch;
-        if (timestamp > lastReadMs) {
-          hasNewAlert = true;
-          break;
-        }
+        currentAlertIds.add(
+            'schedule_${log.id}_${log.scheduledAt?.millisecondsSinceEpoch}');
       }
-      if (!hasNewAlert) {
-        for (var app in staleApps) {
-          final staleThresholdDate =
-              app.appliedDate.add(const Duration(days: 14));
-          if (staleThresholdDate.millisecondsSinceEpoch > lastReadMs) {
-            hasNewAlert = true;
-            break;
-          }
-        }
+      for (var app in staleApps) {
+        currentAlertIds.add('stale_${app.id}');
       }
+
+      final hasUnreadAlert =
+          currentAlertIds.any((id) => !readIds.contains(id));
 
       if (mounted) {
         setState(() {
@@ -175,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _applications = apps;
           _upcomingSchedules = upcoming;
           _stats = (results[2] as Map<String, dynamic>?) ?? {};
-          _hasReadNotifications = !hasNewAlert;
+          _hasReadNotifications = !hasUnreadAlert;
           _isLoading = false;
         });
       }
@@ -896,11 +889,25 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 HapticFeedback.lightImpact();
                 setState(() => _hasReadNotifications = true);
+
+                final currentAlertIds = <String>{};
+                for (var item in _upcomingSchedules) {
+                  final log = item['log'] as ApplicationLog;
+                  currentAlertIds.add(
+                      'schedule_${log.id}_${log.scheduledAt?.millisecondsSinceEpoch}');
+                }
+                for (var app in staleApplications) {
+                  currentAlertIds.add('stale_${app.id}');
+                }
+
                 final prefs = await SharedPreferences.getInstance();
-                await prefs.setInt(
-                  'last_read_notifications_timestamp',
-                  DateTime.now().millisecondsSinceEpoch,
-                );
+                final readIds =
+                    (prefs.getStringList('read_notification_ids') ?? [])
+                        .toSet();
+                readIds.addAll(currentAlertIds);
+                await prefs.setStringList(
+                    'read_notification_ids', readIds.toList());
+
                 if (mounted) {
                   NotificationSheet.show(
                     context,

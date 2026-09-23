@@ -1413,7 +1413,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 _buildInfoRow(AppStrings.jobSourceLabel, app.jobPortalCustom ?? AppStrings.localizedJobPortal(app.jobPortal), CupertinoIcons.globe, isDark),
                 if (app.location != null && app.location!.isNotEmpty) ...[
                   const Divider(height: 20),
-                  _buildInfoRow(AppStrings.locationLabel, app.location!, CupertinoIcons.location_solid, isDark),
+                  _buildLocationBlock(app.location!, isDark),
                 ],
                 if (app.salaryExpectation != null) ...[
                   const Divider(height: 20),
@@ -2079,28 +2079,89 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
   Widget _buildInfoRow(String title, String value, IconData icon, bool isDark) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: isDark ? AppColors.textHintDark : AppColors.textHint),
+            Icon(icon,
+                size: 18,
+                color: isDark ? AppColors.textHintDark : AppColors.textHint),
             const SizedBox(width: 8),
             Text(
               title,
               style: TextStyle(
                 fontSize: 13,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
               ),
             ),
           ],
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.2,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
+              height: 1.35,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocationBlock(String location, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              CupertinoIcons.location_solid,
+              size: 17,
+              color: isDark ? AppColors.textHintDark : AppColors.textHint,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              AppStrings.locationLabel,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              width: 0.8,
+            ),
+          ),
+          child: Text(
+            location,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+              letterSpacing: -0.2,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
           ),
         ),
       ],

@@ -1,6 +1,7 @@
 import '../models/job_application.dart';
 import '../models/application_log.dart';
 import '../models/user_profile.dart';
+import '../models/user_resume.dart';
 
 abstract class JobRepository {
   // Auth & Profile
@@ -27,6 +28,10 @@ abstract class JobRepository {
 
   // Stats / Dashboard
   Future<Map<String, dynamic>> getDashboardStats({bool forceRefresh = false});
+
+  // User Resume / CV & Cover Letter Data
+  Future<UserResume?> getUserResume({bool forceRefresh = false});
+  Future<UserResume> saveUserResume(UserResume resume);
 
   // Reactive Data Stream
   Stream<void> get dataChanges;

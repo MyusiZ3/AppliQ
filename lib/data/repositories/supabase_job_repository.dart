@@ -5,6 +5,7 @@ import '../../core/config/app_config.dart';
 import '../models/application_log.dart';
 import '../models/job_application.dart';
 import '../models/user_profile.dart';
+import '../models/user_resume.dart';
 import 'job_repository.dart';
 
 class SupabaseJobRepository implements JobRepository {
@@ -14,6 +15,7 @@ class SupabaseJobRepository implements JobRepository {
   // In-Memory Cache
   List<JobApplication>? _cachedApplications;
   UserProfile? _cachedProfile;
+  UserResume? _cachedResume;
   final Map<String, List<ApplicationLog>> _cachedLogs = {};
   List<ApplicationLog>? _cachedAllLogs;
   Map<String, dynamic>? _cachedStats;
@@ -139,6 +141,7 @@ class SupabaseJobRepository implements JobRepository {
   Future<void> signOut() async {
     _cachedApplications = null;
     _cachedProfile = null;
+    _cachedResume = null;
     _cachedLogs.clear();
     _cachedAllLogs = null;
     _cachedStats = null;
@@ -230,7 +233,6 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<JobApplication> updateApplication(JobApplication application) async {
-    final userId = _supabase.auth.currentUser?.id;
     final updateData = <String, dynamic>{
       'company_name': application.companyName,
       'position_title': application.positionTitle,
@@ -461,5 +463,76 @@ class SupabaseJobRepository implements JobRepository {
     };
 
     return _cachedStats!;
+  }
+
+  @override
+  Future<UserResume?> getUserResume({bool forceRefresh = false}) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+
+    if (!forceRefresh && _cachedResume != null) {
+      return _cachedResume;
+    }
+
+    try {
+      final data = await _supabase
+          .from('user_resumes')
+          .select()
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      if (data != null) {
+        _cachedResume = UserResume.fromJson(data);
+        return _cachedResume;
+      }
+
+      // If no resume in Supabase yet, populate initial template with user's profile info
+      final profile = await getCurrentUserProfile();
+      _cachedResume = UserResume.empty(
+        user.id,
+        fullName: profile?.fullName ?? user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? '',
+        email: user.email ?? profile?.email ?? '',
+        phone: profile?.phoneNumber ?? '',
+      );
+      return _cachedResume;
+    } catch (_) {
+      // Fallback
+      final profile = await getCurrentUserProfile();
+      _cachedResume = UserResume.empty(
+        user.id,
+        fullName: profile?.fullName ?? '',
+        email: user.email ?? '',
+        phone: profile?.phoneNumber ?? '',
+      );
+      return _cachedResume;
+    }
+  }
+
+  @override
+  Future<UserResume> saveUserResume(UserResume resume) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('Pengguna belum terautentikasi');
+
+    final json = resume.toJson();
+    json['user_id'] = user.id;
+    if (json['id'] == null || (json['id'] as String).isEmpty) {
+      json.remove('id');
+    }
+
+    try {
+      final response = await _supabase
+          .from('user_resumes')
+          .upsert(json, onConflict: 'user_id')
+          .select()
+          .single();
+
+      _cachedResume = UserResume.fromJson(response);
+    } catch (e) {
+      // Offline fallback: keep in memory
+      _cachedResume = resume.copyWith(userId: user.id);
+    }
+
+    notifyDataChanged();
+    return _cachedResume!;
   }
 }

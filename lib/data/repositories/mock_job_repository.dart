@@ -4,6 +4,7 @@ import '../../core/constants/app_enums.dart';
 import '../models/application_log.dart';
 import '../models/job_application.dart';
 import '../models/user_profile.dart';
+import '../models/user_resume.dart';
 import 'job_repository.dart';
 
 class MockJobRepository implements JobRepository {
@@ -33,6 +34,7 @@ class MockJobRepository implements JobRepository {
 
   final List<JobApplication> _applications = [];
   final List<ApplicationLog> _logs = [];
+  UserResume? _userResume;
 
   MockJobRepository() {
     _seedInitialData();
@@ -40,6 +42,95 @@ class MockJobRepository implements JobRepository {
 
   void _seedInitialData() {
     final now = DateTime.now();
+
+    _userResume = UserResume(
+      id: 'mock-resume-1',
+      userId: 'mock-user-1',
+      fullName: 'Fajar Pratama',
+      cityCountry: 'Bandung, Indonesia',
+      phoneNumber: '0812-3456-7890',
+      email: 'user.demo@appliq.id',
+      linkedinUrl: 'https://linkedin.com/in/fajarpratama',
+      portfolioUrl: 'https://fajarpratama.dev',
+      summary:
+          'Lulusan Teknologi Rekayasa Multimedia dengan fokus pada Mobile & Frontend Development. Berpengalaman membangun aplikasi Flutter berskala produksi dengan arsitektur bersih (Clean Architecture) dan integrasi Cloud Backend.',
+      educations: [
+        EducationItem(
+          id: 'edu-1',
+          institution: 'Universitas Telkom',
+          degreeAndMajor: 'D4 Teknologi Rekayasa Multimedia',
+          cityCountry: 'Bandung, Indonesia',
+          period: '2020 - 2024',
+          gpa: '3.79 / 4.00',
+          bulletPoints: [
+            'Fokus pada Rekayasa Perangkat Lunak Mobile, Grafika Komputer, dan UI/UX Design.',
+            'Menyelesaikan tugas akhir implementasi Job Application Tracking System berbasis Flutter.',
+          ],
+        ),
+      ],
+      experiences: [
+        ExperienceItem(
+          id: 'exp-1',
+          position: 'Mobile Application Developer (Intern)',
+          companyOrProject: 'PT Inovasi Teknologi Nusantara',
+          cityCountry: 'Jakarta Selatan',
+          period: 'Feb 2023 - Agu 2023',
+          bulletPoints: [
+            'Mengembangkan fitur autentikasi dan sinkronisasi data offline-first menggunakan Supabase & SQLite.',
+            'Meningkatkan performa rendering aplikasi hingga 25% melalui optimasi state management.',
+          ],
+        ),
+        ExperienceItem(
+          id: 'exp-2',
+          position: 'Full Stack & Mobile Freelancer',
+          companyOrProject: 'AppliQ Job Tracker Project',
+          cityCountry: 'Remote',
+          period: 'Sep 2023 - Sekarang',
+          bulletPoints: [
+            'Merancang dan membangun aplikasi tracking lamaran kerja multi-platform dengan ekspor dokumen PDF otomatis.',
+          ],
+        ),
+      ],
+      certifications: [
+        CertificationItem(
+          id: 'cert-1',
+          title: 'Google Associate Android Developer',
+          organization: 'Google Developers',
+          year: '2023',
+        ),
+        CertificationItem(
+          id: 'cert-2',
+          title: 'Flutter & Dart Complete Development Suite',
+          organization: 'Dicoding Indonesia',
+          year: '2023',
+        ),
+      ],
+      technicalSkills: [
+        'Flutter',
+        'Dart',
+        'Supabase',
+        'Firebase',
+        'RESTful API',
+        'Git & GitHub',
+        'State Management (Provider/BLoC)',
+        'Clean Architecture',
+        'Figma',
+      ],
+      softSkills: [
+        'Problem Solving',
+        'Team Collaboration',
+        'Attention to Detail',
+        'Time Management',
+        'Adaptability',
+        'Effective Communication',
+      ],
+      birthPlaceDate: 'Bandung, 12 Januari 2002',
+      fullAddress: 'Jl. Sukabirus No. 45, Dayeuhkolot, Kab. Bandung, Jawa Barat 40257',
+      maritalStatus: 'Belum Menikah',
+      citizenship: 'Indonesia',
+      lastEducation: 'D4 Teknologi Rekayasa Multimedia - Universitas Telkom',
+      targetJobPosition: 'Mobile Developer / Software Engineer',
+    );
     _applications.addAll([
       JobApplication(
         id: _uuid.v4(),
@@ -331,6 +422,28 @@ class MockJobRepository implements JobRepository {
     _authController.add(profile);
     notifyDataChanged();
     return profile;
+  }
+
+  @override
+  Future<UserResume?> getUserResume({bool forceRefresh = false}) async {
+    if (_userResume != null) return _userResume;
+    return UserResume.empty(
+      _currentUser?.id ?? 'mock-user-1',
+      fullName: _currentUser?.fullName ?? 'Fajar Pratama',
+      email: _currentUser?.email ?? 'user.demo@appliq.id',
+      phone: _currentUser?.phoneNumber ?? '0812-3456-7890',
+    );
+  }
+
+  @override
+  Future<UserResume> saveUserResume(UserResume resume) async {
+    _userResume = resume.copyWith(
+      id: resume.id.isEmpty ? _uuid.v4() : resume.id,
+      userId: _currentUser?.id ?? 'mock-user-1',
+      updatedAt: DateTime.now(),
+    );
+    notifyDataChanged();
+    return _userResume!;
   }
 
   @override

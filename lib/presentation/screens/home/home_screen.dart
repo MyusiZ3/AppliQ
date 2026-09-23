@@ -1082,10 +1082,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Column(
           children: [
-            Icon(
-              CupertinoIcons.doc_text,
-              size: 40,
-              color: isDark ? AppColors.textHintDark : AppColors.textHint,
+            const AppliqLoading(
+              size: 64,
             ),
             const SizedBox(height: 12),
             Text(

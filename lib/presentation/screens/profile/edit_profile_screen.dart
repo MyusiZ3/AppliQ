@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/ui_helper.dart';
@@ -55,7 +56,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _handleSave() async {
     final fullName = _fullNameController.text.trim();
     if (fullName.isEmpty) {
-      UIHelper.showErrorSnackBar(context, 'Nama lengkap tidak boleh kosong');
+      UIHelper.showErrorSnackBar(context, AppStrings.fullNameEmptyError);
       return;
     }
 
@@ -74,7 +75,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await widget.repository.updateUserProfile(updatedProfile);
 
       if (mounted) {
-        UIHelper.showSuccessSnackBar(context, 'Profil berhasil diperbarui!');
+        UIHelper.showSuccessSnackBar(context, AppStrings.profileUpdatedSuccess);
         Navigator.pop(context, updatedProfile);
       }
     } catch (e) {
@@ -88,20 +89,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Hapus Akun Permanen?'),
-        content: const Text(
-          'Seluruh data lamaran, riwayat interview, dan catatan kamu akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.',
-        ),
+        title: Text(AppStrings.deleteAccountConfirmTitle),
+        content: Text(AppStrings.deleteAccountConfirmMessage),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Batal'),
+            child: Text(AppStrings.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Hapus Akun'),
+            child: Text(AppStrings.deleteAccountButton),
           ),
         ],
       ),
@@ -111,7 +110,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       try {
         await widget.repository.deleteAccount();
         if (mounted) {
-          UIHelper.showSuccessSnackBar(context, 'Akun berhasil dihapus');
+          UIHelper.showSuccessSnackBar(context, AppStrings.accountDeletedSuccess);
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (_) => LoginScreen(repository: widget.repository),
@@ -164,7 +163,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         centerTitle: true,
         title: Text(
-          'Edit Profile',
+          AppStrings.editProfileTitle,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
@@ -225,7 +224,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          'Email Akun Google',
+                          AppStrings.googleEmailLabel,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -252,7 +251,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                'Terhubung',
+                                AppStrings.connected,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -276,7 +275,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Email disinkronkan langsung dari autentikasi Google.',
+                      AppStrings.googleEmailDesc,
                       style: TextStyle(
                         fontSize: 11.5,
                         color: isDark ? AppColors.textHintDark : AppColors.textHint,
@@ -290,9 +289,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // Form Inputs (Spacious Stacked Layout)
               _buildModernInputField(
-                label: 'Nama Lengkap',
+                label: AppStrings.fullNameLabel,
                 controller: _fullNameController,
-                hint: 'Masukkan nama lengkap',
+                hint: AppStrings.fullNameHint,
                 icon: CupertinoIcons.person,
                 isDark: isDark,
                 inputBg: inputBg,
@@ -302,7 +301,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 14),
 
               _buildModernInputField(
-                label: 'Username',
+                label: AppStrings.usernameLabel,
                 controller: _usernameController,
                 hint: '@username',
                 icon: CupertinoIcons.at,
@@ -314,7 +313,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 14),
 
               _buildModernInputField(
-                label: 'Nomor Telepon / WhatsApp',
+                label: AppStrings.phoneLabel,
                 controller: _phoneController,
                 hint: '0812-3456-7890',
                 icon: CupertinoIcons.phone,
@@ -327,9 +326,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 14),
 
               _buildModernInputField(
-                label: 'Posisi Impian / Target Role',
+                label: AppStrings.targetRoleLabel,
                 controller: _targetRoleController,
-                hint: 'Contoh: Flutter Developer / UI Designer',
+                hint: AppStrings.targetRoleHint,
                 icon: CupertinoIcons.briefcase,
                 isDark: isDark,
                 inputBg: inputBg,
@@ -360,7 +359,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                       )
                     : Text(
-                        'Save Changes',
+                        AppStrings.saveChangesButton,
                         style: TextStyle(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w800,
@@ -376,9 +375,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Center(
                 child: TextButton(
                   onPressed: _handleDeleteAccount,
-                  child: const Text(
-                    'Delete Account',
-                    style: TextStyle(
+                  child: Text(
+                    AppStrings.deleteAccountButton,
+                    style: const TextStyle(
                       color: Color(0xFFEF4444),
                       fontWeight: FontWeight.w700,
                       fontSize: 13.5,

@@ -173,8 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _formatSalary(double? amount) {
-    if (amount == null || amount == 0) return 'Gaji Dirahasiakan';
-    return '${_salaryFormatter.format(amount)} / bln';
+    if (amount == null || amount == 0) return AppStrings.salaryUndisclosed;
+    return '${_salaryFormatter.format(amount)} ${AppStrings.perMonth}';
   }
 
   @override
@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               // Smart Follow-Up Reminder Alert (If any stale applications)
                               if (!_isFollowUpDismissed &&
-                                  staleApplications.isNotEmpty) ...[
+                                   staleApplications.isNotEmpty) ...[
                                 const SizedBox(height: 18),
                                 _buildFollowUpAlert(staleApplications, isDark),
                               ],
@@ -272,8 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               // Section 2: Perusahaan yang Dilamar
                               _buildSectionHeader(
-                                title: LanguageManager.isEnglish ? 'Applied Companies' : 'Perusahaan Dilamar',
-                                actionLabel: LanguageManager.isEnglish ? 'View Detail' : 'Lihat Detail',
+                                title: AppStrings.appliedCompanies,
+                                actionLabel: AppStrings.viewDetails,
                                 onAction: () => widget.onNavigateToTab?.call(1),
                                 isDark: isDark,
                               ),
@@ -294,8 +294,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActions(bool isDark, bool isMono) {
-    final isEn = LanguageManager.isEnglish;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       decoration: BoxDecoration(
@@ -318,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildQuickActionItem(
             icon: CupertinoIcons.plus,
-            label: isEn ? 'Add' : 'Lamaran',
+            label: AppStrings.quickAddApplication,
             isPrimary: !isMono,
             onTap: () {
               HapticFeedback.lightImpact();
@@ -335,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _buildQuickActionItem(
             icon: CupertinoIcons.calendar,
-            label: isEn ? 'Schedule' : 'Jadwal',
+            label: AppStrings.quickSchedule,
             onTap: () {
               HapticFeedback.lightImpact();
               widget.onNavigateToTab?.call(2);
@@ -344,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _buildQuickActionItem(
             icon: CupertinoIcons.doc_text,
-            label: 'Template',
+            label: AppStrings.quickTemplate,
             onTap: () {
               HapticFeedback.lightImpact();
               HrTemplatesSheet.show(context);
@@ -353,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _buildQuickActionItem(
             icon: CupertinoIcons.square_arrow_up,
-            label: isEn ? 'Export' : 'Ekspor',
+            label: AppStrings.quickExport,
             onTap: () {
               HapticFeedback.lightImpact();
               ExportSheet.show(context, _applications);
@@ -473,7 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white, size: 12),
                     const SizedBox(width: 4),
                     Text(
-                      isEn ? 'Next Schedule' : 'Jadwal Terdekat',
+                      AppStrings.nextSchedule,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
@@ -539,13 +537,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(CupertinoIcons.videocam_fill,
+                      children: [
+                        const Icon(CupertinoIcons.videocam_fill,
                             color: Color(0xFF18181B), size: 14),
-                        SizedBox(width: 6),
+                        const SizedBox(width: 6),
                         Text(
-                          'Buka Link Meeting',
-                          style: TextStyle(
+                          AppStrings.openMeetingLink,
+                          style: const TextStyle(
                             color: Color(0xFF18181B),
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -573,7 +571,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Lihat Detail',
+                      AppStrings.viewDetails,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 12,
@@ -633,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Perlu Follow-up ($count)',
+                      '${AppStrings.followUpNeeded} ($count)',
                       style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
@@ -657,8 +655,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 2),
                 Text(
                   count == 1
-                      ? 'Lamaran di $firstName sudah > 7 hari tanpa kabar status.'
-                      : '$count lamaran termasuk di $firstName sudah > 7 hari tanpa respon.',
+                      ? AppStrings.staleAppSingle(firstName)
+                      : AppStrings.staleAppMulti(count, firstName),
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark
@@ -680,7 +678,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Kirim Email Follow-up',
+                        AppStrings.sendFollowUpEmail,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -709,11 +707,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader(bool isDark, List<JobApplication> staleApplications) {
     final rawName = _userProfile?.fullName.isNotEmpty == true
         ? _userProfile!.fullName
-        : 'Pencari Karir';
+        : (LanguageManager.isEnglish ? 'Job Seeker' : 'Pencari Karir');
     final displayName =
         rawName.length > 12 ? '${rawName.substring(0, 12)}...' : rawName;
-    final initialLetter =
-        rawName.isNotEmpty ? rawName[0].toUpperCase() : 'U';
     final greeting = _getDynamicGreeting();
     final hasAlerts = !_hasReadNotifications &&
         (_upcomingSchedules.isNotEmpty || staleApplications.isNotEmpty);
@@ -837,9 +833,9 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Ringkasan Lamaran',
-                style: TextStyle(
+              Text(
+                AppStrings.applicationSummary,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -861,17 +857,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Text(
-                        'Statistik',
-                        style: TextStyle(
+                        AppStrings.statsButton,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(width: 4),
-                      Icon(CupertinoIcons.chevron_right,
+                      const SizedBox(width: 4),
+                      const Icon(CupertinoIcons.chevron_right,
                           color: Colors.white, size: 12),
                     ],
                   ),
@@ -887,7 +883,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _buildBannerStat(
                   icon: CupertinoIcons.briefcase_fill,
                   value: '$total',
-                  label: 'Dilamar',
+                  label: AppStrings.appliedLabel,
                 ),
               ),
               Container(
@@ -900,7 +896,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _buildBannerStat(
                   icon: CupertinoIcons.videocam_fill,
                   value: '$interview',
-                  label: 'Interview',
+                  label: AppStrings.statInterview,
                 ),
               ),
               Container(
@@ -913,7 +909,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _buildBannerStat(
                   icon: CupertinoIcons.gift_fill,
                   value: '$offering',
-                  label: 'Offering',
+                  label: AppStrings.statOffering,
                 ),
               ),
             ],
@@ -1024,7 +1020,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Belum ada lamaran tersimpan',
+              AppStrings.emptyRecentApps,
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
@@ -1034,7 +1030,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Mulai tambahkan lowongan pekerjaan yang sedang kamu ikuti.',
+              AppStrings.emptyRecentAppsDesc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12.5,
@@ -1056,7 +1052,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     .then((_) => _loadDashboardData());
               },
               icon: const Icon(CupertinoIcons.plus, size: 16),
-              label: const Text('Catat Lamaran Pertama'),
+              label: Text(AppStrings.addFirstApp),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     isDark ? Colors.white : const Color(0xFF18181B),
@@ -1206,9 +1202,9 @@ class _HomeScreenState extends State<HomeScreen> {
               spacing: 5,
               runSpacing: 4,
               children: [
-                _buildTag(app.workSystem.label, isDark),
-                _buildTag(app.jobPortal.label, isDark),
-                _buildStatusTag(app.status.label,
+                _buildTag(AppStrings.localizedWorkSystem(app.workSystem), isDark),
+                _buildTag(AppStrings.localizedJobPortal(app.jobPortal), isDark),
+                _buildStatusTag(AppStrings.localizedStatus(app.status),
                     StatusHelper.getStatusColor(app.status), isDark),
               ],
             ),
@@ -1321,7 +1317,7 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         child: Center(
           child: Text(
-            'Belum ada daftar perusahaan yang dilamar.',
+            AppStrings.noAppliedCompanies,
             style: TextStyle(
               fontSize: 13,
               color: isDark ? AppColors.textHintDark : AppColors.textHint,
@@ -1418,7 +1414,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       latestRole.isNotEmpty
                           ? latestRole
-                          : '${apps.length} Lamaran',
+                          : AppStrings.applicationsCount(apps.length),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1442,7 +1438,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '${apps.length} Posisi',
+                  AppStrings.positionsCount(apps.length),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../data/models/application_log.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
@@ -162,7 +163,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Jadwal & Agenda',
+                      AppStrings.scheduleTitle,
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -231,7 +232,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Cari perusahaan, posisi, atau tahap...',
+                      hintText: AppStrings.searchScheduleHint,
                       hintStyle: TextStyle(
                         color: isDark ? AppColors.textHintDark : AppColors.textHint,
                         fontSize: 13.5,
@@ -261,15 +262,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
               child: NotchedPillCard<bool>(
-                items: const [
+                items: [
                   NotchedPillItem(
                     value: true,
-                    label: 'Mendatang',
+                    label: AppStrings.upcomingTab,
                     icon: CupertinoIcons.calendar_today,
                   ),
                   NotchedPillItem(
                     value: false,
-                    label: 'Semua Agenda',
+                    label: AppStrings.allAgendaTab,
                     icon: CupertinoIcons.list_bullet,
                   ),
                 ],
@@ -293,8 +294,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               _loadSchedules(forceRefresh: true),
                           child: EmptyStateView(
                             icon: CupertinoIcons.calendar_badge_plus,
-                            title: 'Belum Ada Jadwal',
-                            message: 'Belum ada tahapan interview atau deadline yang tersimpan. Jadwal akan otomatis muncul saat kamu mencatat agenda.',
+                            title: AppStrings.noScheduleTitle,
+                            message: AppStrings.noScheduleMessage,
                             action: ElevatedButton.icon(
                               onPressed: () =>
                                   _loadSchedules(forceRefresh: true),
@@ -304,7 +305,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 color: isDark ? const Color(0xFF18181B) : Colors.white,
                               ),
                               label: Text(
-                                'Perbarui Jadwal',
+                                AppStrings.refreshSchedule,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
@@ -416,8 +417,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           onRefresh: () => _loadSchedules(forceRefresh: true),
           child: EmptyStateView(
             icon: CupertinoIcons.search,
-            title: 'Tidak Ada Jadwal Ditemukan',
-            message: 'Tidak ada agenda wawancara atau tahapan yang cocok dengan kata kunci "$_searchQuery".',
+            title: AppStrings.noScheduleFoundTitle,
+            message: AppStrings.noScheduleFoundMessage(_searchQuery),
             action: ElevatedButton.icon(
               onPressed: () {
                 _searchController.clear();
@@ -429,7 +430,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 color: isDark ? const Color(0xFF18181B) : Colors.white,
               ),
               label: Text(
-                'Reset Pencarian',
+                AppStrings.resetSearch,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
@@ -452,10 +453,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         onRefresh: () => _loadSchedules(forceRefresh: true),
         child: EmptyStateView(
           icon: CupertinoIcons.calendar_today,
-          title: _upcomingOnly ? 'Tidak Ada Jadwal Mendatang' : 'Belum Ada Jadwal',
+          title: _upcomingOnly ? AppStrings.noUpcomingScheduleTitle : AppStrings.noScheduleTitle,
           message: _upcomingOnly
-              ? 'Semua jadwal sudah terlewati atau belum ada agenda baru yang dijadwalkan.'
-              : 'Belum ada catatan tahapan atau wawancara.',
+              ? AppStrings.noUpcomingScheduleMessage
+              : AppStrings.noPastScheduleMessage,
         ),
       );
     }
@@ -468,8 +469,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         children: [
           if (overdueItems.isNotEmpty)
             _buildSection(
-              title: 'Terlewat',
-              subtitle: 'Jadwal belum selesai/diupdate',
+              title: AppStrings.sectionOverdue,
+              subtitle: AppStrings.sectionOverdueSubtitle,
               icon: CupertinoIcons.exclamationmark_triangle_fill,
               accentColor: const Color(0xFFEF4444),
               items: overdueItems,
@@ -478,8 +479,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
           if (todayItems.isNotEmpty)
             _buildSection(
-              title: 'Hari Ini',
-              subtitle: 'Agenda yang harus diikuti hari ini',
+              title: AppStrings.sectionToday,
+              subtitle: AppStrings.sectionTodaySubtitle,
               icon: CupertinoIcons.flame_fill,
               accentColor: const Color(0xFF10B981),
               items: todayItems,
@@ -487,8 +488,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
           if (thisWeekItems.isNotEmpty)
             _buildSection(
-              title: 'Minggu Ini',
-              subtitle: 'Agenda dalam 7 hari ke depan',
+              title: AppStrings.sectionThisWeek,
+              subtitle: AppStrings.sectionThisWeekSubtitle,
               icon: CupertinoIcons.calendar_today,
               accentColor: const Color(0xFF3B82F6),
               items: thisWeekItems,
@@ -496,8 +497,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
           if (upcomingItems.isNotEmpty)
             _buildSection(
-              title: 'Mendatang',
-              subtitle: 'Agenda lebih dari 7 hari ke depan',
+              title: AppStrings.sectionUpcoming,
+              subtitle: AppStrings.sectionUpcomingSubtitle,
               icon: CupertinoIcons.hourglass,
               accentColor: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
               items: upcomingItems,
@@ -505,8 +506,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
           if (!_upcomingOnly && pastHistoryItems.isNotEmpty)
             _buildSection(
-              title: 'Riwayat Selesai',
-              subtitle: 'Agenda yang sudah selesai/terlewati',
+              title: AppStrings.sectionHistory,
+              subtitle: AppStrings.sectionHistorySubtitle,
               icon: CupertinoIcons.archivebox_fill,
               accentColor: isDark ? const Color(0xFF71717A) : const Color(0xFFA1A1AA),
               items: pastHistoryItems,
@@ -644,6 +645,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   Builder(
                     builder: (context) {
                       final badgeColor = _getLogResultColor(log.result, isOverdue: isOverdue);
+                      final badgeLabel = isOverdue ? AppStrings.sectionOverdue : AppStrings.localizedResult(log.result);
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
@@ -655,7 +657,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           ),
                         ),
                         child: Text(
-                          isOverdue ? 'Terlewat' : log.result,
+                          badgeLabel,
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -711,7 +713,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Pewawancara: ${log.interviewerName}',
+                      '${AppStrings.interviewerPrefix}${log.interviewerName}',
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
@@ -735,12 +737,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(CupertinoIcons.video_camera_solid, size: 15, color: AppColors.primary),
-                        SizedBox(width: 6),
+                      children: [
+                        const Icon(CupertinoIcons.video_camera_solid, size: 15, color: AppColors.primary),
+                        const SizedBox(width: 6),
                         Text(
-                          'Buka Link Pertemuan',
-                          style: TextStyle(
+                          AppStrings.openMeetingRoom,
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,

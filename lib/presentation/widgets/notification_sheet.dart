@@ -3,9 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/localization/app_strings.dart';
 import '../../data/models/job_application.dart';
 import '../../data/models/application_log.dart';
 import '../../services/notification_service.dart';
+import '../../utils/language_manager.dart';
 import '../../utils/ui_helper.dart';
 import '../widgets/hr_templates_sheet.dart';
 
@@ -48,16 +50,19 @@ class _NotificationSheetState extends State<NotificationSheet> {
 
     try {
       await NotificationService.instance.requestPermissions();
+      final isEn = LanguageManager.isEnglish;
       await NotificationService.instance.showInstantNotification(
         id: 9999,
-        title: 'AppliQ • Notifikasi Pengingat',
-        body: 'Sistem notifikasi popup aktif! Pengingat jadwal wawancara kamu akan muncul otomatis.',
+        title: isEn ? 'AppliQ • Reminder Notification' : 'AppliQ • Notifikasi Pengingat',
+        body: isEn 
+            ? 'Popup notification system active! Your interview reminders will appear automatically.' 
+            : 'Sistem notifikasi popup aktif! Pengingat jadwal wawancara kamu akan muncul otomatis.',
       );
 
       if (mounted) {
         UIHelper.showSuccessSnackBar(
           context,
-          'Notifikasi uji coba berhasil dikirim ke perangkat!',
+          AppStrings.testNotificationSentToast,
         );
       }
     } catch (e) {
@@ -70,6 +75,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = LanguageManager.isEnglish;
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final totalAlerts = widget.upcomingSchedules.length + widget.staleApplications.length;
 
@@ -124,7 +130,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pusat Notifikasi',
+                        AppStrings.notificationCenterTitle,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
@@ -134,8 +140,8 @@ class _NotificationSheetState extends State<NotificationSheet> {
                       ),
                       Text(
                         totalAlerts == 0
-                            ? 'Tidak ada pengingat mendesak'
-                            : '$totalAlerts pengingat aktif',
+                            ? AppStrings.noUrgentReminders
+                            : AppStrings.activeRemindersCount(totalAlerts),
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
@@ -184,7 +190,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Push Notification Popup',
+                        AppStrings.pushNotificationTestTitle,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -193,7 +199,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Tes pop-up alarm di status bar perangkat.',
+                        AppStrings.pushNotificationTestDesc,
                         style: TextStyle(
                           fontSize: 11.5,
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
@@ -221,9 +227,9 @@ class _NotificationSheetState extends State<NotificationSheet> {
                             color: isDark ? const Color(0xFF18181B) : Colors.white,
                           ),
                         )
-                      : const Text(
-                          'Tes Notif',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                      : Text(
+                          AppStrings.testNotificationButton,
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                         ),
                 ),
               ],
@@ -241,7 +247,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                 // Upcoming Interview Schedules
                 if (widget.upcomingSchedules.isNotEmpty) ...[
                   Text(
-                    'AGENDA INTERVIEW & TES',
+                    AppStrings.interviewAgendaSection,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -255,6 +261,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                     final log = item['log'] as ApplicationLog;
                     final date = log.scheduledAt!;
                     final timeStr = DateFormat('dd MMM, HH:mm').format(date);
+                    final formattedTime = isEn ? timeStr : '$timeStr WIB';
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
@@ -297,7 +304,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Jadwal: $timeStr WIB',
+                                  '${AppStrings.scheduleDateLabel}: $formattedTime',
                                   style: const TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w600,
@@ -317,7 +324,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                 // Follow-up Alerts (> 7 Days)
                 if (widget.staleApplications.isNotEmpty) ...[
                   Text(
-                    'PERLU FOLLOW-UP (> 7 HARI)',
+                    AppStrings.followUpNeededSection,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -370,7 +377,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${app.positionTitle} • Dilamar $days hari lalu',
+                                  '${app.positionTitle} • ${AppStrings.appliedDaysAgo(days)}',
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
@@ -395,7 +402,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                'Email HR',
+                                AppStrings.emailHrButton,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -423,7 +430,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'Semua Agenda Terjadwal Aman',
+                            AppStrings.allSchedulesSafeTitle,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -432,7 +439,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Belum ada wawancara mendesak atau lamaran tertunda.',
+                            AppStrings.allSchedulesSafeDesc,
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,

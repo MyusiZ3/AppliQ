@@ -75,7 +75,7 @@ void main() {
     await tester.tap(find.byIcon(CupertinoIcons.pencil));
     await tester.pumpAndSettle();
 
-    expect(find.text('Edit Lamaran'), findsOneWidget);
+    expect(find.text(AppStrings.editApplicationTitle), findsOneWidget);
   });
 
   testWidgets('ProfileScreen renders Settings and navigates to EditProfileScreen', (WidgetTester tester) async {
@@ -106,9 +106,9 @@ void main() {
     expect(find.text('Delete Account'), findsOneWidget);
   });
 
-  testWidgets('LanguageManager dynamically switches between Indonesian and English', (WidgetTester tester) async {
+  testWidgets('LanguageManager dynamically switches between Indonesian, English, Japanese, and Korean', (WidgetTester tester) async {
     await LanguageManager.setLanguage(AppLanguage.id);
-    expect(LanguageManager.isEnglish, isFalse);
+    expect(LanguageManager.isIndonesian, isTrue);
     expect(AppStrings.applicationsTitle, 'Daftar Lamaran');
     expect(AppStrings.cancel, 'Batal');
 
@@ -116,6 +116,16 @@ void main() {
     expect(LanguageManager.isEnglish, isTrue);
     expect(AppStrings.applicationsTitle, 'Applications');
     expect(AppStrings.cancel, 'Cancel');
+
+    await LanguageManager.setLanguage(AppLanguage.ja);
+    expect(LanguageManager.isJapanese, isTrue);
+    expect(AppStrings.applicationsTitle, '応募一覧');
+    expect(AppStrings.cancel, 'キャンセル');
+
+    await LanguageManager.setLanguage(AppLanguage.ko);
+    expect(LanguageManager.isKorean, isTrue);
+    expect(AppStrings.applicationsTitle, '지원 내역');
+    expect(AppStrings.cancel, '취소');
 
     // Reset back to Indonesian
     await LanguageManager.setLanguage(AppLanguage.id);

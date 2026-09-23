@@ -36,9 +36,11 @@ class _ExportSheetState extends State<ExportSheet> {
 
   String _generateCsv() {
     final buffer = StringBuffer();
+    final isEn = LanguageManager.isEnglish;
     // CSV Header
-    buffer.writeln(
-        'No,Perusahaan,Posisi,Sistem Kerja,Portal Lowongan,Status,Tanggal Melamar,Ekspektasi Gaji,Gaji Ditawarkan,Lokasi,Catatan');
+    buffer.writeln(isEn
+        ? 'No,Company,Position,Work System,Job Portal,Status,Applied Date,Salary Expectation,Salary Offered,Location,Notes'
+        : 'No,Perusahaan,Posisi,Sistem Kerja,Portal Lowongan,Status,Tanggal Melamar,Ekspektasi Gaji,Gaji Ditawarkan,Lokasi,Catatan');
 
     final dateFormat = DateFormat('yyyy-MM-dd');
 
@@ -50,9 +52,12 @@ class _ExportSheetState extends State<ExportSheet> {
       final notes =
           (app.notes ?? '-').replaceAll('\n', ' ').replaceAll(',', ';');
       final location = (app.location ?? '-').replaceAll(',', ';');
+      final workSys = AppStrings.localizedWorkSystem(app.workSystem);
+      final portal = app.jobPortalCustom ?? AppStrings.localizedJobPortal(app.jobPortal);
+      final status = AppStrings.localizedStatus(app.status);
 
       buffer.writeln(
-        '"${i + 1}","${app.companyName}","${app.positionTitle}","${app.workSystem.label}","${app.jobPortal.label}","${app.status.label}","$applied","$expSalary","$offSalary","$location","$notes"',
+        '"${i + 1}","${app.companyName}","${app.positionTitle}","$workSys","$portal","$status","$applied","$expSalary","$offSalary","$location","$notes"',
       );
     }
 
@@ -70,7 +75,9 @@ class _ExportSheetState extends State<ExportSheet> {
       if (mounted) {
         Navigator.of(context).pop();
         UIHelper.showSuccessSnackBar(context,
-            'Format CSV (${widget.applications.length} lamaran) berhasil disalin!');
+            LanguageManager.isEnglish 
+                ? 'CSV format (${widget.applications.length} applications) copied!' 
+                : 'Format CSV (${widget.applications.length} lamaran) berhasil disalin!');
       }
     } catch (e) {
       if (mounted) {
@@ -171,7 +178,9 @@ class _ExportSheetState extends State<ExportSheet> {
                             ),
                           ),
                           pw.Text(
-                            'Laporan Rekapitulasi Lamaran Kerja',
+                            LanguageManager.isEnglish 
+                                ? 'Job Applications Report' 
+                                : 'Laporan Rekapitulasi Lamaran Kerja',
                             style: const pw.TextStyle(
                               fontSize: 9,
                               color: PdfColor.fromInt(0xFF71717A),
@@ -196,7 +205,9 @@ class _ExportSheetState extends State<ExportSheet> {
                           ),
                         ),
                         child: pw.Text(
-                          'Total: $totalApps Lamaran',
+                          LanguageManager.isEnglish
+                              ? 'Total: $totalApps Applications'
+                              : 'Total: $totalApps Lamaran',
                           style: pw.TextStyle(
                             fontSize: 9,
                             fontWeight: pw.FontWeight.bold,
@@ -206,7 +217,7 @@ class _ExportSheetState extends State<ExportSheet> {
                       ),
                       pw.SizedBox(height: 3),
                       pw.Text(
-                        'Dicetak: ${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.now())}',
+                        '${LanguageManager.isEnglish ? 'Printed' : 'Dicetak'}: ${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.now())}',
                         style: const pw.TextStyle(
                           fontSize: 8,
                           color: PdfColor.fromInt(0xFFA1A1AA),
@@ -237,7 +248,9 @@ class _ExportSheetState extends State<ExportSheet> {
                         fontSize: 8, color: PdfColor.fromInt(0xFFA1A1AA)),
                   ),
                   pw.Text(
-                    'Halaman ${ctx.pageNumber} dari ${ctx.pagesCount}',
+                    LanguageManager.isEnglish
+                        ? 'Page ${ctx.pageNumber} of ${ctx.pagesCount}'
+                        : 'Halaman ${ctx.pageNumber} dari ${ctx.pagesCount}',
                     style: const pw.TextStyle(
                         fontSize: 8, color: PdfColor.fromInt(0xFF71717A)),
                   ),
@@ -249,16 +262,24 @@ class _ExportSheetState extends State<ExportSheet> {
             // KPI Summary Row (Executive Summary at top)
             pw.Row(
               children: [
-                _buildPdfKpiCard('TOTAL LAMARAN', '$totalApps',
+                _buildPdfKpiCard(
+                    LanguageManager.isEnglish ? 'TOTAL APPLIED' : 'TOTAL LAMARAN',
+                    '$totalApps',
                     const PdfColor.fromInt(0xFF18181B)),
                 pw.SizedBox(width: 8),
-                _buildPdfKpiCard('TAHAP INTERVIEW', '$interviewApps',
+                _buildPdfKpiCard(
+                    LanguageManager.isEnglish ? 'INTERVIEW STAGE' : 'TAHAP INTERVIEW',
+                    '$interviewApps',
                     const PdfColor.fromInt(0xFF2563EB)),
                 pw.SizedBox(width: 8),
-                _buildPdfKpiCard('OFFERING / DITERIMA', '$acceptedApps',
+                _buildPdfKpiCard(
+                    LanguageManager.isEnglish ? 'OFFER / ACCEPTED' : 'OFFERING / DITERIMA',
+                    '$acceptedApps',
                     const PdfColor.fromInt(0xFF059669)),
                 pw.SizedBox(width: 8),
-                _buildPdfKpiCard('MENUNGGU RESPON', '$activeApps',
+                _buildPdfKpiCard(
+                    LanguageManager.isEnglish ? 'WAITING RESPONSE' : 'MENUNGGU RESPON',
+                    '$activeApps',
                     const PdfColor.fromInt(0xFFD97706)),
               ],
             ),
@@ -269,7 +290,9 @@ class _ExportSheetState extends State<ExportSheet> {
                 child: pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(vertical: 40),
                   child: pw.Text(
-                    'Belum ada data riwayat lamaran kerja yang tersimpan.',
+                    LanguageManager.isEnglish
+                        ? 'No job application history recorded yet.'
+                        : 'Belum ada data riwayat lamaran kerja yang tersimpan.',
                     style: const pw.TextStyle(
                         fontSize: 11, color: PdfColor.fromInt(0xFF71717A)),
                   ),
@@ -304,11 +327,11 @@ class _ExportSheetState extends State<ExportSheet> {
                     ),
                     children: [
                       _buildHeaderCell('#', align: pw.TextAlign.center),
-                      _buildHeaderCell('Perusahaan & Posisi'),
+                      _buildHeaderCell(LanguageManager.isEnglish ? 'Company & Position' : 'Perusahaan & Posisi'),
                       _buildHeaderCell('Status'),
-                      _buildHeaderCell('Sistem & Portal'),
-                      _buildHeaderCell('Tgl Melamar'),
-                      _buildHeaderCell('Ekspektasi Gaji'),
+                      _buildHeaderCell(LanguageManager.isEnglish ? 'System & Portal' : 'Sistem & Portal'),
+                      _buildHeaderCell(LanguageManager.isEnglish ? 'Applied Date' : 'Tgl Melamar'),
+                      _buildHeaderCell(LanguageManager.isEnglish ? 'Salary Expectation' : 'Ekspektasi Gaji'),
                     ],
                   ),
                   // Table Rows
@@ -371,7 +394,7 @@ class _ExportSheetState extends State<ExportSheet> {
                           padding: const pw.EdgeInsets.symmetric(
                               vertical: 6, horizontal: 6),
                           child: pw.Text(
-                            '${app.workSystem.label} / ${app.jobPortalCustom ?? app.jobPortal.label}',
+                            '${AppStrings.localizedWorkSystem(app.workSystem)} / ${app.jobPortalCustom ?? AppStrings.localizedJobPortal(app.jobPortal)}',
                             style: const pw.TextStyle(
                                 fontSize: 8,
                                 color: PdfColor.fromInt(0xFF334155)),
@@ -411,7 +434,7 @@ class _ExportSheetState extends State<ExportSheet> {
       // Launch PDF print preview / share dialog
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdfBytes,
-        name: 'AppliQ_Laporan_Lamaran.pdf',
+        name: LanguageManager.isEnglish ? 'AppliQ_Applications_Report.pdf' : 'AppliQ_Laporan_Lamaran.pdf',
       );
 
       if (mounted) {
@@ -501,7 +524,6 @@ class _ExportSheetState extends State<ExportSheet> {
         textColor = const PdfColor.fromInt(0xFF1D4ED8);
         break;
       case ApplicationStatus.noResponse:
-      default:
         bgColor = const PdfColor.fromInt(0xFFF1F5F9);
         textColor = const PdfColor.fromInt(0xFF475569);
         break;
@@ -514,7 +536,7 @@ class _ExportSheetState extends State<ExportSheet> {
         borderRadius: pw.BorderRadius.circular(4),
       ),
       child: pw.Text(
-        status.label,
+        AppStrings.localizedStatus(status),
         style: pw.TextStyle(
           fontSize: 7.5,
           fontWeight: pw.FontWeight.bold,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/localization/app_strings.dart';
 import '../../core/utils/status_helper.dart';
 import '../../data/models/job_application.dart';
 import 'status_badge.dart';
@@ -117,12 +118,12 @@ class ApplicationCard extends StatelessWidget {
                       ),
                     _buildMetaTag(
                       CupertinoIcons.briefcase,
-                      application.workSystem.label,
+                      AppStrings.localizedWorkSystem(application.workSystem),
                       isDark,
                     ),
                     _buildMetaTag(
                       CupertinoIcons.globe,
-                      application.jobPortalCustom ?? application.jobPortal.label,
+                      application.jobPortalCustom ?? AppStrings.localizedJobPortal(application.jobPortal),
                       isDark,
                       maxWidth: 130,
                     ),

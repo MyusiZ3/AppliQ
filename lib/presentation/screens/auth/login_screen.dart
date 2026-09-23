@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/animated_logo_mascot.dart';
@@ -28,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = await widget.repository.getCurrentUserProfile();
       if (user != null && mounted) {
         UIHelper.showSuccessSnackBar(
-            context, 'Selamat datang, ${user.fullName}!');
+            context, AppStrings.welcomeUser(user.fullName));
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => MainNav(repository: widget.repository),
@@ -142,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Tagline / Subtitle
                 Text(
-                  'Kelola & pantau setiap tahapan\nlamaran kerjamu secara real-time.',
+                  AppStrings.loginTagline,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.5,
@@ -194,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   const GoogleLogo(size: 22),
                                   const SizedBox(width: 12),
                                   Text(
-                                    'Sign in with Google',
+                                    AppStrings.signInWithGoogle,
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
@@ -220,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          'Dengan masuk, kamu menyetujui ',
+                          AppStrings.termsPrefix,
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
@@ -230,11 +231,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         GestureDetector(
                           onTap: () => _showPolicySheet(
-                            'Ketentuan Layanan',
-                            'Dengan menggunakan AppliQ, kamu setuju untuk menggunakan aplikasi ini untuk keperluan pencatatan lamaran kerja secara bertanggung jawab. Data kamu disimpan secara aman menggunakan protokol enkripsi standar industri.',
+                            AppStrings.termsOfService,
+                            AppStrings.termsContent,
                           ),
                           child: Text(
-                            'Ketentuan Layanan',
+                            AppStrings.termsOfService,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -246,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         Text(
-                          ' dan ',
+                          AppStrings.andConjunction,
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
@@ -256,11 +257,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         GestureDetector(
                           onTap: () => _showPolicySheet(
-                            'Kebijakan Privasi',
-                            'AppliQ menghormati dan menjaga privasi datamu. Seluruh data lamaran, profil, dan kontak hanya dapat diakses oleh pemilik akun dan tidak pernah dibagikan kepada pihak ketiga tanpa persetujuan eksplisit.',
+                            AppStrings.privacyPolicy,
+                            AppStrings.privacyContent,
                           ),
                           child: Text(
-                            'Kebijakan Privasi',
+                            AppStrings.privacyPolicy,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -272,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         Text(
-                          ' AppliQ.',
+                          '.',
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark

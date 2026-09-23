@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/localization/app_strings.dart';
+import '../../utils/language_manager.dart';
 
 class HrTemplatesSheet extends StatefulWidget {
   final String? defaultCompanyName;
@@ -33,8 +35,80 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
   int _selectedCategoryIndex = 0;
 
   List<Map<String, String>> _getTemplates() {
-    final company = widget.defaultCompanyName?.isNotEmpty == true ? widget.defaultCompanyName! : '[Nama Perusahaan]';
-    final position = widget.defaultPosition?.isNotEmpty == true ? widget.defaultPosition! : '[Posisi yang Dilamar]';
+    final isEn = LanguageManager.isEnglish;
+    final company = widget.defaultCompanyName?.isNotEmpty == true
+        ? widget.defaultCompanyName!
+        : (isEn ? '[Company Name]' : '[Nama Perusahaan]');
+    final position = widget.defaultPosition?.isNotEmpty == true
+        ? widget.defaultPosition!
+        : (isEn ? '[Applied Position]' : '[Posisi yang Dilamar]');
+
+    if (isEn) {
+      return [
+        {
+          'title': 'Job Application Follow-Up',
+          'category': 'Follow-up',
+          'desc': 'Use this template when you have not received an update > 7 days after applying.',
+          'subject': 'Job Application Follow-Up - $position - [Your Name]',
+          'body': 'Dear Hiring Team at $company,\n\n'
+              'I hope this email finds you well.\n\n'
+              'I am writing to respectfully check in on the status of my application for the $position role at $company, which I submitted recently.\n\n'
+              'I remain very enthusiastic about the opportunity to contribute to $company and would be pleased to provide any additional information or work samples if needed.\n\n'
+              'Thank you very much for your time and consideration.\n\n'
+              'Warm regards,\n[Your Name]\n[Phone Number / WhatsApp]\n[LinkedIn Profile]',
+        },
+        {
+          'title': 'Interview Confirmation',
+          'category': 'Interview',
+          'desc': 'Confirm your attendance after receiving an interview invitation.',
+          'subject': 'Interview Confirmation - $position - [Your Name]',
+          'body': 'Dear HR / Recruitment Team at $company,\n\n'
+              'Thank you very much for the invitation to interview for the $position role at $company.\n\n'
+              'I am pleased to confirm my attendance for the scheduled interview session:\n\n'
+              '• Date: [Day, Date]\n'
+              '• Time: [Time & Timezone]\n'
+              '• Platform / Location: [Google Meet / Zoom / Office]\n\n'
+              'I look forward to discussing how my experience and skills align with your team\'s goals.\n\n'
+              'Sincerely,\n[Your Name]\n[Contact Details]',
+        },
+        {
+          'title': 'Post-Interview Thank You Note',
+          'category': 'Interview',
+          'desc': 'Send within 24 hours after your interview session finishes.',
+          'subject': 'Thank You - Interview for $position - [Your Name]',
+          'body': 'Dear [Interviewer Name / HR Team at $company],\n\n'
+              'Thank you so much for taking the time to speak with me today regarding the $position role.\n\n'
+              'I thoroughly enjoyed learning more about the team\'s vision and the upcoming projects at $company. The conversation further strengthened my excitement about joining your team.\n\n'
+              'Please let me know if you need any further materials or references from my end.\n\n'
+              'Best regards,\n[Your Name]',
+        },
+        {
+          'title': 'Interview Reschedule Request',
+          'category': 'Interview',
+          'desc': 'Politely request a schedule change due to unforeseen conflicts.',
+          'subject': 'Interview Reschedule Request - $position - [Your Name]',
+          'body': 'Dear Recruitment Team at $company,\n\n'
+              'Thank you very much for the interview invitation for the $position position.\n\n'
+              'Unfortunately, due to an unavoidable conflict ([briefly state urgent reason]), I will not be able to attend at the originally scheduled time. Please accept my sincere apologies.\n\n'
+              'Would it be possible to reschedule the session to one of the following time slots?\n'
+              '• Option 1: [Day, Date, Time]\n'
+              '• Option 2: [Day, Date, Time]\n\n'
+              'Thank you very much for your understanding and flexibility.\n\n'
+              'Sincerely,\n[Your Name]',
+        },
+        {
+          'title': 'Job Offer Acceptance / Discussion',
+          'category': 'Offering',
+          'desc': 'Professional response upon receiving a formal employment offer.',
+          'subject': 'Job Offer Response - $position - [Your Name]',
+          'body': 'Dear HR Team at $company,\n\n'
+              'Thank you very much for extending the formal offer for the $position position at $company. I am thrilled and honored to receive this opportunity.\n\n'
+              'After reviewing the terms and compensation package, I would love to [formally accept this offer / discuss a few specifics regarding ...] before signing the final agreement.\n\n'
+              'Thank you again for your support throughout the recruitment process.\n\n'
+              'Warm regards,\n[Your Name]',
+        },
+      ];
+    }
 
     return [
       {
@@ -108,7 +182,7 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label berhasil disalin ke clipboard!'),
+        content: Text(AppStrings.copiedToast(label)),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -119,11 +193,18 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final templates = _getTemplates();
-    final categories = ['Semua', 'Follow-up', 'Interview', 'Offering'];
+    final categories = [
+      AppStrings.categoryAll,
+      AppStrings.categoryFollowUp,
+      AppStrings.categoryInterview,
+      AppStrings.categoryOffering,
+    ];
+
+    final rawCategories = ['All', 'Follow-up', 'Interview', 'Offering'];
 
     final filtered = _selectedCategoryIndex == 0
         ? templates
-        : templates.where((t) => t['category'] == categories[_selectedCategoryIndex]).toList();
+        : templates.where((t) => t['category'] == rawCategories[_selectedCategoryIndex] || t['category'] == categories[_selectedCategoryIndex]).toList();
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -156,7 +237,7 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Template Pesan HR',
+                      AppStrings.hrTemplatesSheetTitle,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -166,7 +247,7 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Format email profesional siap salin & pakai.',
+                      AppStrings.hrTemplatesSheetSubtitle,
                       style: TextStyle(
                         fontSize: 12.5,
                         color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
@@ -339,13 +420,13 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
-                              onPressed: () => _copyToClipboard(item['subject']!, 'Subject Email'),
+                              onPressed: () => _copyToClipboard(item['subject']!, AppStrings.copySubjectButton),
                               icon: const Icon(CupertinoIcons.doc_on_clipboard, size: 13),
-                              label: const Text(
-                                'Salin Subject',
+                              label: Text(
+                                AppStrings.copySubjectButton,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
                               ),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: isDark ? Colors.white : const Color(0xFF18181B),
@@ -360,13 +441,13 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () => _copyToClipboard(item['body']!, 'Template Email'),
+                              onPressed: () => _copyToClipboard(item['body']!, AppStrings.copyBodyButton),
                               icon: const Icon(CupertinoIcons.doc_text, size: 13),
-                              label: const Text(
-                                'Salin Body Email',
+                              label: Text(
+                                AppStrings.copyBodyButton,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),

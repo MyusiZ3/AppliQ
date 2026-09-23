@@ -33,7 +33,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _defaultCurrency = 'IDR (Rp)';
   String _dateFormat = 'DD MMMM YYYY';
   bool _hapticFeedbackEnabled = true;
-  bool _confirmBeforeDelete = true;
   String _defaultSortOption = 'Terbaru Ditambahkan';
 
   @override
@@ -53,7 +52,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _defaultCurrency = prefs.getString('general_currency') ?? 'IDR (Rp)';
         _dateFormat = prefs.getString('general_date_format') ?? 'DD MMMM YYYY';
         _hapticFeedbackEnabled = prefs.getBool('general_haptic') ?? true;
-        _confirmBeforeDelete = prefs.getBool('general_confirm_delete') ?? true;
         _defaultSortOption = prefs.getString('general_default_sort') ?? 'Terbaru Ditambahkan';
       });
     }
@@ -71,15 +69,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final granted = await NotificationService.instance.requestPermissions();
       if (mounted) {
         if (granted) {
-          UIHelper.showSuccessSnackBar(context, 'Notifikasi pengingat agenda diaktifkan.');
+          UIHelper.showSuccessSnackBar(context, 
+              LanguageManager.isEnglish 
+                  ? 'Agenda reminder notifications enabled.' 
+                  : 'Notifikasi pengingat agenda diaktifkan.');
         } else {
-          UIHelper.showInfoSnackBar(context, 'Notifikasi diaktifkan.');
+          UIHelper.showInfoSnackBar(context, 
+              LanguageManager.isEnglish ? 'Notifications enabled.' : 'Notifikasi diaktifkan.');
         }
       }
     } else {
       await NotificationService.instance.cancelAll();
       if (mounted) {
-        UIHelper.showInfoSnackBar(context, 'Notifikasi pengingat dinonaktifkan.');
+        UIHelper.showInfoSnackBar(context, 
+            LanguageManager.isEnglish 
+                ? 'Reminder notifications disabled.' 
+                : 'Notifikasi pengingat dinonaktifkan.');
       }
     }
   }
@@ -118,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'name': 'Bahasa Indonesia',
         'code': 'id',
         'subtitle': AppStrings.languageIdSubtitle,
-        'badge': LanguageManager.isEnglish ? 'Default' : 'Utama',
+        'badge': LanguageManager.isIndonesian ? 'Aktif' : 'Default',
         'icon': '🇮🇩',
         'locked': false,
       },
@@ -134,21 +139,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'name': '日本語',
         'code': 'ja',
         'subtitle': AppStrings.languageJaSubtitle,
-        'badge': AppStrings.comingSoon,
+        'badge': 'Nihongo',
         'icon': '🇯🇵',
-        'locked': true,
+        'locked': false,
       },
       {
         'name': '한국어',
         'code': 'ko',
         'subtitle': AppStrings.languageKoSubtitle,
-        'badge': AppStrings.comingSoon,
+        'badge': 'Hangugeo',
         'icon': '🇰🇷',
-        'locked': true,
+        'locked': false,
       },
     ];
 
-    final isEn = LanguageManager.isEnglish;
+    final currentLang = LanguageManager.current;
 
     UIHelper.showPremiumBottomSheet(
       context: context,
@@ -197,8 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
             ...languages.map((lang) {
               final isLocked = lang['locked'] == true;
-              final isSelected = (!isLocked) &&
-                  ((lang['code'] == 'en' && isEn) || (lang['code'] == 'id' && !isEn));
+              final isSelected = currentLang.name == lang['code'];
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -210,8 +214,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return;
                     }
 
-                    final newLang = lang['code'] == 'en' ? AppLanguage.en : AppLanguage.id;
-                    await LanguageManager.setLanguage(newLang);
+                    AppLanguage targetLang = AppLanguage.id;
+                    if (lang['code'] == 'en') targetLang = AppLanguage.en;
+                    if (lang['code'] == 'ja') targetLang = AppLanguage.ja;
+                    if (lang['code'] == 'ko') targetLang = AppLanguage.ko;
+
+                    await LanguageManager.setLanguage(targetLang);
                     setState(() => _selectedLanguage = lang['name'] as String);
                     if (mounted) Navigator.pop(context);
                   },
@@ -356,6 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final isEn = LanguageManager.isEnglish;
 
     showModalBottomSheet(
       context: context,
@@ -400,7 +409,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'General Settings',
+                                isEn ? 'General Preferences' : 'General Settings',
                                 style: TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
@@ -410,7 +419,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Kustomisasi pengalaman & preferensi pelacakan',
+                                isEn 
+                                    ? 'Customize tracking preferences & formatting' 
+                                    : 'Kustomisasi pengalaman & preferensi pelacakan',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -434,7 +445,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                       children: [
                         // Section 1: Preferensi Format
-                        _buildSectionHeader('PREFERENSI FORMAT & NILAI', isDark),
+                        _buildSectionHeader(
+                            isEn ? 'FORMAT & VALUE PREFERENCES' : 'PREFERENSI FORMAT & NILAI', 
+                            isDark),
                         Container(
                           decoration: BoxDecoration(
                             color: cardBg,
@@ -457,7 +470,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: isDark ? Colors.white : const Color(0xFF18181B),
                                   ),
                                 ),
-                                title: const Text('Mata Uang Default', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600)),
+                                title: Text(
+                                  isEn ? 'Default Currency' : 'Mata Uang Default', 
+                                  style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+                                ),
                                 subtitle: Text(_defaultCurrency, style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textHintDark : AppColors.textHint)),
                                 trailing: Icon(CupertinoIcons.chevron_right, size: 15, color: isDark ? AppColors.textHintDark : AppColors.textHint),
                                 onTap: () => _showCurrencyPicker(setModalState),
@@ -477,7 +493,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: isDark ? Colors.white : const Color(0xFF18181B),
                                   ),
                                 ),
-                                title: const Text('Format Tanggal', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600)),
+                                title: Text(
+                                  isEn ? 'Date Format' : 'Format Tanggal', 
+                                  style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+                                ),
                                 subtitle: Text(_dateFormat, style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textHintDark : AppColors.textHint)),
                                 trailing: Icon(CupertinoIcons.chevron_right, size: 15, color: isDark ? AppColors.textHintDark : AppColors.textHint),
                                 onTap: () => _showDateFormatPicker(setModalState),
@@ -497,7 +516,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: isDark ? Colors.white : const Color(0xFF18181B),
                                   ),
                                 ),
-                                title: const Text('Urutan Lamaran Default', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600)),
+                                title: Text(
+                                  isEn ? 'Default Application Sort' : 'Urutan Lamaran Default', 
+                                  style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+                                ),
                                 subtitle: Text(_defaultSortOption, style: TextStyle(fontSize: 12.5, color: isDark ? AppColors.textHintDark : AppColors.textHint)),
                                 trailing: Icon(CupertinoIcons.chevron_right, size: 15, color: isDark ? AppColors.textHintDark : AppColors.textHint),
                                 onTap: () => _showSortOptionPicker(setModalState),
@@ -509,7 +531,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 18),
 
                         // Section: Penyimpanan & Cache
-                        _buildSectionHeader('PENYIMPANAN & CACHE', isDark),
+                        _buildSectionHeader(
+                            isEn ? 'STORAGE & CACHE' : 'PENYIMPANAN & CACHE', 
+                            isDark),
                         Container(
                           decoration: BoxDecoration(
                             color: cardBg,
@@ -531,15 +555,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: Color(0xFFEF4444),
                                   ),
                                 ),
-                                title: const Text('Bersihkan Cache Lokal', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: Color(0xFFEF4444))),
-                                subtitle: const Text('Mengosongkan cache gambar & temporary memory files', style: TextStyle(fontSize: 12)),
+                                title: Text(
+                                  isEn ? 'Clear Local Cache' : 'Bersihkan Cache Lokal', 
+                                  style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: Color(0xFFEF4444)),
+                                ),
+                                subtitle: Text(
+                                  isEn 
+                                      ? 'Clear cached images & temporary memory files' 
+                                      : 'Mengosongkan cache gambar & temporary memory files', 
+                                  style: const TextStyle(fontSize: 12),
+                                ),
                                 onTap: () async {
                                   _triggerHaptic();
                                   PaintingBinding.instance.imageCache.clear();
                                   PaintingBinding.instance.imageCache.clearLiveImages();
                                   if (mounted) {
                                     Navigator.pop(context);
-                                    UIHelper.showSuccessSnackBar(context, 'Cache gambar dan data sementara berhasil dibersihkan!');
+                                    UIHelper.showSuccessSnackBar(
+                                      context, 
+                                      isEn 
+                                          ? 'Image cache and temporary data cleared successfully!' 
+                                          : 'Cache gambar dan data sementara berhasil dibersihkan!',
+                                    );
                                   }
                                 },
                               ),
@@ -575,12 +612,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showCurrencyPicker(StateSetter setModalState) {
+    final isEn = LanguageManager.isEnglish;
     final currencies = [
-      {'code': 'IDR (Rp)', 'name': 'Rupiah Indonesia', 'symbol': 'Rp', 'flag': '🇮🇩', 'preview': 'Rp 15.000.000 / bulan'},
+      {'code': 'IDR (Rp)', 'name': isEn ? 'Indonesian Rupiah' : 'Rupiah Indonesia', 'symbol': 'Rp', 'flag': '🇮🇩', 'preview': isEn ? 'Rp 15,000,000 / mo' : 'Rp 15.000.000 / bulan'},
       {'code': 'USD (\$)', 'name': 'US Dollar', 'symbol': '\$', 'flag': '🇺🇸', 'preview': '\$ 3,500 / month'},
       {'code': 'EUR (€)', 'name': 'Euro', 'symbol': '€', 'flag': '🇪🇺', 'preview': '€ 3,200 / month'},
-      {'code': 'SGD (S\$)', 'name': 'Singapore Dollar', 'symbol': 'S\$', 'flag': '🇸🇬', 'preview': 'S\$ 4,800 / month'},
-      {'code': 'MYR (RM)', 'name': 'Ringgit Malaysia', 'symbol': 'RM', 'flag': '🇲🇾', 'preview': 'RM 5,500 / month'},
+      {'code': 'SGD (S\$)', 'name': isEn ? 'Singapore Dollar' : 'Singapore Dollar', 'symbol': 'S\$', 'flag': '🇸🇬', 'preview': 'S\$ 4,800 / month'},
+      {'code': 'MYR (RM)', 'name': isEn ? 'Malaysian Ringgit' : 'Ringgit Malaysia', 'symbol': 'RM', 'flag': '🇲🇾', 'preview': 'RM 5,500 / month'},
       {'code': 'JPY (¥)', 'name': 'Japanese Yen', 'symbol': '¥', 'flag': '🇯🇵', 'preview': '¥ 450,000 / month'},
     ];
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -603,7 +641,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pilih Mata Uang Default',
+                        isEn ? 'Select Default Currency' : 'Pilih Mata Uang Default',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -613,7 +651,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Digunakan untuk input ekspektasi gaji lamaran',
+                        isEn 
+                            ? 'Used for salary expectation & offer inputs' 
+                            : 'Digunakan untuk input ekspektasi gaji lamaran',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -698,7 +738,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Contoh: ${c['preview']}',
+                                '${isEn ? 'Preview: ' : 'Contoh: '}${c['preview']}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -747,40 +787,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showDateFormatPicker(StateSetter setModalState) {
+    final isEn = LanguageManager.isEnglish;
     final now = DateTime.now();
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
+    final months = isEn
+        ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        : ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     final previewId = '${now.day} ${months[now.month - 1]} ${now.year}';
     final formats = [
       {
         'id': 'DD MMMM YYYY',
         'title': 'DD MMMM YYYY',
-        'badge': 'Direkomendasikan',
+        'badge': isEn ? 'Recommended' : 'Direkomendasikan',
         'preview': previewId,
-        'desc': 'Format panjang standar formal (contoh: $previewId)',
+        'desc': isEn ? 'Long formal format (e.g. $previewId)' : 'Format panjang standar formal (contoh: $previewId)',
       },
       {
         'id': 'DD/MM/YYYY',
         'title': 'DD/MM/YYYY',
-        'badge': 'Standar ID & UK',
+        'badge': isEn ? 'ID & UK Standard' : 'Standar ID & UK',
         'preview': DateFormat('dd/MM/yyyy').format(now),
-        'desc': 'Format numerik hari-bulan-tahun',
+        'desc': isEn ? 'Numeric day-month-year' : 'Format numerik hari-bulan-tahun',
       },
       {
         'id': 'YYYY-MM-DD',
         'title': 'YYYY-MM-DD',
-        'badge': 'Format ISO',
+        'badge': isEn ? 'ISO Format' : 'Format ISO',
         'preview': DateFormat('yyyy-MM-dd').format(now),
-        'desc': 'Format teknis standar internasional',
+        'desc': isEn ? 'International ISO standard' : 'Format teknis standar internasional',
       },
       {
         'id': 'MM/DD/YYYY',
         'title': 'MM/DD/YYYY',
-        'badge': 'Standar US',
+        'badge': isEn ? 'US Standard' : 'Standar US',
         'preview': DateFormat('MM/dd/yyyy').format(now),
-        'desc': 'Format numerik bulan-hari-tahun',
+        'desc': isEn ? 'Numeric month-day-year' : 'Format numerik bulan-hari-tahun',
       },
     ];
 
@@ -804,7 +844,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pilih Format Tanggal',
+                        isEn ? 'Select Date Format' : 'Pilih Format Tanggal',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -814,7 +854,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Tampilan tanggal pada kartu lamaran & agenda',
+                        isEn 
+                            ? 'Date display format across application cards & agenda' 
+                            : 'Tampilan tanggal pada kartu lamaran & agenda',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -914,7 +956,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                'Contoh: ${f['preview']}',
+                                '${isEn ? 'Preview: ' : 'Contoh: '}${f['preview']}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -964,25 +1006,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showSortOptionPicker(StateSetter setModalState) {
+    final isEn = LanguageManager.isEnglish;
     final options = [
       {
         'id': 'Terbaru Ditambahkan',
-        'desc': 'Menampilkan lamaran yang paling baru Anda tambahkan di posisi paling atas',
+        'label': isEn ? 'Newest Added' : 'Terbaru Ditambahkan',
+        'desc': isEn 
+            ? 'Show your most recently added jobs at the top' 
+            : 'Menampilkan lamaran yang paling baru Anda tambahkan di posisi paling atas',
         'icon': CupertinoIcons.sparkles,
       },
       {
         'id': 'Deadline Terdekat',
-        'desc': 'Memprioritaskan lamaran dengan batas waktu & jadwal terdekat',
+        'label': isEn ? 'Closest Schedule' : 'Deadline Terdekat',
+        'desc': isEn 
+            ? 'Prioritize applications with upcoming interview schedules' 
+            : 'Memprioritaskan lamaran dengan batas waktu & jadwal terdekat',
         'icon': CupertinoIcons.clock_fill,
       },
       {
         'id': 'Nama Perusahaan A-Z',
-        'desc': 'Mengurutkan seluruh lamaran secara alfabetis nama perusahaan',
+        'label': isEn ? 'Company (A to Z)' : 'Nama Perusahaan A-Z',
+        'desc': isEn 
+            ? 'Sort all applications alphabetically by company name' 
+            : 'Mengurutkan seluruh lamaran secara alfabetis nama perusahaan',
         'icon': CupertinoIcons.textformat_abc,
       },
       {
         'id': 'Gaji Tertinggi',
-        'desc': 'Menampilkan peluang karir dengan penawaran gaji tertinggi lebih dulu',
+        'label': isEn ? 'Highest Salary' : 'Gaji Tertinggi',
+        'desc': isEn 
+            ? 'Display career opportunities with highest compensation first' 
+            : 'Menampilkan peluang karir dengan penawaran gaji tertinggi lebih dulu',
         'icon': CupertinoIcons.money_dollar_circle_fill,
       },
     ];
@@ -1007,7 +1062,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Urutan Lamaran Default',
+                        isEn ? 'Default Application Sort' : 'Urutan Lamaran Default',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -1017,7 +1072,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Metode pengurutan otomatis daftar lamaran',
+                        isEn 
+                            ? 'Automatic sorting method for applications list' 
+                            : 'Metode pengurutan otomatis daftar lamaran',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -1084,7 +1141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                opt['id'] as String,
+                                opt['label'] as String,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -1464,43 +1521,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
 
-    final List<Map<String, String>> faqs = [
-      {
-        'q': 'Apa itu AppliQ dan bagaimana cara kerjanya?',
-        'a':
-            'AppliQ adalah aplikasi pelacak lamaran kerja (Job Tracker) pintar yang membantu Anda mencatat setiap lamaran, menjadwalkan interview, melacak tahapan rekrutmen, hingga menganalisis konversi peluang karir secara real-time.',
-      },
-      {
-        'q': 'Bagaimana cara menjadwalkan notifikasi reminder interview?',
-        'a':
-            'Saat menambahkan atau mengedit tahapan interview pada detail lamaran, tentukan tanggal dan waktu jadwal. Pastikan tombol toggle "Notifikasi Pengingat" di menu Settings aktif agar aplikasi dapat mengirimkan reminder tepat waktu.',
-      },
-      {
-        'q': 'Apakah data lamaran dan riwayat gaji saya aman?',
-        'a':
-            'Sangat aman. AppliQ menerapkan standar Row-Level Security (RLS) di Supabase dan transmisi TLS terenkripsi. Tidak ada pengguna lain yang dapat melihat data posisi, gaji, maupun catatan interview Anda.',
-      },
-      {
-        'q': 'Bagaimana cara mencari dan memfilter lamaran yang sudah ada?',
-        'a':
-            'Buka menu Pelacak Lamaran atau Jadwal Agenda. Anda dapat menggunakan Search Bar di bagian atas untuk mencari berdasarkan nama perusahaan atau posisi, serta memfilter berdasarkan status (Terkirim, Interview, Diterima, Ditolak).',
-      },
-      {
-        'q': 'Apakah saya bisa mengekspor data riwayat lamaran?',
-        'a':
-            'Bisa. Fitur ekspor laporan tersedia untuk mengunduh rekapitulasi data lamaran kerja ke dalam format PDF profesional atau spreadsheet Excel.',
-      },
-      {
-        'q': 'Bagaimana cara mengubah tema aplikasi dan foto profil?',
-        'a':
-            'Anda dapat mengaktifkan Dark Mode atau Monochrome Mode langsung dari halaman Settings ini. Foto profil Anda disinkronkan secara otomatis dan elegan dari akun Google Anda.',
-      },
-      {
-        'q': 'Bagaimana cara menghapus akun secara permanen?',
-        'a':
-            'Masuk ke Edit Profile (klik kartu profil paling atas) lalu pilih "Delete Account" di bagian bawah. Seluruh data lamaran, riwayat interview, dan preferensi akun Anda akan dihapus permanen dari server.',
-      },
-    ];
+    final isEn = AppStrings.isEn;
+    final List<Map<String, String>> faqs = isEn
+        ? [
+            {
+              'q': 'What is AppliQ and how does it work?',
+              'a':
+                  'AppliQ is a smart job application tracker that helps you record every application, schedule interviews, track hiring stages, and analyze career opportunity conversions in real-time.',
+            },
+            {
+              'q': 'How do I schedule interview reminder notifications?',
+              'a':
+                  'When adding or editing an interview stage in the application details, set the date and time. Make sure "Reminder Notifications" toggle in Settings is active so the app can send you timely notifications.',
+            },
+            {
+              'q': 'Is my application data and salary history secure?',
+              'a':
+                  'Extremely secure. AppliQ enforces Row-Level Security (RLS) in Supabase and TLS encrypted transport. No other user can access your position, salary, or interview notes.',
+            },
+            {
+              'q': 'How do I search and filter existing applications?',
+              'a':
+                  'Open the Applications or Schedule tab. Use the Search Bar at the top to search by company or role name, and filter by status (Applied, Interview, Offered, Rejected).',
+            },
+            {
+              'q': 'Can I export my application history data?',
+              'a':
+                  'Yes. The export feature allows you to download your career history summary as a professional PDF report or CSV spreadsheet.',
+            },
+            {
+              'q': 'How do I change the app theme and profile picture?',
+              'a':
+                  'You can activate Dark Mode or Monochrome Mode directly in this Settings page. Your profile picture automatically synchronizes with your Google account.',
+            },
+            {
+              'q': 'How do I delete my account permanently?',
+              'a':
+                  'Go to Edit Profile (click the top profile card) and select "Delete Account" at the bottom. All your applications, stages, and preferences will be permanently wiped from the server.',
+            },
+          ]
+        : [
+            {
+              'q': 'Apa itu AppliQ dan bagaimana cara kerjanya?',
+              'a':
+                  'AppliQ adalah aplikasi pelacak lamaran kerja (Job Tracker) pintar yang membantu Anda mencatat setiap lamaran, menjadwalkan interview, melacak tahapan rekrutmen, hingga menganalisis konversi peluang karir secara real-time.',
+            },
+            {
+              'q': 'Bagaimana cara menjadwalkan notifikasi reminder interview?',
+              'a':
+                  'Saat menambahkan atau mengedit tahapan interview pada detail lamaran, tentukan tanggal dan waktu jadwal. Pastikan tombol toggle "Notifikasi Pengingat" di menu Settings aktif agar aplikasi dapat mengirimkan reminder tepat waktu.',
+            },
+            {
+              'q': 'Apakah data lamaran dan riwayat gaji saya aman?',
+              'a':
+                  'Sangat aman. AppliQ menerapkan standar Row-Level Security (RLS) di Supabase dan transmisi TLS terenkripsi. Tidak ada pengguna lain yang dapat melihat data posisi, gaji, maupun catatan interview Anda.',
+            },
+            {
+              'q': 'Bagaimana cara mencari dan memfilter lamaran yang sudah ada?',
+              'a':
+                  'Buka menu Pelacak Lamaran atau Jadwal Agenda. Anda dapat menggunakan Search Bar di bagian atas untuk mencari berdasarkan nama perusahaan atau posisi, serta memfilter berdasarkan status (Terkirim, Interview, Diterima, Ditolak).',
+            },
+            {
+              'q': 'Apakah saya bisa mengekspor data riwayat lamaran?',
+              'a':
+                  'Bisa. Fitur ekspor laporan tersedia untuk mengunduh rekapitulasi data lamaran kerja ke dalam format PDF profesional atau spreadsheet Excel.',
+            },
+            {
+              'q': 'Bagaimana cara mengubah tema aplikasi dan foto profil?',
+              'a':
+                  'Anda dapat mengaktifkan Dark Mode atau Monochrome Mode langsung dari halaman Settings ini. Foto profil Anda disinkronkan secara otomatis dan elegan dari akun Google Anda.',
+            },
+            {
+              'q': 'Bagaimana cara menghapus akun secara permanen?',
+              'a':
+                  'Masuk ke Edit Profile (klik kartu profil paling atas) lalu pilih "Delete Account" di bagian bawah. Seluruh data lamaran, riwayat interview, dan preferensi akun Anda akan dihapus permanen dari server.',
+            },
+          ];
 
     showModalBottomSheet(
       context: context,
@@ -1552,7 +1648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Pertanyaan umum & panduan penggunaan AppliQ',
+                              isEn ? 'General questions & guide on using AppliQ' : 'Pertanyaan umum & panduan penggunaan AppliQ',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

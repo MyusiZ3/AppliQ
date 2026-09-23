@@ -75,7 +75,12 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       final saved = await widget.repository.updateApplication(updated);
       if (mounted) {
         setState(() => _application = saved);
-        UIHelper.showSuccessSnackBar(context, 'Status diubah ke ${newStatus.label}');
+        UIHelper.showSuccessSnackBar(
+          context,
+          LanguageManager.isEnglish
+              ? 'Status updated to ${AppStrings.localizedStatus(newStatus)}'
+              : 'Status diubah ke ${newStatus.label}',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -89,18 +94,18 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Hapus Lamaran?'),
-        content: const Text('Seluruh data lamaran dan riwayat tahapan wawancara terkait akan dihapus permanen.'),
+        title: Text(AppStrings.deleteApplicationConfirmTitle),
+        content: Text(AppStrings.deleteApplicationConfirmMessage),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Batal'),
+            child: Text(AppStrings.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Hapus'),
+            child: Text(AppStrings.delete),
           ),
         ],
       ),
@@ -110,7 +115,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       try {
         await widget.repository.deleteApplication(widget.applicationId);
         if (mounted) {
-          UIHelper.showSuccessSnackBar(context, 'Lamaran telah dihapus');
+          UIHelper.showSuccessSnackBar(context, AppStrings.successDeleted);
           Navigator.of(context).pop(true);
         }
       } catch (e) {
@@ -132,7 +137,12 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     try {
       await widget.repository.updateApplicationLog(updated);
       if (mounted) {
-        UIHelper.showSuccessSnackBar(context, 'Status tahap "${log.stageName}" diubah ke $newResult');
+        UIHelper.showSuccessSnackBar(
+          context,
+          LanguageManager.isEnglish
+              ? 'Stage "${log.stageName}" status set to ${AppStrings.localizedResult(newResult)}'
+              : 'Status tahap "${log.stageName}" diubah ke $newResult',
+        );
         _loadData();
       }
     } catch (e) {
@@ -180,7 +190,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Update Status Tahap',
+                  AppStrings.updateStageStatusTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 17,
@@ -205,11 +215,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 const SizedBox(height: 20),
 
                 _buildStageOptionTile(
-                  title: 'Lolos / Selesai',
+                  title: AppStrings.stageOptionPassed,
                   icon: CupertinoIcons.checkmark_circle_fill,
                   color: const Color(0xFF10B981),
                   isDark: isDark,
-                  isSelected: log.result == 'Lolos' || log.result == 'Selesai',
+                  isSelected: log.result == 'Lolos' || log.result == 'Selesai' || log.result == 'Passed',
                   onTap: () async {
                     Navigator.pop(ctx);
                     await _updateLogResult(log, 'Lolos');
@@ -218,7 +228,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 const SizedBox(height: 8),
 
                 _buildStageOptionTile(
-                  title: 'Lanjut Tahap Berikutnya',
+                  title: AppStrings.stageOptionNext,
                   icon: CupertinoIcons.arrow_right_circle_fill,
                   color: const Color(0xFF3B82F6),
                   isDark: isDark,
@@ -232,11 +242,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 const SizedBox(height: 8),
 
                 _buildStageOptionTile(
-                  title: 'Diterima / Offering',
+                  title: AppStrings.stageOptionOffering,
                   icon: CupertinoIcons.sparkles,
                   color: const Color(0xFFF59E0B),
                   isDark: isDark,
-                  isSelected: log.result == 'Diterima',
+                  isSelected: log.result == 'Diterima' || log.result == 'Offering' || log.result == 'Accepted',
                   onTap: () async {
                     Navigator.pop(ctx);
                     await _updateLogResult(log, 'Diterima');
@@ -246,7 +256,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 const SizedBox(height: 8),
 
                 _buildStageOptionTile(
-                  title: 'Menunggu (Waiting)',
+                  title: AppStrings.stageOptionWaiting,
                   icon: CupertinoIcons.hourglass,
                   color: isDark
                       ? const Color(0xFFA1A1AA)
@@ -262,12 +272,14 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 const SizedBox(height: 8),
 
                 _buildStageOptionTile(
-                  title: 'Tidak Lolos (Gagal)',
+                  title: AppStrings.stageOptionFailed,
                   icon: CupertinoIcons.xmark_circle_fill,
                   color: const Color(0xFFEF4444),
                   isDark: isDark,
                   isSelected: log.result == 'Gagal' ||
-                      log.result == 'Ditolak',
+                      log.result == 'Ditolak' ||
+                      log.result == 'Rejected' ||
+                      log.result == 'Failed',
                   onTap: () async {
                     Navigator.pop(ctx);
                     await _updateLogResult(log, 'Gagal');
@@ -443,7 +455,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 4),
                                   child: Text(
-                                    'Batal',
+                                    AppStrings.cancel,
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
@@ -455,7 +467,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                 ),
                               ),
                               Text(
-                                isEditing ? 'Edit Tahap' : 'Tahap Baru',
+                                isEditing
+                                    ? (LanguageManager.isEnglish ? 'Edit Stage' : 'Edit Tahap')
+                                    : (LanguageManager.isEnglish ? 'New Stage' : 'Tahap Baru'),
                                 style: TextStyle(
                                   fontSize: 16.5,
                                   fontWeight: FontWeight.w700,
@@ -520,7 +534,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                               Navigator.of(context).pop();
                                               UIHelper.showSuccessSnackBar(
                                                   context,
-                                                  'Tahap rekrutmen berhasil diperbarui');
+                                                  LanguageManager.isEnglish
+                                                      ? 'Recruitment stage updated successfully'
+                                                      : 'Tahap rekrutmen berhasil diperbarui');
                                             }
                                           } else {
                                             final log = ApplicationLog(
@@ -562,7 +578,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                               Navigator.of(context).pop();
                                               UIHelper.showSuccessSnackBar(
                                                   context,
-                                                  'Tahap wawancara berhasil ditambahkan');
+                                                  LanguageManager.isEnglish
+                                                      ? 'Interview stage added successfully'
+                                                      : 'Tahap wawancara berhasil ditambahkan');
                                             }
                                           }
                                           _loadData();
@@ -589,7 +607,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                           ),
                                         )
                                       : Text(
-                                          'Simpan',
+                                          AppStrings.save,
                                           style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w700,
@@ -623,7 +641,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           padding:
                               const EdgeInsets.symmetric(horizontal: 20),
                           child: Text(
-                            'TIPE TAHAP',
+                            LanguageManager.isEnglish ? 'STAGE TYPE' : 'TIPE TAHAP',
                             style: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
@@ -719,7 +737,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           padding:
                               const EdgeInsets.symmetric(horizontal: 20),
                           child: Text(
-                            'INFORMASI UTAMA',
+                            LanguageManager.isEnglish ? 'MAIN INFORMATION' : 'INFORMASI UTAMA',
                             style: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
@@ -762,8 +780,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                           : AppColors.textPrimary,
                                     ),
                                     decoration: InputDecoration(
-                                      hintText:
-                                          'Nama tahap (misal: HR Interview)',
+                                      hintText: LanguageManager.isEnglish
+                                          ? 'Stage name (e.g. HR Interview)'
+                                          : 'Nama tahap (misal: HR Interview)',
                                       hintStyle: TextStyle(
                                         fontSize: 14,
                                         color: isDark
@@ -799,8 +818,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                           : AppColors.textPrimary,
                                     ),
                                     decoration: InputDecoration(
-                                      hintText:
-                                          'Pewawancara (misal: Ibu Sarah)',
+                                      hintText: LanguageManager.isEnglish
+                                          ? 'Interviewer (e.g. Sarah)'
+                                          : 'Pewawancara (misal: Ibu Sarah)',
                                       hintStyle: TextStyle(
                                         fontSize: 14,
                                         color: isDark
@@ -866,7 +886,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            '${DateFormat('dd MMM yyyy, HH:mm').format(scheduledDate)} WIB',
+                                            LanguageManager.isEnglish
+                                                ? DateFormat('dd MMM yyyy, HH:mm').format(scheduledDate)
+                                                : '${DateFormat('dd MMM yyyy, HH:mm').format(scheduledDate)} WIB',
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w600,
@@ -909,8 +931,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                           : AppColors.textPrimary,
                                     ),
                                     decoration: InputDecoration(
-                                      hintText:
-                                          'Tautan Google Meet / Zoom / Lokasi',
+                                      hintText: LanguageManager.isEnglish
+                                          ? 'Meeting Link / Zoom / Office Location'
+                                          : 'Tautan Google Meet / Zoom / Lokasi',
                                       hintStyle: TextStyle(
                                         fontSize: 14,
                                         color: isDark
@@ -947,8 +970,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                           : AppColors.textPrimary,
                                     ),
                                     decoration: InputDecoration(
-                                      hintText:
-                                          'Catatan / kisi-kisi persiapan...',
+                                      hintText: LanguageManager.isEnglish
+                                          ? 'Prep notes / questions to ask...'
+                                          : 'Catatan / kisi-kisi persiapan...',
                                       hintStyle: TextStyle(
                                         fontSize: 14,
                                         color: isDark
@@ -974,7 +998,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
-                              'STATUS HASIL TAHAP',
+                              LanguageManager.isEnglish ? 'STAGE RESULT STATUS' : 'STATUS HASIL TAHAP',
                               style: TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
@@ -1037,7 +1061,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
-                                              res,
+                                              AppStrings.localizedResult(res),
                                               style: TextStyle(
                                                 fontSize: 12.5,
                                                 fontWeight: isSelected
@@ -1213,7 +1237,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           IconButton(
             icon: const Icon(CupertinoIcons.pencil, size: 20),
             color: isDark ? Colors.white : const Color(0xFF18181B),
-            tooltip: 'Edit Lamaran',
+            tooltip: AppStrings.editApplicationTooltip,
             onPressed: () async {
               final updated = await Navigator.of(context).push(
                 MaterialPageRoute(
@@ -1228,7 +1252,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           ),
           IconButton(
             icon: const Icon(CupertinoIcons.trash, color: AppColors.expense, size: 20),
-            tooltip: 'Hapus',
+            tooltip: AppStrings.deleteTooltip,
             onPressed: _deleteApplication,
           ),
         ],
@@ -1312,7 +1336,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
 
                 // Quick Status Update Selector
                 Text(
-                  'Ubah Status:',
+                  '${AppStrings.updateStatus}:',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -1346,7 +1370,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                               ),
                             ),
                             child: Text(
-                              st.label,
+                              AppStrings.localizedStatus(st),
                               style: TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -1381,22 +1405,22 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             ),
             child: Column(
               children: [
-                _buildInfoRow('Tanggal Melamar', DateFormat('dd MMMM yyyy').format(app.appliedDate), CupertinoIcons.calendar, isDark),
+                _buildInfoRow(AppStrings.appliedDateLabel, DateFormat('dd MMMM yyyy').format(app.appliedDate), CupertinoIcons.calendar, isDark),
                 const Divider(height: 20),
-                _buildInfoRow('Sistem Kerja', app.workSystem.label, CupertinoIcons.briefcase, isDark),
+                _buildInfoRow(AppStrings.workSystemLabel, AppStrings.localizedWorkSystem(app.workSystem), CupertinoIcons.briefcase, isDark),
                 const Divider(height: 20),
-                _buildInfoRow('Sumber Lowongan', app.jobPortalCustom ?? app.jobPortal.label, CupertinoIcons.globe, isDark),
+                _buildInfoRow(AppStrings.jobSourceLabel, app.jobPortalCustom ?? AppStrings.localizedJobPortal(app.jobPortal), CupertinoIcons.globe, isDark),
                 if (app.location != null && app.location!.isNotEmpty) ...[
                   const Divider(height: 20),
-                  _buildInfoRow('Lokasi', app.location!, CupertinoIcons.location_solid, isDark),
+                  _buildInfoRow(AppStrings.locationLabel, app.location!, CupertinoIcons.location_solid, isDark),
                 ],
                 if (app.salaryExpectation != null) ...[
                   const Divider(height: 20),
-                  _buildInfoRow('Ekspektasi Gaji', 'Rp ${NumberFormat('#,###').format(app.salaryExpectation)}', CupertinoIcons.creditcard, isDark),
+                  _buildInfoRow(AppStrings.salaryExpectation, 'Rp ${NumberFormat('#,###').format(app.salaryExpectation)}', CupertinoIcons.creditcard, isDark),
                 ],
                 if (app.salaryOffered != null) ...[
                   const Divider(height: 20),
-                  _buildInfoRow('Gaji Ditawarkan', 'Rp ${NumberFormat('#,###').format(app.salaryOffered)}', CupertinoIcons.creditcard_fill, isDark),
+                  _buildInfoRow(AppStrings.salaryOffered, 'Rp ${NumberFormat('#,###').format(app.salaryOffered)}', CupertinoIcons.creditcard_fill, isDark),
                 ],
                 if (app.jobUrl != null && app.jobUrl!.isNotEmpty) ...[
                   const Divider(height: 20),
@@ -1407,12 +1431,12 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         children: [
                           Icon(CupertinoIcons.link, size: 18, color: isDark ? AppColors.textHintDark : AppColors.textHint),
                           const SizedBox(width: 8),
-                          Text('Link Lowongan', style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
+                          Text(AppStrings.jobUrlLabel, style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary)),
                         ],
                       ),
                       TextButton.icon(
                         icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 14),
-                        label: const Text('Buka URL'),
+                        label: Text(AppStrings.openUrl),
                         onPressed: () => UIHelper.openUrl(context, app.jobUrl),
                       ),
                     ],
@@ -1439,7 +1463,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Catatan Tambahan',
+                    AppStrings.notesTitle,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -1499,7 +1523,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          'Berkas & CV (Google Drive)',
+                          AppStrings.attachedDriveFiles,
                           style: TextStyle(
                             fontSize: 14.5,
                             fontWeight: FontWeight.w700,
@@ -1574,7 +1598,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             ),
                             child: IconButton(
                               icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 15, color: Color(0xFF10B981)),
-                              tooltip: 'Buka di Google Drive',
+                              tooltip: AppStrings.openInDrive,
                               padding: EdgeInsets.zero,
                               onPressed: () => UIHelper.openUrl(context, app.cvFileUrl),
                             ),
@@ -1589,7 +1613,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             ),
                             child: IconButton(
                               icon: const Icon(CupertinoIcons.trash, size: 15, color: Color(0xFFEF4444)),
-                              tooltip: 'Hapus Berkas',
+                              tooltip: AppStrings.delete,
                               padding: EdgeInsets.zero,
                               onPressed: _handleDeleteCvAttachment,
                             ),
@@ -1609,7 +1633,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Belum ada berkas CV yang dilampirkan. Edit lamaran untuk mengupload ke Google Drive.',
+                          AppStrings.noCvAttached,
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark ? AppColors.textHintDark : AppColors.textHint,
@@ -1630,7 +1654,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Tahapan Rekrutmen',
+                AppStrings.recruitmentStages,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -1640,7 +1664,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               ),
               TextButton.icon(
                 icon: const Icon(CupertinoIcons.plus_circle, size: 16),
-                label: const Text('Tambah Tahap'),
+                label: Text(AppStrings.addStageBtn),
                 onPressed: _showAddStageSheet,
               ),
             ],
@@ -1653,7 +1677,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               borderRadius: 20,
               child: Center(
                 child: Text(
-                  'Belum ada jadwal wawancara atau tahapan tes dicatat.',
+                  AppStrings.noStagesMsg,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -1728,7 +1752,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    log.result,
+                                    AppStrings.localizedResult(log.result),
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
@@ -1778,18 +1802,18 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                     await showCupertinoDialog<bool>(
                                   context: context,
                                   builder: (ctx) => CupertinoAlertDialog(
-                                    title: const Text('Hapus Tahap?'),
+                                    title: Text(AppStrings.deleteStageConfirm),
                                     content: Text(
-                                        'Hapus tahap "${log.stageName}" dari lamaran ini?'),
+                                        AppStrings.deleteStageMsg(log.stageName)),
                                     actions: [
                                       CupertinoDialogAction(
-                                        child: const Text('Batal'),
+                                        child: Text(AppStrings.cancel),
                                         onPressed: () =>
                                             Navigator.pop(ctx, false),
                                       ),
                                       CupertinoDialogAction(
                                         isDestructiveAction: true,
-                                        child: const Text('Hapus'),
+                                        child: Text(AppStrings.delete),
                                         onPressed: () =>
                                             Navigator.pop(ctx, true),
                                       ),
@@ -1801,7 +1825,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                     await widget.repository
                                         .deleteApplicationLog(log.id);
                                     UIHelper.showGlobalSuccessToast(
-                                        'Tahap berhasil dihapus');
+                                        AppStrings.stageDeletedSuccess);
                                     _loadData();
                                   } catch (e) {
                                     UIHelper.showGlobalErrorToast(
@@ -1825,7 +1849,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                     ),
                                     const SizedBox(width: 10),
                                     Text(
-                                      'Edit Tahap',
+                                      AppStrings.editStage,
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
@@ -1842,16 +1866,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                 value: 'delete',
                                 height: 38,
                                 child: Row(
-                                  children: const [
-                                    Icon(
+                                  children: [
+                                    const Icon(
                                       CupertinoIcons.trash,
                                       size: 15,
                                       color: AppColors.expense,
                                     ),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                     Text(
-                                      'Hapus Tahap',
-                                      style: TextStyle(
+                                      AppStrings.deleteStage,
+                                      style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.expense,
@@ -1882,7 +1906,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                '${DateFormat('dd MMM yyyy, HH:mm').format(log.scheduledAt!)} WIB',
+                                '${DateFormat('dd MMM yyyy, HH:mm').format(log.scheduledAt!)}${LanguageManager.isEnglish ? '' : ' WIB'}',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -1904,7 +1928,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Pewawancara: ${log.interviewerName}',
+                              '${AppStrings.interviewerPrefix}${log.interviewerName}',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,

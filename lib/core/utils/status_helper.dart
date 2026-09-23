@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../utils/language_manager.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_enums.dart';
+import '../localization/app_strings.dart';
 
 class StatusHelper {
   static String getFeedbackText(ApplicationStatus status, DateTime appliedDate) {
@@ -22,7 +23,9 @@ class StatusHelper {
     } else if (status == ApplicationStatus.rejected || status == ApplicationStatus.noResponse) {
       return isEn ? 'Stay motivated, more opportunities await!' : 'Semangat, masih ada kesempatan lainnya';
     } else {
-      return isEn ? 'You are currently in ${status.label} stage' : 'Kamu sedang dalam tahap ${status.label}';
+      return isEn 
+          ? 'You are currently in ${AppStrings.localizedStatus(status)} stage' 
+          : 'Kamu sedang dalam tahap ${status.label}';
     }
   }
 

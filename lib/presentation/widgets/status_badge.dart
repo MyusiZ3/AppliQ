@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_enums.dart';
+import '../../core/localization/app_strings.dart';
 import '../../core/utils/status_helper.dart';
 
 class StatusBadge extends StatelessWidget {
@@ -30,7 +31,7 @@ class StatusBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        status.label,
+        AppStrings.localizedStatus(status),
         style: TextStyle(
           color: color,
           fontSize: isCompact ? 11 : 12,

@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../data/repositories/job_repository.dart';
-import '../../../utils/language_manager.dart';
 import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/export_sheet.dart';
@@ -165,12 +164,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 items: [
                   NotchedPillItem(
                     value: 0,
-                    label: LanguageManager.isEnglish ? 'Pipeline Funnel' : 'Kategori Status',
+                    label: AppStrings.pipelineFunnel,
                     icon: CupertinoIcons.chart_pie_fill,
                   ),
                   NotchedPillItem(
                     value: 1,
-                    label: LanguageManager.isEnglish ? 'Systems & Portals' : 'Sistem & Portal',
+                    label: AppStrings.systemsAndPortals,
                     icon: CupertinoIcons.chart_bar_alt_fill,
                   ),
                 ],
@@ -193,10 +192,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           onRefresh: () => _loadStats(forceRefresh: true),
                           child: EmptyStateView(
                             icon: CupertinoIcons.chart_bar_alt_fill,
-                            title: LanguageManager.isEnglish ? 'No Analytics Data' : 'Belum Ada Data Statistik',
-                            message: LanguageManager.isEnglish
-                                ? 'Career analytics, interview conversion rates, and portal performance will be calculated once you start tracking applications.'
-                                : 'Statistik, rasio panggilan interview, dan efektivitas portal loker akan dihitung otomatis saat kamu mulai mencatat lamaran.',
+                            title: AppStrings.noAnalyticsDataTitle,
+                            message: AppStrings.noAnalyticsDataMessage,
                             action: ElevatedButton.icon(
                               onPressed: () async {
                                 final added = await Navigator.of(context).push(
@@ -215,7 +212,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     : Colors.white,
                               ),
                               label: Text(
-                                LanguageManager.isEnglish ? 'Add First Application' : 'Catat Lamaran Pertama',
+                                AppStrings.addFirstApp,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
@@ -281,9 +278,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Tingkat Keberhasilan Lamaran',
-                                        style: TextStyle(
+                                      Text(
+                                        AppStrings.successRateTitle,
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 14.5,
                                           fontWeight: FontWeight.w700,
@@ -309,7 +306,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 ),
                                                 const SizedBox(height: 2),
                                                 Text(
-                                                  'Panggilan Interview',
+                                                  AppStrings.interviewCallsRate,
                                                   style: TextStyle(
                                                     color: Colors.white
                                                         .withValues(
@@ -344,7 +341,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 ),
                                                 const SizedBox(height: 2),
                                                 Text(
-                                                  'Diterima Kerja',
+                                                  AppStrings.hiredRate,
                                                   style: TextStyle(
                                                     color: Colors.white
                                                         .withValues(
@@ -369,7 +366,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   children: [
                                     Expanded(
                                       child: MetricCard(
-                                        label: 'Total Lamaran',
+                                        label: AppStrings.totalApplicationsMetric,
                                         value: '$total',
                                         icon: CupertinoIcons.doc_text_fill,
                                         accentColor: AppColors.primary,
@@ -378,7 +375,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: MetricCard(
-                                        label: 'Tahap Interview',
+                                        label: AppStrings.interviewStageMetric,
                                         value: '$interview',
                                         icon: CupertinoIcons.mic_fill,
                                         accentColor: AppColors.warning,
@@ -391,7 +388,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   children: [
                                     Expanded(
                                       child: MetricCard(
-                                        label: 'Offering',
+                                        label: AppStrings.offeringMetric,
                                         value: '$offering',
                                         icon: CupertinoIcons.gift_fill,
                                         accentColor: AppColors.income,
@@ -400,7 +397,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: MetricCard(
-                                        label: 'Diterima Kerja',
+                                        label: AppStrings.hiredMetric,
                                         value: '$accepted',
                                         icon:
                                             CupertinoIcons.checkmark_seal_fill,
@@ -420,7 +417,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Distribusi Status Lamaran',
+                                        AppStrings.statusDistribution,
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
@@ -486,7 +483,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Distribusi Sistem Kerja',
+                                        AppStrings.workSystemDistribution,
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
@@ -503,7 +500,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             padding: const EdgeInsets.symmetric(
                                                 vertical: 12),
                                             child: Text(
-                                              'Belum ada data sistem kerja',
+                                              AppStrings.noWorkSystemData,
                                               style: TextStyle(
                                                   fontSize: 13,
                                                   color: isDark
@@ -543,7 +540,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Sumber Portal Lowongan',
+                                        AppStrings.portalSources,
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
@@ -560,7 +557,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             padding: const EdgeInsets.symmetric(
                                                 vertical: 12),
                                             child: Text(
-                                              'Belum ada data portal lowongan',
+                                              AppStrings.noPortalData,
                                               style: TextStyle(
                                                   fontSize: 13,
                                                   color: isDark

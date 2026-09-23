@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/localization/app_strings.dart';
 import '../../data/repositories/job_repository.dart';
+import '../../utils/language_manager.dart';
 import '../widgets/appliq_logo.dart';
 import 'auth/login_screen.dart';
 
@@ -23,23 +25,32 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late final AnimationController _animController;
   late final Animation<double> _floatAnimation;
 
-  final List<OnboardingData> _pages = [
-    OnboardingData(
-      title: 'Kendalikan Proses\nLamaran Kerja',
-      subtitle: 'Catat setiap lowongan, posisi, dan perusahaan yang kamu lamar dalam hitungan detik.',
-      type: OnboardingType.tracker,
-    ),
-    OnboardingData(
-      title: 'Pantau Jadwal\nWawancara & Tes',
-      subtitle: 'Simpan nama interviewer, catatan teknis, dan tautan pertemuan secara rapi dalam satu tempat.',
-      type: OnboardingType.schedule,
-    ),
-    OnboardingData(
-      title: 'Analitik Pelamar\nBerbasis Data',
-      subtitle: 'Ketahui portal loker paling efektif dan tingkat keberhasilan interview kamu secara real-time.',
-      type: OnboardingType.analytics,
-    ),
-  ];
+  List<OnboardingData> get _pages {
+    final isEn = LanguageManager.isEnglish;
+    return [
+      OnboardingData(
+        title: isEn ? 'Take Control of Your\nJob Applications' : 'Kendalikan Proses\nLamaran Kerja',
+        subtitle: isEn 
+            ? 'Track every job vacancy, role, and company you apply to in seconds.' 
+            : 'Catat setiap lowongan, posisi, dan perusahaan yang kamu lamar dalam hitungan detik.',
+        type: OnboardingType.tracker,
+      ),
+      OnboardingData(
+        title: isEn ? 'Track Interview &\nTest Schedules' : 'Pantau Jadwal\nWawancara & Tes',
+        subtitle: isEn 
+            ? 'Keep interviewer names, technical notes, and video meeting links neatly in one place.' 
+            : 'Simpan nama interviewer, catatan teknis, dan tautan pertemuan secara rapi dalam satu tempat.',
+        type: OnboardingType.schedule,
+      ),
+      OnboardingData(
+        title: isEn ? 'Data-Driven\nCareer Analytics' : 'Analitik Pelamar\nBerbasis Data',
+        subtitle: isEn 
+            ? 'Discover your most effective job portals and track interview conversion rates in real-time.' 
+            : 'Ketahui portal loker paling efektif dan tingkat keberhasilan interview kamu secara real-time.',
+        type: OnboardingType.analytics,
+      ),
+    ];
+  }
 
   @override
   void initState() {
@@ -125,7 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                       child: Text(
-                        'Lewati',
+                        LanguageManager.isEnglish ? 'Skip' : 'Lewati',
                         style: TextStyle(
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
@@ -396,7 +407,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Rp 22.000.000 - 30.000.000 / bln',
+                      'Rp 22.000.000 - 30.000.000 ${AppStrings.perMonth}',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -404,7 +415,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ),
                     ),
                     Text(
-                      '2 jam lalu',
+                      LanguageManager.isEnglish ? '2h ago' : '2 jam lalu',
                       style: TextStyle(
                         fontSize: 11.5,
                         color: isDark ? AppColors.textHintDark : AppColors.textHint,
@@ -464,7 +475,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Besok, 10:00 WIB',
+                        LanguageManager.isEnglish ? 'Tomorrow, 10:00 AM' : 'Besok, 10:00 WIB',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -510,7 +521,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ),
             const SizedBox(height: 4),
             Text(
-              'Bank Digital Asia • Bersama Engineering Manager',
+              LanguageManager.isEnglish 
+                  ? 'Asia Digital Bank • with Engineering Manager' 
+                  : 'Bank Digital Asia • Bersama Engineering Manager',
               style: TextStyle(
                 fontSize: 12.5,
                 color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
@@ -562,11 +575,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         // 3 Key Metric Capsules
         Row(
           children: [
-            Expanded(child: _buildMetricItem('24', 'Total Lamaran', CupertinoIcons.briefcase_fill, isDark, cardBg, borderColor)),
+            Expanded(child: _buildMetricItem('24', AppStrings.statTotal, CupertinoIcons.briefcase_fill, isDark, cardBg, borderColor)),
             const SizedBox(width: 10),
-            Expanded(child: _buildMetricItem('8', 'Interview', CupertinoIcons.chat_bubble_2_fill, isDark, cardBg, borderColor)),
+            Expanded(child: _buildMetricItem('8', AppStrings.statInterview, CupertinoIcons.chat_bubble_2_fill, isDark, cardBg, borderColor)),
             const SizedBox(width: 10),
-            Expanded(child: _buildMetricItem('3', 'Offering', CupertinoIcons.sparkles, isDark, cardBg, borderColor)),
+            Expanded(child: _buildMetricItem('3', AppStrings.statOffering, CupertinoIcons.sparkles, isDark, cardBg, borderColor)),
           ],
         ),
         const SizedBox(height: 14),
@@ -594,7 +607,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Tingkat Keberhasilan (Conversion)',
+                    LanguageManager.isEnglish ? 'Conversion Rate' : 'Tingkat Keberhasilan (Conversion)',
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
@@ -787,7 +800,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Mulai',
+                              LanguageManager.isEnglish ? 'Get Started' : 'Mulai',
                               style: TextStyle(
                                 color: btnFg,
                                 fontWeight: FontWeight.bold,

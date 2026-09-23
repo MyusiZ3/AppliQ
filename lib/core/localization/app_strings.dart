@@ -1,274 +1,384 @@
 import '../../utils/language_manager.dart';
 import '../constants/app_enums.dart';
+import 'languages/base_language.dart';
+import 'languages/en_language.dart';
+import 'languages/id_language.dart';
+import 'languages/ja_language.dart';
+import 'languages/ko_language.dart';
 
+/// Central localization facade for AppliQ.
+/// Dynamically resolves strings to the active [BaseLanguage] instance
+/// without any string-map lookup overhead.
 class AppStrings {
-  static bool get _isEn => LanguageManager.isEnglish;
+  static final BaseLanguage _id = IdLanguage();
+  static final BaseLanguage _en = EnLanguage();
+  static final BaseLanguage _ja = JaLanguage();
+  static final BaseLanguage _ko = KoLanguage();
+
+  /// Returns the active language instance.
+  static BaseLanguage get current {
+    switch (LanguageManager.current) {
+      case AppLanguage.id:
+        return _id;
+      case AppLanguage.en:
+        return _en;
+      case AppLanguage.ja:
+        return _ja;
+      case AppLanguage.ko:
+        return _ko;
+    }
+  }
+
+  static bool get isEn => LanguageManager.isEnglish;
 
   // Navigation
-  static String get navHome => _isEn ? 'Home' : 'Home';
-  static String get navApplications => _isEn ? 'Applications' : 'Lamaran';
-  static String get navAnalytics => _isEn ? 'Analytics' : 'Analitik';
-  static String get navProfile => _isEn ? 'Profile' : 'Profil';
+  static String get navHome => current.navHome;
+  static String get navApplications => current.navApplications;
+  static String get navAnalytics => current.navAnalytics;
+  static String get navProfile => current.navProfile;
 
   // Common Actions & Labels
-  static String get cancel => _isEn ? 'Cancel' : 'Batal';
-  static String get save => _isEn ? 'Save' : 'Simpan';
-  static String get delete => _isEn ? 'Delete' : 'Hapus';
-  static String get edit => _isEn ? 'Edit' : 'Edit';
-  static String get close => _isEn ? 'Close' : 'Tutup';
-  static String get search => _isEn ? 'Search...' : 'Cari...';
-  static String get filter => _isEn ? 'Filter' : 'Filter';
-  static String get sort => _isEn ? 'Sort' : 'Urutkan';
-  static String get reset => _isEn ? 'Reset' : 'Reset';
-  static String get apply => _isEn ? 'Apply' : 'Terapkan';
-  static String get confirm => _isEn ? 'Confirm' : 'Konfirmasi';
-  static String get done => _isEn ? 'Done' : 'Selesai';
-  static String get back => _isEn ? 'Back' : 'Kembali';
-  static String get retry => _isEn ? 'Retry' : 'Coba Lagi';
-  static String get loading => _isEn ? 'Loading...' : 'Memuat...';
-  static String get empty => _isEn ? 'No data' : 'Tidak ada data';
-  static String get comingSoon => _isEn ? 'Coming Soon' : 'Segera Hadir';
-  static String get viewAll => _isEn ? 'View All' : 'Lihat Semua';
-  static String get openInDrive => _isEn ? 'Open in Google Drive' : 'Buka di Google Drive';
+  static String get cancel => current.cancel;
+  static String get save => current.save;
+  static String get delete => current.delete;
+  static String get edit => current.edit;
+  static String get close => current.close;
+  static String get search => current.search;
+  static String get filter => current.filter;
+  static String get sort => current.sort;
+  static String get reset => current.reset;
+  static String get apply => current.apply;
+  static String get confirm => current.confirm;
+  static String get done => current.done;
+  static String get back => current.back;
+  static String get retry => current.retry;
+  static String get loading => current.loading;
+  static String get empty => current.empty;
+  static String get comingSoon => current.comingSoon;
+  static String get viewAll => current.viewAll;
+  static String get openInDrive => current.openInDrive;
+  static String get scheduleDateLabel => current.scheduleDateLabel;
 
   // Home Screen
-  static String get greetingMorning => _isEn ? 'Good Morning' : 'Selamat Pagi';
-  static String get greetingAfternoon => _isEn ? 'Good Afternoon' : 'Selamat Siang';
-  static String get greetingEvening => _isEn ? 'Good Evening' : 'Selamat Sore';
-  static String get greetingNight => _isEn ? 'Good Night' : 'Selamat Malam';
-  static String get homeSubtitle => _isEn ? 'Track your career journey seamlessly' : 'Pantau perjalanan karirmu hari ini';
-  static String get homeSearchHint => _isEn ? 'Search company or position...' : 'Cari perusahaan atau posisi...';
-  static String get statTotal => _isEn ? 'Total Applied' : 'Total Lamaran';
-  static String get statActive => _isEn ? 'In Progress' : 'Sedang Proses';
-  static String get statInterview => _isEn ? 'Interview' : 'Interview';
-  static String get statOffering => _isEn ? 'Offer / Accepted' : 'Offer / Diterima';
-  static String get recentApplications => _isEn ? 'Recent Applications' : 'Lamaran Terbaru';
-  static String get quickAddApplication => _isEn ? 'Add Application' : 'Tambah Lamaran';
-  static String get quickAddTooltip => _isEn ? 'Record new job application' : 'Catat lamaran kerja baru';
-  static String get upcomingReminders => _isEn ? 'Upcoming Reminders' : 'Pengingat Mendatang';
-  static String get noReminders => _isEn ? 'No upcoming interview or schedule' : 'Tidak ada jadwal atau interview mendatang';
-  static String get emptyRecentApps => _isEn ? 'No job applications recorded yet' : 'Belum ada lamaran kerja yang dicatat';
-  static String get addFirstApp => _isEn ? 'Add Your First Job' : 'Tambah Lamaran Pertama';
+  static String get greetingMorning => current.greetingMorning;
+  static String get greetingAfternoon => current.greetingAfternoon;
+  static String get greetingEvening => current.greetingEvening;
+  static String get greetingNight => current.greetingNight;
+  static String get homeSubtitle => current.homeSubtitle;
+  static String get homeSearchHint => current.homeSearchHint;
+  static String get statTotal => current.statTotal;
+  static String get statActive => current.statActive;
+  static String get statInterview => current.statInterview;
+  static String get statOffering => current.statOffering;
+  static String get recentApplications => current.recentApplications;
+  static String get quickAddApplication => current.quickAddApplication;
+  static String get quickSchedule => current.quickSchedule;
+  static String get quickTemplate => current.quickTemplate;
+  static String get quickExport => current.quickExport;
+  static String get quickAddTooltip => current.quickAddTooltip;
+  static String get upcomingReminders => current.upcomingReminders;
+  static String get noReminders => current.noReminders;
+  static String get emptyRecentApps => current.emptyRecentApps;
+  static String get emptyRecentAppsDesc => current.emptyRecentAppsDesc;
+  static String get addFirstApp => current.addFirstApp;
+  static String get applicationSummary => current.applicationSummary;
+  static String get statsButton => current.statsButton;
+  static String get appliedLabel => current.appliedLabel;
+  static String get nextSchedule => current.nextSchedule;
+  static String get openMeetingLink => current.openMeetingLink;
+  static String get viewDetails => current.viewDetails;
+  static String get followUpNeeded => current.followUpNeeded;
+  static String get sendFollowUpEmail => current.sendFollowUpEmail;
+  static String get appliedCompanies => current.appliedCompanies;
+  static String get noAppliedCompanies => current.noAppliedCompanies;
+  static String get salaryUndisclosed => current.salaryUndisclosed;
+  static String get perMonth => current.perMonth;
+  static String positionsCount(int count) => current.positionsCount(count);
+  static String applicationsCount(int count) => current.applicationsCount(count);
+  static String staleAppSingle(String company) => current.staleAppSingle(company);
+  static String staleAppMulti(int count, String company) => current.staleAppMulti(count, company);
 
   // Applications List Screen
-  static String get applicationsTitle => _isEn ? 'Applications' : 'Daftar Lamaran';
-  static String get allStatusTab => _isEn ? 'All' : 'Semua';
-  static String get searchApplicationPlaceholder => _isEn ? 'Search position, company, location...' : 'Cari posisi, perusahaan, lokasi...';
-  static String get filterStatus => _isEn ? 'Filter Status' : 'Filter Status';
-  static String get filterPortal => _isEn ? 'Job Portal' : 'Portal Lowongan';
-  static String get filterWorkSystem => _isEn ? 'Work System' : 'Sistem Kerja';
-  static String get filterEmploymentType => _isEn ? 'Job Type' : 'Tipe Pekerjaan';
-  static String get sortNewest => _isEn ? 'Newest Applied' : 'Paling Baru Dilamar';
-  static String get sortOldest => _isEn ? 'Oldest Applied' : 'Paling Lama Dilamar';
-  static String get sortCompanyAZ => _isEn ? 'Company (A to Z)' : 'Perusahaan (A - Z)';
-  static String get sortSalaryHighest => _isEn ? 'Highest Salary' : 'Gaji Tertinggi';
-  static String get noApplicationsFound => _isEn ? 'No applications match your criteria' : 'Tidak ada lamaran yang sesuai kriteria';
-  static String get clearFilters => _isEn ? 'Reset Filter' : 'Reset Filter';
-  static String get deleteApplicationConfirmTitle => _isEn ? 'Delete Application?' : 'Hapus Lamaran?';
-  static String get deleteApplicationConfirmMessage => _isEn 
-      ? 'This application and all associated interview logs will be permanently deleted.' 
-      : 'Lamaran ini dan seluruh riwayat tahap interview akan dihapus permanen.';
+  static String get applicationsTitle => current.applicationsTitle;
+  static String get allStatusTab => current.allStatusTab;
+  static String get searchApplicationPlaceholder => current.searchApplicationPlaceholder;
+  static String get filterStatus => current.filterStatus;
+  static String get filterPortal => current.filterPortal;
+  static String get filterWorkSystem => current.filterWorkSystem;
+  static String get filterEmploymentType => current.filterEmploymentType;
+  static String get sortNewest => current.sortNewest;
+  static String get sortOldest => current.sortOldest;
+  static String get sortCompanyAZ => current.sortCompanyAZ;
+  static String get sortSalaryHighest => current.sortSalaryHighest;
+  static String get sortStarredFirst => current.sortStarredFirst;
+  static String get noApplicationsFound => current.noApplicationsFound;
+  static String get clearFilters => current.clearFilters;
+  static String get deleteApplicationConfirmTitle => current.deleteApplicationConfirmTitle;
+  static String get deleteApplicationConfirmMessage => current.deleteApplicationConfirmMessage;
+  static String get listView => current.listView;
+  static String get kanbanBoard => current.kanbanBoard;
+  static String get starred => current.starred;
+  static String get emptyKanban => current.emptyKanban;
+  static String get noApplicationsYet => current.noApplicationsYet;
+  static String get noApplicationsYetMsg => current.noApplicationsYetMsg;
+  static String get newApplicationBtn => current.newApplicationBtn;
 
   // Application Detail Screen
-  static String get applicationDetailTitle => _isEn ? 'Application Details' : 'Detail Lamaran';
-  static String get overviewTab => _isEn ? 'Overview' : 'Ringkasan';
-  static String get timelineTab => _isEn ? 'Timeline & Logs' : 'Tahapan & Catatan';
-  static String get companyInfo => _isEn ? 'Company Information' : 'Informasi Perusahaan';
-  static String get salaryDetails => _isEn ? 'Salary Expectation & Offer' : 'Ekspektasi & Penawaran Gaji';
-  static String get salaryExpectation => _isEn ? 'Expectation' : 'Ekspektasi Gaji';
-  static String get salaryOffered => _isEn ? 'Offered' : 'Penawaran Gaji';
-  static String get appliedOn => _isEn ? 'Applied on' : 'Dilamar pada';
-  static String get notesTitle => _isEn ? 'Notes & Details' : 'Catatan Tambahan';
-  static String get noNotes => _isEn ? 'No notes added for this application.' : 'Belum ada catatan untuk lamaran ini.';
-  static String get jobUrlLabel => _isEn ? 'Job Posting Link' : 'Tautan Lowongan Kerja';
-  static String get openJobUrl => _isEn ? 'Open Link' : 'Buka Link';
-  static String get updateStatus => _isEn ? 'Update Status' : 'Ubah Status';
-  static String get selectNewStatus => _isEn ? 'Select Application Status' : 'Pilih Status Lamaran';
-  static String get addTimelineStage => _isEn ? 'Add Stage Log' : 'Tambah Catatan Tahap';
-  static String get editTimelineStage => _isEn ? 'Edit Stage Log' : 'Edit Catatan Tahap';
-  static String get deleteTimelineStage => _isEn ? 'Delete Stage' : 'Hapus Tahap';
-  static String get stageNameLabel => _isEn ? 'Stage Name (e.g., HR Interview, Technical Test)' : 'Nama Tahap (cth: HR Interview, User Test)';
-  static String get stageDateLabel => _isEn ? 'Schedule / Date' : 'Tanggal / Jadwal';
-  static String get stageNotesLabel => _isEn ? 'Notes / Feedback / Questions Asked' : 'Catatan / Pertanyaan / Feedback';
-  static String get cvAttachmentTitle => _isEn ? 'Attached CV / Portfolio' : 'Lampiran CV / Portofolio';
-  static String get savedInDrive => _isEn ? 'Saved in Google Drive' : 'Tersimpan di Google Drive';
-  static String get uploadCvToDrive => _isEn ? 'Upload CV / Resume to Google Drive' : 'Upload CV / Berkas ke Google Drive';
-  static String get manageAttachment => _isEn ? 'Manage Document Attachment' : 'Kelola Berkas Lampiran';
-  static String get deleteFromDrive => _isEn ? 'Permanently Delete from Google Drive' : 'Hapus Permanen dari Google Drive';
-  static String get detachOnly => _isEn ? 'Detach Attachment Only' : 'Lepas Lampiran Saja';
+  static String get applicationDetailTitle => current.applicationDetailTitle;
+  static String get overviewTab => current.overviewTab;
+  static String get timelineTab => current.timelineTab;
+  static String get companyInfo => current.companyInfo;
+  static String get salaryDetails => current.salaryDetails;
+  static String get salaryExpectation => current.salaryExpectation;
+  static String get salaryOffered => current.salaryOffered;
+  static String get appliedOn => current.appliedOn;
+  static String get notesTitle => current.notesTitle;
+  static String get noNotes => current.noNotes;
+  static String get jobUrlLabel => current.jobUrlLabel;
+  static String get openJobUrl => current.openJobUrl;
+  static String get updateStatus => current.updateStatus;
+  static String get selectNewStatus => current.selectNewStatus;
+  static String get addTimelineStage => current.addTimelineStage;
+  static String get editTimelineStage => current.editTimelineStage;
+  static String get deleteTimelineStage => current.deleteTimelineStage;
+  static String get stageNameLabel => current.stageNameLabel;
+  static String get stageDateLabel => current.stageDateLabel;
+  static String get stageNotesLabel => current.stageNotesLabel;
+  static String get cvAttachmentTitle => current.cvAttachmentTitle;
+  static String get savedInDrive => current.savedInDrive;
+  static String get uploadCvToDrive => current.uploadCvToDrive;
+  static String get manageAttachment => current.manageAttachment;
+  static String get deleteFromDrive => current.deleteFromDrive;
+  static String get detachOnly => current.detachOnly;
+  static String get updateStageStatusTitle => current.updateStageStatusTitle;
+  static String get stageOptionPassed => current.stageOptionPassed;
+  static String get stageOptionNext => current.stageOptionNext;
+  static String get stageOptionOffering => current.stageOptionOffering;
+  static String get stageOptionWaiting => current.stageOptionWaiting;
+  static String get stageOptionFailed => current.stageOptionFailed;
+  static String get deleteStageConfirmTitle => current.deleteStageConfirmTitle;
+  static String get deleteStageConfirmMessage => current.deleteStageConfirmMessage;
+  static String get noStagesRecorded => current.noStagesRecorded;
+  static String get addStagePrompt => current.addStagePrompt;
+  static String get interviewerLabel => current.interviewerLabel;
+  static String get interviewerHint => current.interviewerHint;
+  static String get meetingLinkLabel => current.meetingLinkLabel;
+  static String get meetingLinkHint => current.meetingLinkHint;
+  static String get openMeetingButton => current.openMeetingButton;
+  static String get quickStagesTitle => current.quickStagesTitle;
+  static String get stageStatusResult => current.stageStatusResult;
+  static String get stageNotesPlaceholder => current.stageNotesPlaceholder;
+  static String get editApplicationTooltip => current.editApplicationTooltip;
+  static String get deleteTooltip => current.deleteTooltip;
+  static String get jobSourceLabel => current.jobSourceLabel;
+  static String get openUrl => current.openUrl;
+  static String get attachedDriveFiles => current.attachedDriveFiles;
+  static String get noCvAttached => current.noCvAttached;
+  static String get recruitmentStages => current.recruitmentStages;
+  static String get addStageBtn => current.addStageBtn;
+  static String get noStagesMsg => current.noStagesMsg;
+  static String get editStage => current.editStage;
+  static String get deleteStage => current.deleteStage;
+  static String get deleteStageConfirm => current.deleteStageConfirm;
+  static String deleteStageMsg(String stageName) => current.deleteStageMsg(stageName);
+  static String get stageDeletedSuccess => current.stageDeletedSuccess;
+  static String get stageResultUpdated => current.stageResultUpdated;
 
   // Application Form Screen
-  static String get createApplicationTitle => _isEn ? 'New Application' : 'Tambah Lamaran Baru';
-  static String get editApplicationTitle => _isEn ? 'Edit Application' : 'Edit Data Lamaran';
-  static String get companyNameLabel => _isEn ? 'Company Name' : 'Nama Perusahaan';
-  static String get companyNameHint => _isEn ? 'e.g. Google, GoTo, Tokopedia' : 'Cth: GoTo, Shopee, BCA';
-  static String get companyNameRequired => _isEn ? 'Please enter company name' : 'Nama perusahaan wajib diisi';
-  static String get positionTitleLabel => _isEn ? 'Position Title' : 'Posisi Pekerjaan';
-  static String get positionTitleHint => _isEn ? 'e.g. Senior Flutter Developer' : 'Cth: Flutter Developer, Product Manager';
-  static String get positionTitleRequired => _isEn ? 'Please enter position title' : 'Posisi pekerjaan wajib diisi';
-  static String get locationLabel => _isEn ? 'Location' : 'Lokasi / Kota';
-  static String get locationHint => _isEn ? 'e.g. Jakarta Selatan, Remote' : 'Cth: Jakarta Selatan, Remote';
-  static String get appliedDateLabel => _isEn ? 'Application Date' : 'Tanggal Melamar';
-  static String get saveApplicationButton => _isEn ? 'Save Application' : 'Simpan Lamaran';
-  static String get updateApplicationButton => _isEn ? 'Save Changes' : 'Simpan Perubahan';
+  static String get createApplicationTitle => current.createApplicationTitle;
+  static String get editApplicationTitle => current.editApplicationTitle;
+  static String get vacancyInfoSection => current.vacancyInfoSection;
+  static String get companyNameLabel => current.companyNameLabel;
+  static String get companyNameHint => current.companyNameHint;
+  static String get companyNameRequired => current.companyNameRequired;
+  static String get positionTitleLabel => current.positionTitleLabel;
+  static String get positionTitleHint => current.positionTitleHint;
+  static String get positionTitleRequired => current.positionTitleRequired;
+  static String get locationLabel => current.locationLabel;
+  static String get locationHint => current.locationHint;
+  static String get workTypeAndSystemSection => current.workTypeAndSystemSection;
+  static String get employmentTypeLabel => current.employmentTypeLabel;
+  static String get workSystemLabel => current.workSystemLabel;
+  static String get jobPortalSection => current.jobPortalSection;
+  static String get otherPortalHint => current.otherPortalHint;
+  static String get jobUrlSection => current.jobUrlSection;
+  static String get jobUrlHint => current.jobUrlHint;
+  static String get currentStatusSection => current.currentStatusSection;
+  static String get appliedDateLabel => current.appliedDateLabel;
+  static String get salarySection => current.salarySection;
+  static String get salaryExpectationHint => current.salaryExpectationHint;
+  static String get salaryOfferedHint => current.salaryOfferedHint;
+  static String get notesSection => current.notesSection;
+  static String get notesHint => current.notesHint;
+  static String get saveApplicationButton => current.saveApplicationButton;
+  static String get updateApplicationButton => current.updateApplicationButton;
 
   // Dashboard / Analytics Screen
-  static String get analyticsTitle => _isEn ? 'Career Analytics' : 'Analitik Karir';
-  static String get pipelineFunnel => _isEn ? 'Application Funnel' : 'Tahapan & Konversi Lamaran';
-  static String get topPortals => _isEn ? 'Top Job Portals' : 'Portal Kerja Paling Efektif';
-  static String get monthlyApplications => _isEn ? 'Monthly Activity' : 'Aktivitas Lamaran Bulanan';
-  static String get responseRate => _isEn ? 'Interview Conversion' : 'Rasio Dipanggil Interview';
-  static String get offerRate => _isEn ? 'Offer Success Rate' : 'Rasio Diterima / Offer';
-  static String get totalApplicationsMetric => _isEn ? 'Total Tracked' : 'Total Lamaran';
-  static String get activeApplicationsMetric => _isEn ? 'Active Pipeline' : 'Sedang Berjalan';
+  static String get analyticsTitle => current.analyticsTitle;
+  static String get pipelineFunnel => current.pipelineFunnel;
+  static String get systemsAndPortals => current.systemsAndPortals;
+  static String get successRateTitle => current.successRateTitle;
+  static String get interviewCallsRate => current.interviewCallsRate;
+  static String get hiredRate => current.hiredRate;
+  static String get topPortals => current.topPortals;
+  static String get monthlyApplications => current.monthlyApplications;
+  static String get responseRate => current.responseRate;
+  static String get offerRate => current.offerRate;
+  static String get totalApplicationsMetric => current.totalApplicationsMetric;
+  static String get interviewStageMetric => current.interviewStageMetric;
+  static String get offeringMetric => current.offeringMetric;
+  static String get hiredMetric => current.hiredMetric;
+  static String get statusDistribution => current.statusDistribution;
+  static String get workSystemDistribution => current.workSystemDistribution;
+  static String get noWorkSystemData => current.noWorkSystemData;
+  static String get portalSources => current.portalSources;
+  static String get noPortalData => current.noPortalData;
+  static String get noAnalyticsDataTitle => current.noAnalyticsDataTitle;
+  static String get noAnalyticsDataMessage => current.noAnalyticsDataMessage;
+
+  // Schedule Screen
+  static String get scheduleTitle => current.scheduleTitle;
+  static String get searchScheduleHint => current.searchScheduleHint;
+  static String get upcomingTab => current.upcomingTab;
+  static String get allAgendaTab => current.allAgendaTab;
+  static String get noScheduleTitle => current.noScheduleTitle;
+  static String get noScheduleMessage => current.noScheduleMessage;
+  static String get refreshSchedule => current.refreshSchedule;
+  static String get noScheduleFoundTitle => current.noScheduleFoundTitle;
+  static String noScheduleFoundMessage(String query) => current.noScheduleFoundMessage(query);
+  static String get resetSearch => current.resetSearch;
+  static String get noUpcomingScheduleTitle => current.noUpcomingScheduleTitle;
+  static String get noUpcomingScheduleMessage => current.noUpcomingScheduleMessage;
+  static String get noPastScheduleMessage => current.noPastScheduleMessage;
+  static String get sectionOverdue => current.sectionOverdue;
+  static String get sectionOverdueSubtitle => current.sectionOverdueSubtitle;
+  static String get sectionToday => current.sectionToday;
+  static String get sectionTodaySubtitle => current.sectionTodaySubtitle;
+  static String get sectionThisWeek => current.sectionThisWeek;
+  static String get sectionThisWeekSubtitle => current.sectionThisWeekSubtitle;
+  static String get sectionUpcoming => current.sectionUpcoming;
+  static String get sectionUpcomingSubtitle => current.sectionUpcomingSubtitle;
+  static String get sectionHistory => current.sectionHistory;
+  static String get sectionHistorySubtitle => current.sectionHistorySubtitle;
+  static String get interviewerPrefix => current.interviewerPrefix;
+  static String get openMeetingRoom => current.openMeetingRoom;
 
   // Profile & Settings Screen
-  static String get profileTitle => _isEn ? 'Profile & Settings' : 'Profil & Pengaturan';
-  static String get accountSection => _isEn ? 'Account' : 'Akun';
-  static String get preferencesSection => _isEn ? 'Preferences' : 'Preferensi Aplikasi';
-  static String get dataSection => _isEn ? 'Data & Backup' : 'Data & Cadangan';
-  static String get aboutSection => _isEn ? 'About AppliQ' : 'Tentang AppliQ';
-  static String get themeSetting => _isEn ? 'Theme' : 'Tema Tampilan';
-  static String get accentSetting => _isEn ? 'Accent Style' : 'Gaya Warna Aksen';
-  static String get languageSetting => _isEn ? 'Language' : 'Pilih Bahasa';
-  static String get notificationsSetting => _isEn ? 'Notifications & Reminders' : 'Notifikasi & Pengingat';
-  static String get exportDataSetting => _isEn ? 'Export Data (Excel / CSV / PDF)' : 'Export Data (Excel / CSV / PDF)';
-  static String get googleDriveSetting => _isEn ? 'Google Drive Integration' : 'Integrasi Google Drive';
-  static String get connected => _isEn ? 'Connected' : 'Terhubung';
-  static String get disconnected => _isEn ? 'Not Connected' : 'Belum Terhubung';
-  static String get disconnectDriveConfirm => _isEn ? 'Disconnect Google Drive?' : 'Putuskan Google Drive?';
-  static String get disconnectDriveMessage => _isEn 
-      ? 'You can reconnect anytime to manage and attach your resume files.' 
-      : 'Kamu bisa menghubungkan kembali akun kapan saja untuk upload berkas CV.';
-  static String get logoutButton => _isEn ? 'Log Out' : 'Keluar Akun';
-  static String get logoutConfirmTitle => _isEn ? 'Sign Out of AppliQ?' : 'Keluar dari AppliQ?';
-  static String get logoutConfirmMessage => _isEn 
-      ? 'Your data is securely stored in the cloud and will be restored upon sign in.' 
-      : 'Semua datamu tetap tersimpan aman di cloud dan dapat diakses kembali saat login.';
-  static String get appVersion => _isEn ? 'AppliQ Version' : 'Versi AppliQ';
+  static String get profileTitle => current.profileTitle;
+  static String get accountSection => current.accountSection;
+  static String get preferencesSection => current.preferencesSection;
+  static String get dataSection => current.dataSection;
+  static String get aboutSection => current.aboutSection;
+  static String get themeSetting => current.themeSetting;
+  static String get accentSetting => current.accentSetting;
+  static String get languageSetting => current.languageSetting;
+  static String get notificationsSetting => current.notificationsSetting;
+  static String get exportDataSetting => current.exportDataSetting;
+  static String get googleDriveSetting => current.googleDriveSetting;
+  static String get connected => current.connected;
+  static String get disconnected => current.disconnected;
+  static String get disconnectDriveConfirm => current.disconnectDriveConfirm;
+  static String get disconnectDriveMessage => current.disconnectDriveMessage;
+  static String get logoutButton => current.logoutButton;
+  static String get logoutConfirmTitle => current.logoutConfirmTitle;
+  static String get logoutConfirmMessage => current.logoutConfirmMessage;
+  static String get appVersion => current.appVersion;
+
+  // Edit Profile Screen
+  static String get editProfileTitle => current.editProfileTitle;
+  static String get googleEmailLabel => current.googleEmailLabel;
+  static String get googleEmailDesc => current.googleEmailDesc;
+  static String get fullNameLabel => current.fullNameLabel;
+  static String get fullNameHint => current.fullNameHint;
+  static String get fullNameEmptyError => current.fullNameEmptyError;
+  static String get usernameLabel => current.usernameLabel;
+  static String get phoneLabel => current.phoneLabel;
+  static String get targetRoleLabel => current.targetRoleLabel;
+  static String get targetRoleHint => current.targetRoleHint;
+  static String get saveChangesButton => current.saveChangesButton;
+  static String get deleteAccountButton => current.deleteAccountButton;
+  static String get deleteAccountConfirmTitle => current.deleteAccountConfirmTitle;
+  static String get deleteAccountConfirmMessage => current.deleteAccountConfirmMessage;
+  static String get profileUpdatedSuccess => current.profileUpdatedSuccess;
+  static String get accountDeletedSuccess => current.accountDeletedSuccess;
+
+  // Notification Sheet
+  static String get notificationCenterTitle => current.notificationCenterTitle;
+  static String get noUrgentReminders => current.noUrgentReminders;
+  static String activeRemindersCount(int count) => current.activeRemindersCount(count);
+  static String get pushNotificationTestTitle => current.pushNotificationTestTitle;
+  static String get pushNotificationTestDesc => current.pushNotificationTestDesc;
+  static String get testNotificationButton => current.testNotificationButton;
+  static String get testNotificationSentToast => current.testNotificationSentToast;
+  static String get interviewAgendaSection => current.interviewAgendaSection;
+  static String get followUpNeededSection => current.followUpNeededSection;
+  static String appliedDaysAgo(int days) => current.appliedDaysAgo(days);
+  static String get emailHrButton => current.emailHrButton;
+  static String get allSchedulesSafeTitle => current.allSchedulesSafeTitle;
+  static String get allSchedulesSafeDesc => current.allSchedulesSafeDesc;
+
+  // HR Templates Sheet
+  static String get hrTemplatesSheetTitle => current.hrTemplatesSheetTitle;
+  static String get hrTemplatesSheetSubtitle => current.hrTemplatesSheetSubtitle;
+  static String get categoryAll => current.categoryAll;
+  static String get categoryFollowUp => current.categoryFollowUp;
+  static String get categoryInterview => current.categoryInterview;
+  static String get categoryOffering => current.categoryOffering;
+  static String get copySubjectButton => current.copySubjectButton;
+  static String get copyBodyButton => current.copyBodyButton;
+  static String copiedToast(String label) => current.copiedToast(label);
 
   // Language Modal
-  static String get languageModalTitle => _isEn ? 'Select Language' : 'Pilih Bahasa (Language)';
-  static String get languageModalSubtitle => _isEn ? 'Choose application interface language' : 'Pilih bahasa antarmuka aplikasi';
-  static String get languageIdName => 'Bahasa Indonesia';
-  static String get languageIdSubtitle => _isEn ? 'Indonesian (Standard)' : 'Bahasa Indonesia (Standar)';
-  static String get languageEnName => 'English';
-  static String get languageEnSubtitle => _isEn ? 'English (Global)' : 'English (United States)';
-  static String get languageJaName => '日本語';
-  static String get languageJaSubtitle => 'Japanese (Nihongo)';
-  static String get languageKoName => '한국어';
-  static String get languageKoSubtitle => 'Korean (Hangugeo)';
-  static String get languageComingSoonToast => _isEn 
-      ? 'This language will be available in an upcoming update!' 
-      : 'Bahasa ini akan segera hadir pada update berikutnya!';
+  static String get languageModalTitle => current.languageModalTitle;
+  static String get languageModalSubtitle => current.languageModalSubtitle;
+  static String get languageIdName => current.languageIdName;
+  static String get languageIdSubtitle => current.languageIdSubtitle;
+  static String get languageEnName => current.languageEnName;
+  static String get languageEnSubtitle => current.languageEnSubtitle;
+  static String get languageJaName => current.languageJaName;
+  static String get languageJaSubtitle => current.languageJaSubtitle;
+  static String get languageKoName => current.languageKoName;
+  static String get languageKoSubtitle => current.languageKoSubtitle;
+  static String get languageComingSoonToast => current.languageComingSoonToast;
 
   // Export Sheet
-  static String get exportSheetTitle => _isEn ? 'Export Application Data' : 'Export Data Lamaran';
-  static String get exportSheetSubtitle => _isEn ? 'Download report in your preferred format' : 'Unduh laporan data lamaran kerjamu';
-  static String get exportFormat => _isEn ? 'File Format' : 'Format Berkas';
-  static String get exportDateRange => _isEn ? 'Date Range' : 'Rentang Waktu';
-  static String get exportAllTime => _isEn ? 'All Time' : 'Semua Waktu';
-  static String get exportThisMonth => _isEn ? 'This Month' : 'Bulan Ini';
-  static String get exportLast3Months => _isEn ? 'Last 3 Months' : '3 Bulan Terakhir';
-  static String get exportThisYear => _isEn ? 'This Year' : 'Tahun Ini';
-  static String get exportButton => _isEn ? 'Export & Share File' : 'Export & Bagikan Berkas';
-  static String get exportSuccess => _isEn ? 'Data exported successfully!' : 'Data berhasil diexport!';
-  static String get exportEmpty => _isEn ? 'No application records to export.' : 'Tidak ada data lamaran untuk diexport.';
+  static String get exportSheetTitle => current.exportSheetTitle;
+  static String get exportSheetSubtitle => current.exportSheetSubtitle;
+  static String get exportFormat => current.exportFormat;
+  static String get exportDateRange => current.exportDateRange;
+  static String get exportAllTime => current.exportAllTime;
+  static String get exportThisMonth => current.exportThisMonth;
+  static String get exportLast3Months => current.exportLast3Months;
+  static String get exportThisYear => current.exportThisYear;
+  static String get exportButton => current.exportButton;
+  static String get exportSuccess => current.exportSuccess;
+  static String get exportEmpty => current.exportEmpty;
 
   // Toasts & Snackbars
-  static String get errorOccurred => _isEn ? 'An error occurred. Please try again.' : 'Terjadi kesalahan. Silakan coba lagi.';
-  static String get successSaved => _isEn ? 'Application saved successfully.' : 'Lamaran berhasil dicatat.';
-  static String get successUpdated => _isEn ? 'Application updated successfully.' : 'Lamaran berhasil diperbarui.';
-  static String get successDeleted => _isEn ? 'Application deleted.' : 'Lamaran berhasil dihapus.';
-  static String get fileUploadedDrive => _isEn ? 'File uploaded to Google Drive successfully.' : 'Berkas berhasil diupload ke Google Drive.';
-  static String get fileDeletedDrive => _isEn ? 'File deleted from Google Drive.' : 'Berkas berhasil dihapus dari Google Drive.';
-  static String get attachmentDetached => _isEn ? 'Attachment detached from application.' : 'Lampiran berkas berhasil dilepaskan.';
-  static String get fillRequiredFields => _isEn ? 'Please fill in company name and position first.' : 'Isi nama perusahaan dan posisi terlebih dahulu.';
+  static String get errorOccurred => current.errorOccurred;
+  static String get successSaved => current.successSaved;
+  static String get successUpdated => current.successUpdated;
+  static String get successDeleted => current.successDeleted;
+  static String get fileUploadedDrive => current.fileUploadedDrive;
+  static String get fileDeletedDrive => current.fileDeletedDrive;
+  static String get attachmentDetached => current.attachmentDetached;
+  static String get fillRequiredFields => current.fillRequiredFields;
+
+  // Login Screen
+  static String get loginTagline => current.loginTagline;
+  static String get signInWithGoogle => current.signInWithGoogle;
+  static String get termsPrefix => current.termsPrefix;
+  static String get termsOfService => current.termsOfService;
+  static String get andConjunction => current.andConjunction;
+  static String get privacyPolicy => current.privacyPolicy;
+  static String get termsContent => current.termsContent;
+  static String get privacyContent => current.privacyContent;
+  static String welcomeUser(String name) => current.welcomeUser(name);
 
   // Helper methods for enums
-  static String localizedEmploymentType(EmploymentType type) {
-    if (!_isEn) return type.label;
-    switch (type) {
-      case EmploymentType.fullTime:
-        return 'Full-time';
-      case EmploymentType.internship:
-        return 'Internship';
-      case EmploymentType.contract:
-        return 'Contract';
-      case EmploymentType.partTime:
-        return 'Part-time';
-      case EmploymentType.freelance:
-        return 'Freelance';
-    }
-  }
-
-  static String localizedWorkSystem(WorkSystem system) {
-    if (!_isEn) return system.label;
-    switch (system) {
-      case WorkSystem.onSite:
-        return 'On-site';
-      case WorkSystem.hybrid:
-        return 'Hybrid';
-      case WorkSystem.wfh:
-        return 'Remote (WFH)';
-      case WorkSystem.remoteOverseas:
-        return 'Global Remote';
-      case WorkSystem.flexible:
-        return 'Flexible';
-    }
-  }
-
-  static String localizedJobPortal(JobPortal portal) {
-    if (!_isEn) return portal.label;
-    switch (portal) {
-      case JobPortal.linkedIn:
-        return 'LinkedIn';
-      case JobPortal.jobStreet:
-        return 'JobStreet';
-      case JobPortal.glints:
-        return 'Glints';
-      case JobPortal.kalibrr:
-        return 'Kalibrr';
-      case JobPortal.dealls:
-        return 'Dealls';
-      case JobPortal.techInAsia:
-        return 'Tech in Asia';
-      case JobPortal.referral:
-        return 'Referral / Colleague';
-      case JobPortal.directEmail:
-        return 'Direct Email / HR Outreach';
-      case JobPortal.kitaLulus:
-        return 'KitaLulus';
-      case JobPortal.jobFair:
-        return 'Job Fair / Campus';
-      case JobPortal.website:
-        return 'Company Website';
-      case JobPortal.instagram:
-        return 'Social Media';
-      case JobPortal.komunitas:
-        return 'Community / Group';
-      case JobPortal.freelance:
-        return 'Freelance Platform';
-      case JobPortal.lainnya:
-        return 'Other';
-    }
-  }
-
-  static String localizedStatus(ApplicationStatus status) {
-    // Both English and Indonesian use clean labels (e.g. Applied, Interview, Offering, Accepted, Rejected, No Response)
-    switch (status) {
-      case ApplicationStatus.applied:
-        return 'Applied';
-      case ApplicationStatus.interview:
-        return 'Interview';
-      case ApplicationStatus.offering:
-        return 'Offering';
-      case ApplicationStatus.accepted:
-        return 'Accepted';
-      case ApplicationStatus.rejected:
-        return 'Rejected';
-      case ApplicationStatus.noResponse:
-        return 'No Response';
-    }
-  }
+  static String localizedEmploymentType(EmploymentType type) => current.localizedEmploymentType(type);
+  static String localizedWorkSystem(WorkSystem system) => current.localizedWorkSystem(system);
+  static String localizedJobPortal(JobPortal portal) => current.localizedJobPortal(portal);
+  static String localizedStatus(ApplicationStatus status) => current.localizedStatus(status);
+  static String localizedResult(String result) => current.localizedResult(result);
 }

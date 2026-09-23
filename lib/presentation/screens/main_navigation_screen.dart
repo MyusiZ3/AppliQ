@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../data/repositories/job_repository.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/localization/app_strings.dart';
+import '../../data/repositories/job_repository.dart';
 import 'applications/applications_list_screen.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'profile/profile_screen.dart';
@@ -63,26 +64,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.2),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, letterSpacing: -0.2),
           elevation: 0,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.doc_text, size: 22),
-              activeIcon: Icon(CupertinoIcons.doc_text_fill, size: 22),
-              label: 'Lamaran',
+              icon: const Icon(CupertinoIcons.doc_text, size: 22),
+              activeIcon: const Icon(CupertinoIcons.doc_text_fill, size: 22),
+              label: AppStrings.navApplications,
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.chart_pie, size: 22),
-              activeIcon: Icon(CupertinoIcons.chart_pie_fill, size: 22),
-              label: 'Dashboard',
+              icon: const Icon(CupertinoIcons.chart_pie, size: 22),
+              activeIcon: const Icon(CupertinoIcons.chart_pie_fill, size: 22),
+              label: AppStrings.navAnalytics,
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.calendar, size: 22),
-              activeIcon: Icon(CupertinoIcons.calendar_today, size: 22),
-              label: 'Jadwal',
+              icon: const Icon(CupertinoIcons.calendar, size: 22),
+              activeIcon: const Icon(CupertinoIcons.calendar_today, size: 22),
+              label: AppStrings.quickSchedule,
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person, size: 22),
-              activeIcon: Icon(CupertinoIcons.person_fill, size: 22),
-              label: 'Profil',
+              icon: const Icon(CupertinoIcons.person, size: 22),
+              activeIcon: const Icon(CupertinoIcons.person_fill, size: 22),
+              label: AppStrings.navProfile,
             ),
           ],
         ),

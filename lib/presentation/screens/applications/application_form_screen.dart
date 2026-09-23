@@ -241,11 +241,12 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   }
 
   Future<void> _handleDriveUpload() async {
+    final isEn = LanguageManager.isEnglish;
     final company = _companyController.text.trim();
     final position = _positionController.text.trim();
 
     if (company.isEmpty || position.isEmpty) {
-      UIHelper.showGlobalErrorToast('Isi nama perusahaan dan posisi terlebih dahulu');
+      UIHelper.showGlobalErrorToast(AppStrings.fillRequiredFields);
       return;
     }
 
@@ -267,7 +268,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         if (mounted) {
           UIHelper.showSuccessSnackBar(
             context,
-            'Berkas berhasil diupload ke Google Drive folder: ${uploadResult['folderPath']}',
+            isEn
+                ? 'File uploaded to Google Drive folder: ${uploadResult['folderPath']}'
+                : 'Berkas berhasil diupload ke Google Drive folder: ${uploadResult['folderPath']}',
           );
         }
       } else {
@@ -282,28 +285,29 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   }
 
   Future<void> _handleDeleteCvAttachment() async {
+    final isEn = LanguageManager.isEnglish;
     HapticFeedback.lightImpact();
 
     final action = await showCupertinoModalPopup<String>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: const Text('Kelola Berkas Lampiran'),
-        message: Text(_cvFileName ?? 'Berkas Google Drive'),
+        title: Text(AppStrings.manageAttachment),
+        message: Text(_cvFileName ?? (isEn ? 'Google Drive Document' : 'Berkas Google Drive')),
         actions: [
           if (_cvFileUrl != null && _cvFileUrl!.isNotEmpty)
             CupertinoActionSheetAction(
               isDestructiveAction: true,
               onPressed: () => Navigator.pop(ctx, 'delete_drive'),
-              child: const Text('Hapus Permanen dari Google Drive'),
+              child: Text(AppStrings.deleteFromDrive),
             ),
           CupertinoActionSheetAction(
             onPressed: () => Navigator.pop(ctx, 'detach_only'),
-            child: const Text('Lepas Lampiran Saja'),
+            child: Text(AppStrings.detachOnly),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Batal'),
+          child: Text(AppStrings.cancel),
         ),
       ),
     );
@@ -320,7 +324,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
             _cvFileUrl = null;
             _isUploadingDrive = false;
           });
-          UIHelper.showSuccessSnackBar(context, 'Berkas berhasil dihapus dari Google Drive.');
+          UIHelper.showSuccessSnackBar(context, AppStrings.fileDeletedDrive);
         }
       } catch (e) {
         if (mounted) {
@@ -334,7 +338,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         _cvFileUrl = null;
       });
       if (mounted) {
-        UIHelper.showSuccessSnackBar(context, 'Lampiran berkas dilepaskan dari lamaran ini.');
+        UIHelper.showSuccessSnackBar(context, AppStrings.attachmentDetached);
       }
     }
   }
@@ -387,12 +391,12 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
       if (isEditing) {
         await widget.repository.updateApplication(application);
         if (mounted) {
-          UIHelper.showSuccessSnackBar(context, 'Lamaran berhasil diperbarui');
+          UIHelper.showSuccessSnackBar(context, AppStrings.successUpdated);
         }
       } else {
         await widget.repository.createApplication(application);
         if (mounted) {
-          UIHelper.showSuccessSnackBar(context, 'Lamaran berhasil dicatat');
+          UIHelper.showSuccessSnackBar(context, AppStrings.successSaved);
         }
       }
 
@@ -423,7 +427,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          isEditing ? 'Edit Lamaran' : 'Catat Lamaran Baru',
+          isEditing ? AppStrings.editApplicationTitle : AppStrings.createApplicationTitle,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
@@ -464,7 +468,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   ),
                 )
               : Text(
-                  isEditing ? 'Simpan Perubahan' : 'Simpan Lamaran',
+                  isEditing ? AppStrings.updateApplicationButton : AppStrings.saveApplicationButton,
                   style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -479,43 +483,43 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
           children: [
             // Section 1: Informasi Lowongan
             _buildSectionCard(
-              title: 'Informasi Lowongan',
+              title: AppStrings.vacancyInfoSection,
               icon: CupertinoIcons.building_2_fill,
               isDark: isDark,
               children: [
                 _buildAutocompleteTextField(
                   controller: _companyController,
                   focusNode: _companyFocusNode,
-                  label: 'Nama Perusahaan *',
-                  hint: 'e.g. GoTo, Shopee, BCA, Telkom',
+                  label: AppStrings.companyNameLabel,
+                  hint: AppStrings.companyNameHint,
                   icon: CupertinoIcons.building_2_fill,
                   isDark: isDark,
                   allSuggestions: _combinedCompanySuggestions,
                   userHistory: _userCompanies,
                   validator: (v) => v == null || v.trim().isEmpty
-                      ? 'Nama perusahaan wajib diisi'
+                      ? AppStrings.companyNameRequired
                       : null,
                 ),
                 const SizedBox(height: 14),
                 _buildAutocompleteTextField(
                   controller: _positionController,
                   focusNode: _positionFocusNode,
-                  label: 'Posisi / Role *',
-                  hint: 'e.g. Software Engineer, Finance Staff',
+                  label: AppStrings.positionTitleLabel,
+                  hint: AppStrings.positionTitleHint,
                   icon: CupertinoIcons.briefcase_fill,
                   isDark: isDark,
                   allSuggestions: _combinedPositionSuggestions,
                   userHistory: _userPositions,
                   validator: (v) => v == null || v.trim().isEmpty
-                      ? 'Posisi pekerjaan wajib diisi'
+                      ? AppStrings.positionTitleRequired
                       : null,
                 ),
                 const SizedBox(height: 14),
                 _buildAutocompleteTextField(
                   controller: _locationController,
                   focusNode: _locationFocusNode,
-                  label: 'Lokasi Perusahaan',
-                  hint: 'e.g. Jakarta Selatan, BSD, Remote',
+                  label: AppStrings.locationLabel,
+                  hint: AppStrings.locationHint,
                   icon: CupertinoIcons.location_solid,
                   isDark: isDark,
                   allSuggestions: _combinedLocationSuggestions,
@@ -528,11 +532,11 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
             // Section 2: Tipe & Sistem Kerja
             _buildSectionCard(
-              title: 'Tipe & Sistem Kerja',
+              title: AppStrings.workTypeAndSystemSection,
               icon: CupertinoIcons.slider_horizontal_3,
               isDark: isDark,
               children: [
-                _buildLabel('Tipe Pekerjaan', isDark),
+                _buildLabel(AppStrings.employmentTypeLabel, isDark),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -568,7 +572,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                           ),
                         ),
                         child: Text(
-                          type.label,
+                          AppStrings.localizedEmploymentType(type),
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight:
@@ -587,7 +591,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
-                _buildLabel('Sistem Kerja', isDark),
+                _buildLabel(AppStrings.workSystemLabel, isDark),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -639,7 +643,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              sys.label,
+                              AppStrings.localizedWorkSystem(sys),
                               style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: isSelected
@@ -665,10 +669,10 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   children: [
                     Expanded(
                       child: _buildDropdown<ApplicationStatus>(
-                        label: 'Status Lamaran',
+                        label: AppStrings.currentStatusSection,
                         value: _status,
                         items: ApplicationStatus.values,
-                        getLabel: (e) => e.label,
+                        getLabel: (e) => AppStrings.localizedStatus(e),
                         onChanged: (val) => setState(() => _status = val!),
                         isDark: isDark,
                       ),
@@ -681,7 +685,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildLabel('Tanggal Melamar', isDark),
+                            _buildLabel(AppStrings.appliedDateLabel, isDark),
                             const SizedBox(height: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -736,11 +740,11 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
             // Section 3: Sumber Portal Lowongan
             _buildSectionCard(
-              title: 'Sumber Portal Lowongan',
+              title: AppStrings.jobPortalSection,
               icon: CupertinoIcons.globe,
               isDark: isDark,
               children: [
-                _buildLabel('Pilih Portal Loker', isDark),
+                _buildLabel(LanguageManager.isEnglish ? 'Select Job Portal' : 'Pilih Portal Loker', isDark),
                 const SizedBox(height: 8),
                 Builder(
                   builder: (context) {
@@ -810,7 +814,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    portal.label,
+                                    AppStrings.localizedJobPortal(portal),
                                     style: TextStyle(
                                       fontSize: 12.5,
                                       fontWeight: isSelected
@@ -856,8 +860,10 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                               children: [
                                 Text(
                                   _showAllPortals
-                                      ? 'Lebih Sedikit'
-                                      : '+${JobPortal.values.length - topPortals.length} Opsi Lainnya',
+                                      ? (LanguageManager.isEnglish ? 'Show Less' : 'Lebih Sedikit')
+                                      : (LanguageManager.isEnglish
+                                          ? '+${JobPortal.values.length - topPortals.length} More Options'
+                                          : '+${JobPortal.values.length - topPortals.length} Opsi Lainnya'),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -888,8 +894,12 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   const SizedBox(height: 14),
                   _buildTextField(
                     controller: _portalCustomController,
-                    label: 'Nama Pemberi Referensi / Kontak (Opsional)',
-                    hint: 'Contoh: Kak Kevin (Tech Lead di Perusahaan ini)',
+                    label: LanguageManager.isEnglish
+                        ? 'Referral Name / Contact (Optional)'
+                        : 'Nama Pemberi Referensi / Kontak (Opsional)',
+                    hint: LanguageManager.isEnglish
+                        ? 'e.g. Kevin (Engineering Lead)'
+                        : 'Contoh: Kak Kevin (Tech Lead di Perusahaan ini)',
                     icon: CupertinoIcons.person_crop_circle_badge_checkmark,
                     isDark: isDark,
                   ),
@@ -898,8 +908,12 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   const SizedBox(height: 14),
                   _buildTextField(
                     controller: _portalCustomController,
-                    label: 'Email / Nama Recruiter (Opsional)',
-                    hint: 'Contoh: recruiter@company.com / HR Talenta',
+                    label: LanguageManager.isEnglish
+                        ? 'Recruiter Name / Email (Optional)'
+                        : 'Email / Nama Recruiter (Opsional)',
+                    hint: LanguageManager.isEnglish
+                        ? 'e.g. recruiter@company.com'
+                        : 'Contoh: recruiter@company.com / HR Talenta',
                     icon: CupertinoIcons.mail,
                     isDark: isDark,
                   ),
@@ -908,20 +922,24 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   const SizedBox(height: 14),
                   _buildTextField(
                     controller: _portalCustomController,
-                    label: 'Sebutkan Nama Portal *',
-                    hint: 'e.g. Indeed, Glassdoor, Dribbble',
+                    label: LanguageManager.isEnglish
+                        ? 'Specify Portal Name *'
+                        : 'Sebutkan Nama Portal *',
+                    hint: LanguageManager.isEnglish
+                        ? 'e.g. Indeed, Glassdoor, Dribbble'
+                        : 'e.g. Indeed, Glassdoor, Dribbble',
                     icon: CupertinoIcons.link,
                     isDark: isDark,
                     validator: (v) => _jobPortal == JobPortal.lainnya &&
                             (v == null || v.trim().isEmpty)
-                        ? 'Sebutkan nama portal'
+                        ? (LanguageManager.isEnglish ? 'Please specify portal name' : 'Sebutkan nama portal')
                         : null,
                   ),
                 ],
                 const SizedBox(height: 14),
                 _buildTextField(
                   controller: _urlController,
-                  label: 'Link Lowongan (Opsional)',
+                  label: AppStrings.jobUrlLabel,
                   hint: 'https://...',
                   icon: CupertinoIcons.link,
                   isDark: isDark,
@@ -933,7 +951,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
             // Section 4: Kompensasi & Catatan
             _buildSectionCard(
-              title: 'Kompensasi & Catatan',
+              title: AppStrings.salarySection,
               icon: Icons.account_balance_wallet_rounded,
               isDark: isDark,
               children: [
@@ -942,7 +960,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                     Expanded(
                       child: _buildCurrencyField(
                         controller: _salaryExpectationController,
-                        label: 'Ekspektasi Gaji',
+                        label: AppStrings.salaryExpectation,
                         hint: '8.000.000',
                         isDark: isDark,
                       ),
@@ -951,7 +969,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                     Expanded(
                       child: _buildCurrencyField(
                         controller: _salaryOfferedController,
-                        label: 'Penawaran Gaji',
+                        label: AppStrings.salaryOffered,
                         hint: '8.500.000',
                         isDark: isDark,
                       ),
@@ -961,8 +979,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                 const SizedBox(height: 14),
                 _buildTextField(
                   controller: _notesController,
-                  label: 'Catatan Pribadi',
-                  hint: 'e.g. CV ATS versi 2, kontak HR: Bpk. Dani',
+                  label: AppStrings.notesSection,
+                  hint: AppStrings.notesHint,
                   icon: CupertinoIcons.doc_text,
                   maxLines: 3,
                   isDark: isDark,
@@ -974,7 +992,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
             // Section 5: Lampiran Berkas & CV (Google Drive)
             _buildSectionCard(
-              title: 'Lampiran Berkas & CV',
+              title: AppStrings.cvAttachmentTitle,
               icon: CupertinoIcons.cloud_upload_fill,
               isDark: isDark,
               children: [
@@ -1001,7 +1019,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Penyimpanan Google Drive Otomatis',
+                              LanguageManager.isEnglish
+                                  ? 'Automated Google Drive Storage'
+                                  : 'Penyimpanan Google Drive Otomatis',
                               style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
@@ -1013,7 +1033,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'File CV & berkas akan otomatis disimpan rapi di folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Perusahaan"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Posisi"}',
+                        LanguageManager.isEnglish
+                            ? 'CV & resume files will be neatly organized in folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Company"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Position"}'
+                            : 'File CV & berkas akan otomatis disimpan rapi di folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Perusahaan"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Posisi"}',
                         style: TextStyle(
                           fontSize: 11.5,
                           height: 1.4,
@@ -1064,7 +1086,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Tersimpan di Google Drive',
+                                AppStrings.savedInDrive,
                                 style: TextStyle(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w500,
@@ -1083,7 +1105,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                           ),
                           child: IconButton(
                             icon: const Icon(CupertinoIcons.trash, size: 15, color: Color(0xFFEF4444)),
-                            tooltip: 'Hapus Berkas Lampiran',
+                            tooltip: AppStrings.delete,
                             padding: EdgeInsets.zero,
                             onPressed: _isUploadingDrive ? null : _handleDeleteCvAttachment,
                           ),
@@ -1129,7 +1151,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                               ),
                             ),
                           Text(
-                            _isUploadingDrive ? 'Mengupload ke Google Drive...' : 'Upload CV / Berkas ke Google Drive',
+                            _isUploadingDrive
+                                ? (LanguageManager.isEnglish ? 'Uploading to Google Drive...' : 'Mengupload ke Google Drive...')
+                                : AppStrings.uploadCvToDrive,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -1394,9 +1418,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                                           borderRadius:
                                               BorderRadius.circular(6),
                                         ),
-                                        child: const Text(
-                                          'Riwayat',
-                                          style: TextStyle(
+                                        child: Text(
+                                          LanguageManager.isEnglish ? 'History' : 'Riwayat',
+                                          style: const TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w600,
                                             color: AppColors.primary,

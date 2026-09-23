@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
@@ -135,12 +136,42 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
+      // Periksa riwayat pembacaan notifikasi tersimpan
+      final prefs = await SharedPreferences.getInstance();
+      final lastReadMs = prefs.getInt('last_read_notifications_timestamp') ?? 0;
+
+      final staleApps = apps.where((app) {
+        if (app.status != ApplicationStatus.applied) return false;
+        final days = DateTime.now().difference(app.appliedDate).inDays;
+        return days >= 14;
+      }).toList();
+
+      bool hasNewAlert = false;
+      for (var item in upcoming) {
+        final log = item['log'] as ApplicationLog;
+        final timestamp = log.scheduledAt?.millisecondsSinceEpoch ?? log.createdAt.millisecondsSinceEpoch;
+        if (timestamp > lastReadMs) {
+          hasNewAlert = true;
+          break;
+        }
+      }
+      if (!hasNewAlert) {
+        for (var app in staleApps) {
+          final staleThresholdDate = app.appliedDate.add(const Duration(days: 14));
+          if (staleThresholdDate.millisecondsSinceEpoch > lastReadMs) {
+            hasNewAlert = true;
+            break;
+          }
+        }
+      }
+
       if (mounted) {
         setState(() {
           _userProfile = results[0] as UserProfile?;
           _applications = apps;
           _upcomingSchedules = upcoming;
           _stats = (results[2] as Map<String, dynamic>?) ?? {};
+          _hasReadNotifications = !hasNewAlert;
           _isLoading = false;
         });
       }
@@ -173,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _formatSalary(double? amount) {
-    if (amount == null || amount == 0) return AppStrings.salaryUndisclosed;
+    if (amount == null || amount == 0) return '-';
     return '${_salaryFormatter.format(amount)} ${AppStrings.perMonth}';
   }
 
@@ -782,14 +813,21 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(CupertinoIcons.bell, size: 22),
               color: isDark ? Colors.white : const Color(0xFF18181B),
-              onPressed: () {
+              onPressed: () async {
                 HapticFeedback.lightImpact();
                 setState(() => _hasReadNotifications = true);
-                NotificationSheet.show(
-                  context,
-                  upcomingSchedules: _upcomingSchedules,
-                  staleApplications: staleApplications,
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setInt(
+                  'last_read_notifications_timestamp',
+                  DateTime.now().millisecondsSinceEpoch,
                 );
+                if (mounted) {
+                  NotificationSheet.show(
+                    context,
+                    upcomingSchedules: _upcomingSchedules,
+                    staleApplications: staleApplications,
+                  );
+                }
               },
             ),
             if (hasAlerts)

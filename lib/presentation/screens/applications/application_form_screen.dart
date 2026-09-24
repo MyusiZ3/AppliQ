@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../data/models/job_application.dart';
+import '../../../data/models/user_resume.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../services/google_drive_service.dart';
 import '../../../utils/language_manager.dart';
@@ -231,11 +232,16 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
   Future<void> _pickDate() async {
     HapticFeedback.selectionClick();
+    final firstDate = DateTime(1990);
+    final lastDate = DateTime(2100);
+    final initialDate = _appliedDate.isBefore(firstDate)
+        ? firstDate
+        : (_appliedDate.isAfter(lastDate) ? lastDate : _appliedDate);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _appliedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
     if (picked != null) {
       setState(() => _appliedDate = picked);
@@ -451,6 +457,51 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         if (mounted) {
           UIHelper.showSuccessSnackBar(context, AppStrings.successSaved);
         }
+      }
+
+      if (_status == ApplicationStatus.accepted) {
+        try {
+          final resume = await widget.repository.getUserResume();
+          final formattedP = '${DateFormat('MMM yyyy').format(DateTime.now())} - ${AppStrings.presentLabel}';
+          final newExp = ExperienceItem(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            companyOrProject: application.companyName,
+            position: application.positionTitle,
+            cityCountry: application.location ?? '',
+            period: formattedP,
+            startDate: DateTime.now(),
+            isCurrentlyWorking: true,
+            employmentType: application.employmentType.label,
+            monthlySalary: application.salaryOffered ?? application.salaryExpectation,
+            notes: application.notes,
+          );
+
+          var exps = List<ExperienceItem>.from(resume?.experiences ?? []);
+          final existingIdx = exps.indexWhere((e) =>
+              e.companyOrProject.toLowerCase() == application.companyName.toLowerCase() &&
+              e.position.toLowerCase() == application.positionTitle.toLowerCase());
+
+          if (existingIdx != -1) {
+            exps[existingIdx] = exps[existingIdx].copyWith(isCurrentlyWorking: true);
+          } else {
+            exps = exps.map((e) => e.copyWith(isCurrentlyWorking: false)).toList();
+            exps.insert(0, newExp);
+          }
+
+          final updatedResume = (resume ??
+                  UserResume(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    userId: 'current_user',
+                    fullName: '',
+                    email: '',
+                    phoneNumber: '',
+                    cityCountry: '',
+                  ))
+              .copyWith(experiences: exps);
+
+          await widget.repository.saveUserResume(updatedResume);
+          widget.repository.notifyDataChanged();
+        } catch (_) {}
       }
 
       if (mounted) Navigator.of(context).pop(true);

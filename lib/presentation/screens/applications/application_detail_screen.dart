@@ -85,6 +85,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               ? 'Status updated to ${AppStrings.localizedStatus(newStatus)}'
               : 'Status diubah ke ${newStatus.label}',
         );
+        if (newStatus == ApplicationStatus.accepted) {
+          _promptAddToCurrentlyWorking(saved);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -92,6 +95,244 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         UIHelper.handleError(context, e);
       }
     }
+  }
+
+  Future<void> _promptAddToCurrentlyWorking(JobApplication app) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
+    DateTime startDate = DateTime.now();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+            final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+            final primaryColor = isMono
+                ? (isDark ? Colors.white : const Color(0xFF18181B))
+                : AppColors.pastelLime;
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + MediaQuery.of(modalCtx).padding.bottom),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+                border: Border.all(color: borderColor, width: 0.8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    AppStrings.acceptedPromptTitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    AppStrings.acceptedPromptMessage,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.4,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Job details chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: borderColor, width: 0.8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(CupertinoIcons.building_2_fill, size: 18, color: isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                app.positionTitle,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                '${app.companyName} • ${app.employmentType.label}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Start Date Picker Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppStrings.startDateLabel,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: startDate,
+                            firstDate: DateTime(1990),
+                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                          );
+                          if (picked != null) {
+                            setModalState(() => startDate = picked);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: borderColor, width: 0.8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(CupertinoIcons.calendar, size: 14, color: isDark ? AppColors.textHintDark : AppColors.textHint),
+                              const SizedBox(width: 6),
+                              Text(
+                                DateFormat('dd MMM yyyy').format(startDate),
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Action Buttons
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(modalCtx);
+                      try {
+                        final resume = await widget.repository.getUserResume();
+                        final formattedP = '${DateFormat('MMM yyyy').format(startDate)} - ${AppStrings.presentLabel}';
+                        final newExp = ExperienceItem(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          companyOrProject: app.companyName,
+                          position: app.positionTitle,
+                          cityCountry: app.location ?? '',
+                          period: formattedP,
+                          startDate: startDate,
+                          isCurrentlyWorking: true,
+                          employmentType: app.employmentType.label,
+                          monthlySalary: app.salaryExpectation,
+                          notes: app.notes,
+                        );
+
+                        var exps = List<ExperienceItem>.from(resume?.experiences ?? []);
+                        exps = exps.map((e) => e.copyWith(isCurrentlyWorking: false)).toList();
+                        exps.insert(0, newExp);
+
+                        final updatedResume = (resume ??
+                                UserResume(
+                                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                  userId: 'current_user',
+                                  fullName: '',
+                                  email: '',
+                                  phoneNumber: '',
+                                  cityCountry: '',
+                                ))
+                            .copyWith(experiences: exps);
+
+                        await widget.repository.saveUserResume(updatedResume);
+                        widget.repository.notifyDataChanged();
+
+                        if (mounted) {
+                          UIHelper.showSuccessSnackBar(
+                            context,
+                            LanguageManager.isEnglish
+                                ? 'Added as Currently Working in Career!'
+                                : 'Ditambahkan ke Pekerjaan Aktif di Karir!',
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) UIHelper.handleError(context, e);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: isMono
+                          ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                          : AppColors.textOnPastel,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: Text(
+                      AppStrings.acceptedPromptConfirm,
+                      style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () => Navigator.pop(modalCtx),
+                    child: Text(
+                      AppStrings.acceptedPromptLater,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _deleteApplication() async {
@@ -447,46 +688,53 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         // iOS Nav Header: [Batal] [Judul] [Simpan]
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: isSubmitting
-                                    ? null
-                                    : () => Navigator.pop(context),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 4),
-                                  child: Text(
-                                    AppStrings.cancel,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                      color: isDark
-                                          ? AppColors.textSecondaryDark
-                                          : AppColors.textSecondary,
+                          child: SizedBox(
+                            height: 44,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: isSubmitting
+                                        ? null
+                                        : () => Navigator.pop(context),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 4),
+                                      child: Text(
+                                        AppStrings.cancel,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark
+                                              ? AppColors.textSecondaryDark
+                                              : AppColors.textSecondary,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Text(
-                                isEditing
-                                    ? (LanguageManager.isEnglish ? 'Edit Stage' : 'Edit Tahap')
-                                    : (LanguageManager.isEnglish ? 'New Stage' : 'Tahap Baru'),
-                                style: TextStyle(
-                                  fontSize: 16.5,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
-                                  color: isDark
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
+                                Text(
+                                  isEditing
+                                      ? (LanguageManager.isEnglish ? 'Edit Stage' : 'Edit Tahap')
+                                      : (LanguageManager.isEnglish ? 'New Stage' : 'Tahap Baru'),
+                                  style: TextStyle(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.3,
+                                    color: isDark
+                                        ? AppColors.textPrimaryDark
+                                        : AppColors.textPrimary,
+                                  ),
                                 ),
-                              ),
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: (isSubmitting ||
-                                        stageNameController.text
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: (isSubmitting ||
+                                            stageNameController.text
                                             .trim()
                                             .isEmpty)
                                     ? null
@@ -632,15 +880,17 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                         ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.8,
-                          color: borderColor,
-                        ),
-                        const SizedBox(height: 18),
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      thickness: 0.8,
+                      color: borderColor,
+                    ),
+                    const SizedBox(height: 18),
 
                         // Section 1: TIPE TAHAP
                         Padding(
@@ -852,13 +1102,17 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () async {
                                     HapticFeedback.selectionClick();
+                                    final firstDate = DateTime(1990);
+                                    final lastDate = DateTime(2100);
+                                    final initialDate = scheduledDate.isBefore(firstDate)
+                                        ? firstDate
+                                        : (scheduledDate.isAfter(lastDate) ? lastDate : scheduledDate);
+
                                     final pickedDate = await showDatePicker(
                                       context: context,
-                                      initialDate: scheduledDate,
-                                      firstDate: DateTime.now().subtract(
-                                          const Duration(days: 30)),
-                                      lastDate: DateTime.now().add(
-                                          const Duration(days: 180)),
+                                      initialDate: initialDate,
+                                      firstDate: firstDate,
+                                      lastDate: lastDate,
                                     );
                                     if (pickedDate != null &&
                                         context.mounted) {
@@ -993,10 +1247,10 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                            ],
                           ),
                         ),
+                      ),
 
                         // Section 3: STATUS HASIL TAHAP
                         if (isEditing) ...[
@@ -1115,24 +1369,24 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     required Widget child,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 30,
-            height: 30,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: badgeBg,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(9),
             ),
             child: Icon(
               icon,
-              size: 15,
+              size: 16,
               color: isDark ? Colors.white70 : const Color(0xFF52525B),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 14),
           Expanded(child: child),
         ],
       ),

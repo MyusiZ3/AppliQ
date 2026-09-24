@@ -463,13 +463,16 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isMonochrome = ThemeManager.isMonochrome;
-    final isEditing = widget.applicationToEdit != null;
-    final primaryColor = AppColors.getPrimary(isDark: isDark, isMonochrome: isMonochrome);
+    return ValueListenableBuilder<AccentThemeMode>(
+      valueListenable: ThemeManager.accentNotifier,
+      builder: (context, _, __) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final isMonochrome = ThemeManager.isMonochrome;
+        final isEditing = widget.applicationToEdit != null;
+        final primaryColor = AppColors.getPrimary(isDark: isDark, isMonochrome: isMonochrome);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
@@ -495,10 +498,10 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         padding: EdgeInsets.fromLTRB(
             16, 12, 16, MediaQuery.of(context).padding.bottom + 14),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.backgroundDark : AppColors.background,
+          color: AppColors.getBackground(isDark: isDark, isMonochrome: isMonochrome),
           border: Border(
             top: BorderSide(
-              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              color: AppColors.getBorder(isDark: isDark, isMonochrome: isMonochrome),
               width: 0.8,
             ),
           ),
@@ -506,8 +509,12 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         child: ElevatedButton(
           onPressed: _isLoading ? null : _saveApplication,
           style: ElevatedButton.styleFrom(
-            backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-            foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+            backgroundColor: isMonochrome
+                ? (isDark ? Colors.white : const Color(0xFF18181B))
+                : AppColors.pastelLime,
+            foregroundColor: isMonochrome
+                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                : AppColors.textOnPastel,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -519,7 +526,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                    color: isMonochrome
+                        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                        : AppColors.textOnPastel,
                   ),
                 )
               : Text(
@@ -562,8 +571,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                             height: 38,
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? (isMonochrome ? const Color(0xFF27272A) : const Color(0xFF1C2438))
-                                  : (isMonochrome ? const Color(0xFFF4F4F5) : const Color(0xFFEEF2F6)),
+                                  ? (isMonochrome ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                                  : (isMonochrome ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: AppColors.getBorder(isDark: isDark, isMonochrome: isMonochrome),
@@ -677,51 +686,12 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: EmploymentType.values.map((type) {
-                    final isSelected = _employmentType == type;
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _employmentType = type);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? (isDark
-                                  ? Colors.white
-                                  : const Color(0xFF18181B))
-                              : (isDark
-                                  ? const Color(0xFF27272A)
-                                  : const Color(0xFFF4F4F5)),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: isSelected
-                                ? (isDark
-                                    ? Colors.white
-                                    : const Color(0xFF18181B))
-                                : (isDark
-                                    ? AppColors.borderDark
-                                    : AppColors.borderLight),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Text(
-                          AppStrings.localizedEmploymentType(type),
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight:
-                                isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected
-                                ? (isDark
-                                    ? const Color(0xFF18181B)
-                                    : Colors.white)
-                                : (isDark
-                                    ? AppColors.textPrimaryDark
-                                    : AppColors.textPrimary),
-                          ),
-                        ),
-                      ),
+                    return _buildSelectableChip(
+                      label: AppStrings.localizedEmploymentType(type),
+                      isSelected: _employmentType == type,
+                      isDark: isDark,
+                      isMonochrome: isMonochrome,
+                      onTap: () => setState(() => _employmentType = type),
                     );
                   }).toList(),
                 ),
@@ -732,70 +702,13 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: WorkSystem.values.map((sys) {
-                    final isSelected = _workSystem == sys;
-                    final icon = _getWorkSystemIcon(sys);
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _workSystem = sys);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? (isDark
-                                  ? Colors.white
-                                  : const Color(0xFF18181B))
-                              : (isDark
-                                  ? const Color(0xFF27272A)
-                                  : const Color(0xFFF4F4F5)),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: isSelected
-                                ? (isDark
-                                    ? Colors.white
-                                    : const Color(0xFF18181B))
-                                : (isDark
-                                    ? AppColors.borderDark
-                                    : AppColors.borderLight),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              icon,
-                              size: 14,
-                              color: isSelected
-                                  ? (isDark
-                                      ? const Color(0xFF18181B)
-                                      : Colors.white)
-                                  : (isDark
-                                      ? AppColors.textSecondaryDark
-                                      : AppColors.textSecondary),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              AppStrings.localizedWorkSystem(sys),
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: isSelected
-                                    ? (isDark
-                                        ? const Color(0xFF18181B)
-                                        : Colors.white)
-                                    : (isDark
-                                        ? AppColors.textPrimaryDark
-                                        : AppColors.textPrimary),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    return _buildSelectableChip(
+                      label: AppStrings.localizedWorkSystem(sys),
+                      icon: _getWorkSystemIcon(sys),
+                      isSelected: _workSystem == sys,
+                      isDark: isDark,
+                      isMonochrome: isMonochrome,
+                      onTap: () => setState(() => _workSystem = sys),
                     );
                   }).toList(),
                 ),
@@ -903,70 +816,13 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                       runSpacing: 8,
                       children: [
                         ...visiblePortals.map((portal) {
-                          final isSelected = _jobPortal == portal;
-                          final icon = _getJobPortalIcon(portal);
-                          return GestureDetector(
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              setState(() => _jobPortal = portal);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? (isDark
-                                        ? Colors.white
-                                        : const Color(0xFF18181B))
-                                    : (isDark
-                                        ? const Color(0xFF27272A)
-                                        : const Color(0xFFF4F4F5)),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? (isDark
-                                          ? Colors.white
-                                          : const Color(0xFF18181B))
-                                      : (isDark
-                                          ? AppColors.borderDark
-                                          : AppColors.borderLight),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    icon,
-                                    size: 14,
-                                    color: isSelected
-                                        ? (isDark
-                                            ? const Color(0xFF18181B)
-                                            : Colors.white)
-                                        : (isDark
-                                            ? AppColors.textSecondaryDark
-                                            : AppColors.textSecondary),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    AppStrings.localizedJobPortal(portal),
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w700
-                                          : FontWeight.w500,
-                                      color: isSelected
-                                          ? (isDark
-                                              ? const Color(0xFF18181B)
-                                              : Colors.white)
-                                          : (isDark
-                                              ? AppColors.textPrimaryDark
-                                              : AppColors.textPrimary),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          return _buildSelectableChip(
+                            label: AppStrings.localizedJobPortal(portal),
+                            icon: _getJobPortalIcon(portal),
+                            isSelected: _jobPortal == portal,
+                            isDark: isDark,
+                            isMonochrome: isMonochrome,
+                            onTap: () => setState(() => _jobPortal = portal),
                           );
                         }),
                         // Show More / Show Less Toggle Button
@@ -980,13 +836,11 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF3F3F46).withValues(alpha: 0.35)
-                                  : const Color(0xFFE4E4E7).withValues(alpha: 0.6),
+                                  ? (isMonochrome ? const Color(0xFF3F3F46).withValues(alpha: 0.35) : AppColors.darkSurfaceVariantPastel)
+                                  : (isMonochrome ? const Color(0xFFE4E4E7).withValues(alpha: 0.6) : AppColors.lightSurfaceVariantPastel),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: isDark
-                                    ? AppColors.borderDark
-                                    : AppColors.borderLight,
+                                color: AppColors.getBorder(isDark: isDark, isMonochrome: isMonochrome),
                                 width: 0.8,
                               ),
                             ),
@@ -1297,6 +1151,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         ),
       ),
     );
+      },
+    );
   }
 
   Widget _buildSectionCard({
@@ -1395,28 +1251,29 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
               ),
             ),
             filled: true,
-            fillColor:
-                isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+            fillColor: AppColors.getSurfaceVariant(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                 width: 0.8,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                 width: 0.8,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide:
-                  const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: BorderSide(
+                color: ThemeManager.isMonochrome ? (isDark ? Colors.white : const Color(0xFF18181B)) : AppColors.pastelLime,
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -1472,18 +1329,16 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   child: Material(
                     elevation: 8,
                     shadowColor: Colors.black.withValues(alpha: 0.25),
-                    color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                    color: AppColors.getSurface(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                     borderRadius: BorderRadius.circular(14),
                     child: Container(
                       width: constraints.maxWidth,
                       constraints: const BoxConstraints(maxHeight: 220),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E22) : Colors.white,
+                        color: AppColors.getSurface(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: isDark
-                              ? AppColors.borderDark
-                              : AppColors.borderLight,
+                          color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                           width: 0.8,
                         ),
                       ),
@@ -1592,33 +1447,29 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                           : AppColors.textHint,
                     ),
                     filled: true,
-                    fillColor: isDark
-                        ? const Color(0xFF27272A)
-                        : const Color(0xFFF4F4F5),
+                    fillColor: AppColors.getSurfaceVariant(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: isDark
-                            ? AppColors.borderDark
-                            : AppColors.borderLight,
+                        color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                         width: 0.8,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: isDark
-                            ? AppColors.borderDark
-                            : AppColors.borderLight,
+                        color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                         width: 0.8,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                          color: AppColors.primary, width: 1.5),
+                      borderSide: BorderSide(
+                        color: ThemeManager.isMonochrome ? (isDark ? Colors.white : const Color(0xFF18181B)) : AppColors.pastelLime,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                 );
@@ -1668,28 +1519,29 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                   )
                 : null,
             filled: true,
-            fillColor:
-                isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+            fillColor: AppColors.getSurfaceVariant(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                 width: 0.8,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
                 width: 0.8,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide:
-                  const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: BorderSide(
+                color: ThemeManager.isMonochrome ? (isDark ? Colors.white : const Color(0xFF18181B)) : AppColors.pastelLime,
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -1714,10 +1566,10 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+            color: AppColors.getSurfaceVariant(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
               width: 0.8,
             ),
           ),
@@ -1725,7 +1577,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
             child: DropdownButton<T>(
               value: safeValue,
               isExpanded: true,
-              dropdownColor: isDark ? AppColors.surfaceDark : AppColors.surface,
+              dropdownColor: AppColors.getSurface(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
               style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
@@ -1794,6 +1646,72 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
       case JobPortal.lainnya:
         return CupertinoIcons.ellipsis_circle_fill;
     }
+  }
+
+  Widget _buildSelectableChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isDark,
+    required bool isMonochrome,
+    IconData? icon,
+  }) {
+    final activeBg = isMonochrome
+        ? (isDark ? Colors.white : const Color(0xFF18181B))
+        : AppColors.pastelLime;
+    final activeFg = isMonochrome
+        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+        : AppColors.textOnPastel;
+    final inactiveBg = isMonochrome
+        ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+        : (isDark ? AppColors.darkSurfaceVariantPastel : AppColors.lightSurfaceVariantPastel);
+    final inactiveBorder = isMonochrome
+        ? (isDark ? AppColors.borderDark : AppColors.borderLight)
+        : (isDark ? AppColors.darkBorderPastel : AppColors.lightBorderPastel);
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7.5),
+        decoration: BoxDecoration(
+          color: isSelected ? activeBg : inactiveBg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? activeBg : inactiveBorder,
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected
+                    ? activeFg
+                    : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? activeFg
+                    : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

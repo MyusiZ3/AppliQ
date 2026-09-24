@@ -1245,266 +1245,285 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
     final app = _application!;
     final feedback = StatusHelper.getFeedbackText(app.status, app.appliedDate);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.back),
-          color: isDark ? Colors.white : const Color(0xFF18181B),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          AppStrings.applicationDetailTitle,
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.4,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-          ),
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: Icon(
-              CupertinoIcons.ellipsis_vertical,
-              size: 20,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+    return ValueListenableBuilder<AccentThemeMode>(
+      valueListenable: ThemeManager.accentNotifier,
+      builder: (context, accentMode, _) {
+        final isMono = accentMode == AccentThemeMode.monochrome;
+        final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+        final cardBorder = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+        final scaffoldBg = AppColors.getBackground(isDark: isDark, isMonochrome: isMono);
+
+        return Scaffold(
+          backgroundColor: scaffoldBg,
+          appBar: AppBar(
+            backgroundColor: scaffoldBg,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(CupertinoIcons.back),
+              color: isDark ? Colors.white : const Color(0xFF18181B),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            position: PopupMenuPosition.under,
-            offset: const Offset(0, 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-              side: BorderSide(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                width: 0.8,
+            title: Text(
+              AppStrings.applicationDetailTitle,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.4,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
               ),
             ),
-            color: isDark ? AppColors.surfaceDark : AppColors.surface,
-            elevation: 4,
-            onSelected: (value) async {
-              if (value == 'cover_letter') {
-                _openCoverLetterGenerator();
-              } else if (value == 'edit') {
-                final updated = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ApplicationFormScreen(
-                      repository: widget.repository,
-                      applicationToEdit: app,
+            actions: [
+              PopupMenuButton<String>(
+                icon: Icon(
+                  CupertinoIcons.ellipsis_vertical,
+                  size: 20,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                ),
+                position: PopupMenuPosition.under,
+                offset: const Offset(0, 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: cardBorder,
+                    width: 0.8,
+                  ),
+                ),
+                color: cardBg,
+                elevation: 4,
+                onSelected: (value) async {
+                  if (value == 'cover_letter') {
+                    _openCoverLetterGenerator();
+                  } else if (value == 'edit') {
+                    final updated = await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ApplicationFormScreen(
+                          repository: widget.repository,
+                          applicationToEdit: app,
+                        ),
+                      ),
+                    );
+                    if (updated == true) _loadData();
+                  } else if (value == 'delete') {
+                    _deleteApplication();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'cover_letter',
+                    child: Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.doc_plaintext,
+                          size: 18,
+                          color: isMono
+                              ? (isDark ? Colors.white : const Color(0xFF18181B))
+                              : AppColors.pastelLavender,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-                if (updated == true) _loadData();
-              } else if (value == 'delete') {
-                _deleteApplication();
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem<String>(
-                value: 'cover_letter',
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.doc_plaintext,
-                      size: 18,
-                      color: ThemeManager.isMonochrome
-                          ? (isDark ? Colors.white : const Color(0xFF18181B))
-                          : const Color(0xFF6366F1),
+                  PopupMenuItem<String>(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.pencil,
+                          size: 18,
+                          color: isDark ? Colors.white : const Color(0xFF18181B),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          AppStrings.edit,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                      ),
+                  ),
+                  const PopupMenuDivider(height: 1),
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.trash,
+                          size: 18,
+                          color: AppColors.expense,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          AppStrings.delete,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.expense,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.pencil,
-                      size: 18,
-                      color: isDark ? Colors.white : const Color(0xFF18181B),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      AppStrings.edit,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(height: 1),
-              PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    const Icon(
-                      CupertinoIcons.trash,
-                      size: 18,
-                      color: AppColors.expense,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      AppStrings.delete,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.expense,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-            16, 12, 16, MediaQuery.of(context).padding.bottom + 90),
-        children: [
-          // Header Card with Notch Pill
-          NotchedCard(
-            padding: const EdgeInsets.all(20),
-            borderRadius: 22,
-            showTopNotch: true,
-            showBottomNotch: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          body: ListView(
+            padding: EdgeInsets.fromLTRB(
+                16, 12, 16, MediaQuery.of(context).padding.bottom + 90),
+            children: [
+              // Header Card with Notch Pill
+              NotchedCard(
+                padding: const EdgeInsets.all(20),
+                borderRadius: 22,
+                showTopNotch: true,
+                showBottomNotch: false,
+                backgroundColor: cardBg,
+                borderColor: cardBorder,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        app.positionTitle,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            app.positionTitle,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        StatusBadge(status: app.status),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      app.companyName,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Status Dynamic Feedback Alert Banner
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: StatusHelper.getStatusColor(app.status).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: StatusHelper.getStatusColor(app.status).withValues(alpha: 0.25),
+                          width: 0.8,
                         ),
                       ),
-                    ),
-                    StatusBadge(status: app.status),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  app.companyName,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Status Dynamic Feedback Alert Banner
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: StatusHelper.getStatusColor(app.status).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: StatusHelper.getStatusColor(app.status).withValues(alpha: 0.25),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.info_circle_fill,
-                        size: 16,
-                        color: StatusHelper.getStatusColor(app.status),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          feedback,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.2,
+                      child: Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.info_circle_fill,
+                            size: 16,
                             color: StatusHelper.getStatusColor(app.status),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Quick Status Update Selector
-                Text(
-                  '${AppStrings.updateStatus}:',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.1,
-                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: ApplicationStatus.values.map((st) {
-                      final isSelected = app.status == st;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: InkWell(
-                          onTap: () => _updateStatus(st),
-                          borderRadius: BorderRadius.circular(100),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? StatusHelper.getStatusColor(st)
-                                  : (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant),
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(
-                                color: isSelected
-                                    ? StatusHelper.getStatusColor(st)
-                                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
-                                width: 0.8,
-                              ),
-                            ),
+                          const SizedBox(width: 8),
+                          Expanded(
                             child: Text(
-                              AppStrings.localizedStatus(st),
+                              feedback,
                               style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: -0.2,
-                                color: isSelected
-                                    ? Colors.white
-                                    : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                                color: StatusHelper.getStatusColor(app.status),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Quick Status Update Selector
+                    Text(
+                      '${AppStrings.updateStatus}:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: ApplicationStatus.values.map((st) {
+                          final isSelected = app.status == st;
+                          final activeBg = isMono
+                              ? (isDark ? Colors.white : const Color(0xFF18181B))
+                              : StatusHelper.getStatusColor(st);
+                          final activeFg = isMono
+                              ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                              : AppColors.textOnPastel;
+                          final inactiveBg = isMono
+                              ? (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant)
+                              : (isDark ? AppColors.darkSurfaceVariantPastel : AppColors.lightSurfaceVariantPastel);
+                          final inactiveBorder = isMono
+                              ? (isDark ? AppColors.borderDark : AppColors.borderLight)
+                              : (isDark ? AppColors.darkBorderPastel : AppColors.lightBorderPastel);
+
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: InkWell(
+                              onTap: () => _updateStatus(st),
+                              borderRadius: BorderRadius.circular(100),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? activeBg : inactiveBg,
+                                  borderRadius: BorderRadius.circular(100),
+                                  border: Border.all(
+                                    color: isSelected ? activeBg : inactiveBorder,
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Text(
+                                  AppStrings.localizedStatus(st),
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    letterSpacing: -0.2,
+                                    color: isSelected
+                                        ? activeFg
+                                        : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
           const SizedBox(height: 16),
 
@@ -1512,10 +1531,10 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.surface,
+              color: cardBg,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                color: cardBorder,
                 width: 0.8,
               ),
             ),
@@ -1568,10 +1587,10 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : AppColors.surface,
+                color: cardBg,
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                  color: cardBorder,
                   width: 0.8,
                 ),
               ),
@@ -1607,10 +1626,10 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.surface,
+              color: cardBg,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                color: cardBorder,
                 width: 0.8,
               ),
             ),
@@ -2165,6 +2184,8 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             }),
         ],
       ),
+    );
+      },
     );
   }
 

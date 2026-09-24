@@ -8,6 +8,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/language_manager.dart';
+import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/application_card.dart';
 import '../../widgets/empty_state_view.dart';
@@ -162,91 +163,96 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final filtered = _filteredApplications;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Standardized Top Header Row
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      AppStrings.applicationsTitle,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimary,
-                        letterSpacing: -0.7,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+    return ValueListenableBuilder<AccentThemeMode>(
+      valueListenable: ThemeManager.accentNotifier,
+      builder: (context, accentMode, _) {
+        final isMono = accentMode == AccentThemeMode.monochrome;
+        final scaffoldBg = AppColors.getBackground(isDark: isDark, isMonochrome: isMono);
+
+        return Scaffold(
+          backgroundColor: scaffoldBg,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // Standardized Top Header Row
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                  color: scaffoldBg,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _buildCircleActionButton(
-                        icon: _isSearchOpen
-                            ? CupertinoIcons.xmark
-                            : CupertinoIcons.search,
-                        isDark: isDark,
-                        isActive: _isSearchOpen,
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            _isSearchOpen = !_isSearchOpen;
-                            if (!_isSearchOpen) {
-                              _searchQuery = '';
-                              _searchController.clear();
-                            }
-                          });
-                        },
+                      Expanded(
+                        child: Text(
+                          AppStrings.applicationsTitle,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimary,
+                            letterSpacing: -0.7,
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      _buildCircleActionButton(
-                        icon: CupertinoIcons.plus,
-                        isDark: isDark,
-                        onTap: () async {
-                          HapticFeedback.lightImpact();
-                          closeSearch();
-                          final added = await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ApplicationFormScreen(
-                                  repository: widget.repository),
-                            ),
-                          );
-                          if (added == true) _loadApplications();
-                        },
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildCircleActionButton(
+                            icon: _isSearchOpen
+                                ? CupertinoIcons.xmark
+                                : CupertinoIcons.search,
+                            isDark: isDark,
+                            isActive: _isSearchOpen,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _isSearchOpen = !_isSearchOpen;
+                                if (!_isSearchOpen) {
+                                  _searchQuery = '';
+                                  _searchController.clear();
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                          _buildCircleActionButton(
+                            icon: CupertinoIcons.plus,
+                            isDark: isDark,
+                            onTap: () async {
+                              HapticFeedback.lightImpact();
+                              closeSearch();
+                              final added = await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ApplicationFormScreen(
+                                      repository: widget.repository),
+                                ),
+                              );
+                              if (added == true) _loadApplications();
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            // Collapsible Search Bar (Only appears when search icon is clicked)
-            if (_isSearchOpen)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.surfaceDark : AppColors.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color:
-                          isDark ? AppColors.borderDark : AppColors.borderLight,
-                      width: 0.8,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    autofocus: true,
+                ),
+                // Collapsible Search Bar (Only appears when search icon is clicked)
+                if (_isSearchOpen)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.getSurface(isDark: isDark, isMonochrome: isMono),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.getBorder(isDark: isDark, isMonochrome: isMono),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        autofocus: true,
                     onChanged: (val) => setState(() => _searchQuery = val),
                     style: TextStyle(
                       fontSize: 14,
@@ -455,6 +461,8 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         ),
       ),
     );
+      },
+    );
   }
 
   Widget _buildSortButton(bool isDark) {
@@ -464,6 +472,14 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     if (_sortBy == 'favorite') sortLabel = isEn ? 'Starred' : 'Ditandai';
     if (_sortBy == 'name') sortLabel = isEn ? 'Name A-Z' : 'Nama A-Z';
 
+    final isMono = ThemeManager.isMonochrome;
+    final sortBg = isDark
+        ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+        : (isMono ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel);
+    final sortBorder = isDark
+        ? (isMono ? const Color(0xFF3F3F46) : AppColors.darkBorderPastel)
+        : (isMono ? const Color(0xFFE4E4E7) : AppColors.lightBorderPastel);
+
     return PopupMenuButton<String>(
       tooltip: AppStrings.sort,
       initialValue: _sortBy,
@@ -472,8 +488,16 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         setState(() => _sortBy = val);
       },
       offset: const Offset(0, 36),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: isDark ? const Color(0xFF27272A) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: sortBorder,
+          width: 0.8,
+        ),
+      ),
+      color: isDark
+          ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfacePastel)
+          : Colors.white,
       itemBuilder: (context) => [
         PopupMenuItem(value: 'newest', child: Text(AppStrings.sortNewest)),
         PopupMenuItem(value: 'oldest', child: Text(AppStrings.sortOldest)),
@@ -489,10 +513,10 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+          color: sortBg,
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
-            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+            color: sortBorder,
             width: 0.8,
           ),
         ),
@@ -532,6 +556,14 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     bool isActive = false,
     VoidCallback? onTap,
   }) {
+    final isMono = ThemeManager.isMonochrome;
+    final activeBg = isMono
+        ? (isDark ? Colors.white : const Color(0xFF18181B))
+        : AppColors.pastelLavender;
+    final activeFg = isMono
+        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+        : AppColors.textOnPastel;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -539,12 +571,12 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         height: 40,
         decoration: BoxDecoration(
           color: isActive
-              ? (isDark ? Colors.white : const Color(0xFF18181B))
+              ? activeBg
               : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
           shape: BoxShape.circle,
           border: Border.all(
             color: isActive
-                ? (isDark ? Colors.white : const Color(0xFF18181B))
+                ? activeBg
                 : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7)),
             width: 0.8,
           ),
@@ -554,7 +586,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
             icon,
             size: 18,
             color: isActive
-                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                ? activeFg
                 : (isDark ? Colors.white : const Color(0xFF18181B)),
           ),
         ),
@@ -568,6 +600,18 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     required VoidCallback onTap,
     required bool isDark,
   }) {
+    final isMono = ThemeManager.isMonochrome;
+    final selectedBg = isMono
+        ? (isDark ? Colors.white : const Color(0xFF18181B))
+        : AppColors.pastelLime;
+    final unselectedBg = isMono
+        ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+        : (isDark ? const Color(0xFF1E1D24) : const Color(0xFFF4F4F5));
+
+    final selectedFg = isMono
+        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+        : AppColors.textOnPastel;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -578,13 +622,11 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark ? Colors.white : const Color(0xFF18181B))
-              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
+          color: isSelected ? selectedBg : unselectedBg,
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
             color: isSelected
-                ? (isDark ? Colors.white : const Color(0xFF18181B))
+                ? selectedBg
                 : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7)),
             width: 0.8,
           ),
@@ -596,7 +638,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             letterSpacing: -0.2,
             color: isSelected
-                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                ? selectedFg
                 : (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A)),
           ),
         ),
@@ -634,7 +676,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
             duration: const Duration(seconds: 3),
             action: SnackBarAction(
               label: 'Undo',
-              textColor: const Color(0xFF6366F1),
+              textColor: AppColors.pastelLavender,
               onPressed: () async {
                 final revertedApp =
                     app.copyWith(status: oldStatus, updatedAt: DateTime.now());
@@ -855,6 +897,14 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
 
   Widget _buildEmptyState(bool isDark) {
     final isEn = LanguageManager.isEnglish;
+    final isMono = ThemeManager.isMonochrome;
+    final btnBg = isMono
+        ? (isDark ? Colors.white : const Color(0xFF18181B))
+        : AppColors.pastelLime;
+    final btnFg = isMono
+        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+        : AppColors.textOnPastel;
+
     return EmptyStateView(
       icon: CupertinoIcons.tray,
       title: isEn ? 'No Applications Yet' : 'Belum Ada Lamaran',
@@ -874,19 +924,19 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         icon: Icon(
           CupertinoIcons.plus,
           size: 16,
-          color: isDark ? const Color(0xFF18181B) : Colors.white,
+          color: btnFg,
         ),
         label: Text(
           isEn ? 'New Application' : 'Catat Lamaran Baru',
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 14,
-            color: isDark ? const Color(0xFF18181B) : Colors.white,
+            color: btnFg,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-          foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+          backgroundColor: btnBg,
+          foregroundColor: btnFg,
           elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),

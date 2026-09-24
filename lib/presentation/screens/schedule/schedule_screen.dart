@@ -8,6 +8,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../data/models/application_log.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../applications/application_detail_screen.dart';
 import '../applications/application_form_screen.dart';
@@ -170,189 +171,205 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final now = DateTime.now();
     final filteredItems = _getFilteredSchedules(now);
 
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Standardized Top Header Row
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              color: isDark ? AppColors.backgroundDark : AppColors.background,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      AppStrings.scheduleTitle,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                        letterSpacing: -0.7,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+    return ValueListenableBuilder<AccentThemeMode>(
+      valueListenable: ThemeManager.accentNotifier,
+      builder: (context, accentMode, _) {
+        final isMono = accentMode == AccentThemeMode.monochrome;
+        final scaffoldBg = AppColors.getBackground(isDark: isDark, isMonochrome: isMono);
+
+        return Scaffold(
+          backgroundColor: scaffoldBg,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // Standardized Top Header Row
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                  color: scaffoldBg,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _buildCircleActionButton(
-                        icon: _isSearchOpen ? CupertinoIcons.xmark : CupertinoIcons.search,
-                        isDark: isDark,
-                        isActive: _isSearchOpen,
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            _isSearchOpen = !_isSearchOpen;
-                            if (!_isSearchOpen) {
-                              _searchQuery = '';
-                              _searchController.clear();
-                            }
-                          });
-                        },
+                      Expanded(
+                        child: Text(
+                          AppStrings.scheduleTitle,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            letterSpacing: -0.7,
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      _buildCircleActionButton(
-                        icon: CupertinoIcons.plus,
-                        isDark: isDark,
-                        onTap: () async {
-                          HapticFeedback.lightImpact();
-                          closeSearch();
-                          final added = await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ApplicationFormScreen(repository: widget.repository),
-                            ),
-                          );
-                          if (added == true) _loadSchedules();
-                        },
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildCircleActionButton(
+                            icon: _isSearchOpen ? CupertinoIcons.xmark : CupertinoIcons.search,
+                            isDark: isDark,
+                            isActive: _isSearchOpen,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _isSearchOpen = !_isSearchOpen;
+                                if (!_isSearchOpen) {
+                                  _searchQuery = '';
+                                  _searchController.clear();
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                          _buildCircleActionButton(
+                            icon: CupertinoIcons.plus,
+                            isDark: isDark,
+                            onTap: () async {
+                              HapticFeedback.lightImpact();
+                              closeSearch();
+                              final added = await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ApplicationFormScreen(repository: widget.repository),
+                                ),
+                              );
+                              if (added == true) _loadSchedules();
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            // Collapsible Search Bar (Only appears when search icon is clicked)
-            if (_isSearchOpen)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.surfaceDark : AppColors.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                      width: 0.8,
+                ),
+                // Collapsible Search Bar (Only appears when search icon is clicked)
+                if (_isSearchOpen)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.getSurface(isDark: isDark, isMonochrome: isMono),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.getBorder(isDark: isDark, isMonochrome: isMono),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        autofocus: true,
+                        onChanged: (val) => setState(() => _searchQuery = val),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: AppStrings.searchScheduleHint,
+                          hintStyle: TextStyle(
+                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                            fontSize: 13.5,
+                          ),
+                          prefixIcon: Icon(
+                            CupertinoIcons.search,
+                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                            size: 17,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(CupertinoIcons.clear_circled_solid, size: 16),
+                                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                      ),
                     ),
                   ),
-                  child: TextField(
-                    controller: _searchController,
-                    autofocus: true,
-                    onChanged: (val) => setState(() => _searchQuery = val),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: AppStrings.searchScheduleHint,
-                      hintStyle: TextStyle(
-                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                        fontSize: 13.5,
+                // Notched Pill Filter Switcher (Mendatang vs Semua)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+                  child: NotchedPillCard<bool>(
+                    items: [
+                      NotchedPillItem(
+                        value: true,
+                        label: AppStrings.upcomingTab,
+                        icon: CupertinoIcons.calendar_today,
                       ),
-                      prefixIcon: Icon(
-                        CupertinoIcons.search,
-                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                        size: 17,
+                      NotchedPillItem(
+                        value: false,
+                        label: AppStrings.allAgendaTab,
+                        icon: CupertinoIcons.list_bullet,
                       ),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(CupertinoIcons.clear_circled_solid, size: 16),
-                              color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _searchQuery = '');
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
+                    ],
+                    selectedValue: _upcomingOnly,
+                    onValueChanged: (val) => setState(() => _upcomingOnly = val),
                   ),
                 ),
-              ),
-            // Notched Pill Filter Switcher (Mendatang vs Semua)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-              child: NotchedPillCard<bool>(
-                items: [
-                  NotchedPillItem(
-                    value: true,
-                    label: AppStrings.upcomingTab,
-                    icon: CupertinoIcons.calendar_today,
-                  ),
-                  NotchedPillItem(
-                    value: false,
-                    label: AppStrings.allAgendaTab,
-                    icon: CupertinoIcons.list_bullet,
-                  ),
-                ],
-                selectedValue: _upcomingOnly,
-                onValueChanged: (val) => setState(() => _upcomingOnly = val),
-              ),
-            ),
 
-            // Schedule List Content
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 60),
-                        child: AppliqLoading(),
-                      ),
-                    )
-                  : _scheduleItems.isEmpty
-                      ? RefreshIndicator(
-                          onRefresh: () =>
-                              _loadSchedules(forceRefresh: true),
-                          child: EmptyStateView(
-                            icon: CupertinoIcons.calendar_badge_plus,
-                            title: AppStrings.noScheduleTitle,
-                            message: AppStrings.noScheduleMessage,
-                            action: ElevatedButton.icon(
-                              onPressed: () =>
-                                  _loadSchedules(forceRefresh: true),
-                              icon: Icon(
-                                CupertinoIcons.refresh,
-                                size: 16,
-                                color: isDark ? const Color(0xFF18181B) : Colors.white,
-                              ),
-                              label: Text(
-                                AppStrings.refreshSchedule,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14,
-                                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                                foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(100)),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 22, vertical: 13),
-                              ),
-                            ),
+                // Schedule List Content
+                Expanded(
+                  child: _isLoading
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 60),
+                            child: AppliqLoading(),
                           ),
                         )
-                      : _buildGroupedScheduleList(context, isDark, filteredItems),
+                      : _scheduleItems.isEmpty
+                          ? RefreshIndicator(
+                              onRefresh: () =>
+                                  _loadSchedules(forceRefresh: true),
+                              child: EmptyStateView(
+                                icon: CupertinoIcons.calendar_badge_plus,
+                                title: AppStrings.noScheduleTitle,
+                                message: AppStrings.noScheduleMessage,
+                                action: ElevatedButton.icon(
+                                  onPressed: () =>
+                                      _loadSchedules(forceRefresh: true),
+                                  icon: Icon(
+                                    CupertinoIcons.refresh,
+                                    size: 16,
+                                    color: isMono
+                                        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                        : AppColors.textOnPastel,
+                                  ),
+                                  label: Text(
+                                    AppStrings.refreshSchedule,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                      color: isMono
+                                          ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                          : AppColors.textOnPastel,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isMono
+                                        ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                        : AppColors.pastelLime,
+                                    foregroundColor: isMono
+                                        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                        : AppColors.textOnPastel,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(100)),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 22, vertical: 13),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : _buildGroupedScheduleList(context, isDark, filteredItems),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -362,6 +379,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     required VoidCallback onTap,
     bool isActive = false,
   }) {
+    final isMono = ThemeManager.isMonochrome;
+    final activeBg = isMono
+        ? (isDark ? Colors.white : const Color(0xFF18181B))
+        : AppColors.pastelLavender;
+    final activeFg = isMono
+        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+        : AppColors.textOnPastel;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -369,7 +394,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         height: 40,
         decoration: BoxDecoration(
           color: isActive
-              ? (isDark ? Colors.white : const Color(0xFF18181B))
+              ? activeBg
               : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
           shape: BoxShape.circle,
           border: Border.all(
@@ -384,7 +409,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             icon,
             size: 18,
             color: isActive
-                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                ? activeFg
                 : (isDark ? Colors.white : const Color(0xFF18181B)),
           ),
         ),
@@ -505,7 +530,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               title: AppStrings.sectionToday,
               subtitle: AppStrings.sectionTodaySubtitle,
               icon: CupertinoIcons.flame_fill,
-              accentColor: const Color(0xFF10B981),
+              accentColor: ThemeManager.isMonochrome
+                  ? (isDark ? Colors.white : const Color(0xFF18181B))
+                  : AppColors.pastelMint,
               items: todayItems,
               isDark: isDark,
             ),
@@ -514,7 +541,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               title: AppStrings.sectionThisWeek,
               subtitle: AppStrings.sectionThisWeekSubtitle,
               icon: CupertinoIcons.calendar_today,
-              accentColor: const Color(0xFF3B82F6),
+              accentColor: ThemeManager.isMonochrome
+                  ? (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A))
+                  : AppColors.pastelSky,
               items: thisWeekItems,
               isDark: isDark,
             ),
@@ -560,24 +589,40 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.14),
+                  color: ThemeManager.isMonochrome
+                      ? accentColor.withValues(alpha: 0.14)
+                      : (isDark
+                          ? accentColor.withValues(alpha: 0.18)
+                          : accentColor),
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
-                    color: accentColor.withValues(alpha: 0.3),
+                    color: ThemeManager.isMonochrome
+                        ? accentColor.withValues(alpha: 0.3)
+                        : (isDark
+                            ? accentColor.withValues(alpha: 0.35)
+                            : Colors.black.withValues(alpha: 0.1)),
                     width: 0.8,
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 12, color: accentColor),
+                    Icon(
+                      icon,
+                      size: 12,
+                      color: ThemeManager.isMonochrome
+                          ? accentColor
+                          : (isDark ? accentColor : AppColors.textOnPastel),
+                    ),
                     const SizedBox(width: 5),
                     Text(
                       title.toUpperCase(),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: accentColor,
+                        color: ThemeManager.isMonochrome
+                            ? accentColor
+                            : (isDark ? accentColor : AppColors.textOnPastel),
                         letterSpacing: 0.6,
                       ),
                     ),
@@ -632,12 +677,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : AppColors.surface,
+            color: AppColors.getSurface(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isOverdue
                   ? const Color(0xFFEF4444).withValues(alpha: 0.4)
-                  : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                  : AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
               width: isOverdue ? 1.2 : 0.8,
             ),
             boxShadow: [

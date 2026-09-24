@@ -829,214 +829,218 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = Theme.of(context).cardTheme.color ??
-        (isDark ? const Color(0xFF18181B) : AppColors.surface);
-    final borderColor = Theme.of(context).dividerTheme.color ??
-        (isDark ? const Color(0xFF27272A) : AppColors.borderLight);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        leading: Navigator.canPop(context)
-            ? Padding(
-                padding: const EdgeInsets.only(left: 14),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        CupertinoIcons.arrow_left,
-                        size: 18,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
+    return ValueListenableBuilder<AccentThemeMode>(
+      valueListenable: ThemeManager.accentNotifier,
+      builder: (context, accentMode, _) {
+        final isMono = accentMode == AccentThemeMode.monochrome;
+        final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+        final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            elevation: 0,
+            leading: Navigator.canPop(context)
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 14),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                                : const Color(0xFFF4F4F5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            CupertinoIcons.arrow_left,
+                            size: 18,
+                            color: isDark ? Colors.white : const Color(0xFF18181B),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              )
-            : null,
-        centerTitle: true,
-        title: Text(
-          AppStrings.profileTitle,
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.4,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-          ),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 60),
-                child: AppliqLoading(),
+                  )
+                : null,
+            centerTitle: true,
+            title: Text(
+              AppStrings.profileTitle,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.4,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
               ),
-            )
-          : SafeArea(
-              child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Profile Header Card (Clickable to Edit Profile)
-                    GestureDetector(
-                      onTap: () async {
-                        if (_profile == null) return;
-                        _triggerHaptic();
-                        final updated = await Navigator.push<UserProfile>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EditProfileScreen(
-                              profile: _profile!,
-                              repository: widget.repository,
-                            ),
-                          ),
-                        );
-                        if (updated != null) {
-                          setState(() => _profile = updated);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: cardBg,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: borderColor, width: 0.8),
-                        ),
-                        child: Row(
-                          children: [
-                            _buildAvatar(_profile?.avatarUrl, 24, isDark),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _profile?.fullName.isNotEmpty == true ? _profile!.fullName : 'Your Name',
-                                    style: TextStyle(
-                                      fontSize: 15.5,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -0.3,
-                                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _profile?.username != null && _profile!.username!.isNotEmpty
-                                        ? _profile!.username!
-                                        : (_profile?.email.contains('@') == true
-                                            ? '@${_profile!.email.split('@')[0]}'
-                                            : '@yourname'),
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
+            ),
+          ),
+          body: _isLoading
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 60),
+                    child: AppliqLoading(),
+                  ),
+                )
+              : SafeArea(
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Profile Header Card (Clickable to Edit Profile)
+                        GestureDetector(
+                          onTap: () async {
+                            if (_profile == null) return;
+                            _triggerHaptic();
+                            final updated = await Navigator.push<UserProfile>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EditProfileScreen(
+                                  profile: _profile!,
+                                  repository: widget.repository,
+                                ),
                               ),
+                            );
+                            if (updated != null) {
+                              setState(() => _profile = updated);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: borderColor, width: 0.8),
                             ),
-                            Icon(
-                              CupertinoIcons.chevron_right,
-                              size: 15,
-                              color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Grouped Settings Section 1
-                    Container(
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: borderColor, width: 0.8),
-                      ),
-                      child: Column(
-                        children: [
-                          // Notifications Toggle Tile
-                          _buildTile(
-                            icon: CupertinoIcons.bell_fill,
-                            title: AppStrings.notificationsSetting,
-                            isDark: isDark,
-                            trailing: _buildCustomSwitch(
-                              value: _notificationsEnabled,
-                              isDark: isDark,
-                              onChanged: _toggleNotifications,
-                            ),
-                          ),
-                          _buildDivider(borderColor),
-
-                          // Experience (CV ATS & Cover Letter)
-                          _buildTile(
-                            icon: CupertinoIcons.doc_person,
-                            title: AppStrings.menuExperienceTitle,
-                            subtitle: AppStrings.menuExperienceSubtitle,
-                            isDark: isDark,
-                            showChevron: true,
-                            onTap: () {
-                              _triggerHaptic();
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ResumeBuilderScreen(
-                                    repository: widget.repository,
+                            child: Row(
+                              children: [
+                                _buildAvatar(_profile?.avatarUrl, 24, isDark),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _profile?.fullName.isNotEmpty == true ? _profile!.fullName : 'Your Name',
+                                        style: TextStyle(
+                                          fontSize: 15.5,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.3,
+                                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        _profile?.username != null && _profile!.username!.isNotEmpty
+                                            ? _profile!.username!
+                                            : (_profile?.email.contains('@') == true
+                                                ? '@${_profile!.email.split('@')[0]}'
+                                                : '@yourname'),
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              );
-                            },
+                                Icon(
+                                  CupertinoIcons.chevron_right,
+                                  size: 15,
+                                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                ),
+                              ],
+                            ),
                           ),
-                          _buildDivider(borderColor),
+                        ),
 
-                          // Dark Mode Switch Tile
-                          ValueListenableBuilder<ThemeMode>(
-                            valueListenable: ThemeManager.notifier,
-                            builder: (context, themeMode, _) {
-                              final isDarkModeActive = themeMode == ThemeMode.dark ||
-                                  (themeMode == ThemeMode.system && isDark);
+                        const SizedBox(height: 12),
 
-                              return _buildTile(
-                                icon: CupertinoIcons.moon,
-                                title: AppStrings.darkModeTitle,
+                        // Grouped Settings Section 1
+                        Container(
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: borderColor, width: 0.8),
+                          ),
+                          child: Column(
+                            children: [
+                              // Notifications Toggle Tile
+                              _buildTile(
+                                icon: CupertinoIcons.bell_fill,
+                                title: AppStrings.notificationsSetting,
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
-                                  value: isDarkModeActive,
+                                  value: _notificationsEnabled,
                                   isDark: isDark,
-                                  onChanged: (val) async {
-                                    _triggerHaptic();
-                                    await ThemeManager.setThemeMode(
-                                      val ? ThemeMode.dark : ThemeMode.light,
-                                    );
-                                  },
+                                  isMonochrome: isMono,
+                                  onChanged: _toggleNotifications,
                                 ),
-                              );
-                            },
-                          ),
-                          _buildDivider(borderColor),
+                              ),
+                              _buildDivider(borderColor),
 
-                          // Monochrome Mode Switch Tile
-                          ValueListenableBuilder<AccentThemeMode>(
-                            valueListenable: ThemeManager.accentNotifier,
-                            builder: (context, accentMode, _) {
-                              final isMonochrome = accentMode == AccentThemeMode.monochrome;
-                              return _buildTile(
+                              // Experience (CV ATS & Cover Letter)
+                              _buildTile(
+                                icon: CupertinoIcons.doc_person,
+                                title: AppStrings.menuExperienceTitle,
+                                subtitle: AppStrings.menuExperienceSubtitle,
+                                isDark: isDark,
+                                showChevron: true,
+                                onTap: () {
+                                  _triggerHaptic();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ResumeBuilderScreen(
+                                        repository: widget.repository,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              _buildDivider(borderColor),
+
+                              // Dark Mode Switch Tile
+                              ValueListenableBuilder<ThemeMode>(
+                                valueListenable: ThemeManager.notifier,
+                                builder: (context, themeMode, _) {
+                                  final isDarkModeActive = themeMode == ThemeMode.dark ||
+                                      (themeMode == ThemeMode.system && isDark);
+
+                                  return _buildTile(
+                                    icon: CupertinoIcons.moon,
+                                    title: AppStrings.darkModeTitle,
+                                    isDark: isDark,
+                                    trailing: _buildCustomSwitch(
+                                      value: isDarkModeActive,
+                                      isDark: isDark,
+                                      isMonochrome: isMono,
+                                      onChanged: (val) async {
+                                        _triggerHaptic();
+                                        await ThemeManager.setThemeMode(
+                                          val ? ThemeMode.dark : ThemeMode.light,
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                              _buildDivider(borderColor),
+
+                              // Monochrome Mode Switch Tile
+                              _buildTile(
                                 icon: CupertinoIcons.circle_righthalf_fill,
                                 title: AppStrings.monochromeTitle,
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
-                                  value: isMonochrome,
+                                  value: isMono,
                                   isDark: isDark,
+                                  isMonochrome: isMono,
                                   onChanged: (val) async {
                                     _triggerHaptic();
                                     await ThemeManager.setAccentThemeMode(
@@ -1044,125 +1048,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     );
                                   },
                                 ),
-                              );
-                            },
-                          ),
-                          _buildDivider(borderColor),
-
-                          // Language Tile
-                          _buildTile(
-                            icon: CupertinoIcons.globe,
-                            title: AppStrings.languageSetting,
-                            isDark: isDark,
-                            subtitle: _selectedLanguage,
-                            showChevron: true,
-                            onTap: () {
-                              _triggerHaptic();
-                              _showLanguageSelector();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Grouped Settings Section 2 (FAQ & Policies)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: borderColor, width: 0.8),
-                      ),
-                      child: Column(
-                        children: [
-                          _buildTile(
-                            icon: CupertinoIcons.question_circle,
-                            title: 'FAQ',
-                            isDark: isDark,
-                            showChevron: true,
-                            onTap: () {
-                              _triggerHaptic();
-                              _showFaqSheet();
-                            },
-                          ),
-                          _buildDivider(borderColor),
-                          _buildTile(
-                            icon: CupertinoIcons.info_circle,
-                            title: AppStrings.termsOfService,
-                            isDark: isDark,
-                            showChevron: true,
-                            onTap: () {
-                              _triggerHaptic();
-                              _showTermsOfService();
-                            },
-                          ),
-                          _buildDivider(borderColor),
-                          _buildTile(
-                            icon: CupertinoIcons.shield,
-                            title: AppStrings.privacyPolicy,
-                            isDark: isDark,
-                            showChevron: true,
-                            onTap: () {
-                              _triggerHaptic();
-                              _showPrivacyPolicy();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Log Out Pill Button
-                    GestureDetector(
-                      onTap: () {
-                        _triggerHaptic();
-                        _handleSignOut();
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFF18181B),
-                          borderRadius: BorderRadius.circular(100),
-                          border: Border.all(
-                            color: isDark ? const Color(0xFF3F3F46) : Colors.transparent,
-                            width: 0.8,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.08),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              CupertinoIcons.square_arrow_right,
-                              color: Color(0xFFEF4444),
-                              size: 17,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppStrings.logoutButton,
-                              style: const TextStyle(
-                                color: Color(0xFFEF4444),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14.5,
-                                letterSpacing: -0.2,
                               ),
-                            ),
-                          ],
+                              _buildDivider(borderColor),
+
+                              // Language Tile
+                              _buildTile(
+                                icon: CupertinoIcons.globe,
+                                title: AppStrings.languageSetting,
+                                isDark: isDark,
+                                subtitle: _selectedLanguage,
+                                showChevron: true,
+                                onTap: () {
+                                  _triggerHaptic();
+                                  _showLanguageSelector();
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+
+                        const SizedBox(height: 12),
+
+                        // Grouped Settings Section 2 (FAQ & Policies)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: borderColor, width: 0.8),
+                          ),
+                          child: Column(
+                            children: [
+                              _buildTile(
+                                icon: CupertinoIcons.question_circle,
+                                title: 'FAQ',
+                                isDark: isDark,
+                                showChevron: true,
+                                onTap: () {
+                                  _triggerHaptic();
+                                  _showFaqSheet();
+                                },
+                              ),
+                              _buildDivider(borderColor),
+                              _buildTile(
+                                icon: CupertinoIcons.info_circle,
+                                title: AppStrings.termsOfService,
+                                isDark: isDark,
+                                showChevron: true,
+                                onTap: () {
+                                  _triggerHaptic();
+                                  _showTermsOfService();
+                                },
+                              ),
+                              _buildDivider(borderColor),
+                              _buildTile(
+                                icon: CupertinoIcons.shield,
+                                title: AppStrings.privacyPolicy,
+                                isDark: isDark,
+                                showChevron: true,
+                                onTap: () {
+                                  _triggerHaptic();
+                                  _showPrivacyPolicy();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Log Out Pill Button
+                        GestureDetector(
+                          onTap: () {
+                            _triggerHaptic();
+                            _handleSignOut();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                                  : const Color(0xFF18181B),
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: isDark
+                                    ? (isMono ? const Color(0xFF3F3F46) : AppColors.darkBorderPastel)
+                                    : Colors.transparent,
+                                width: 0.8,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.08),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  CupertinoIcons.square_arrow_right,
+                                  color: Color(0xFFEF4444),
+                                  size: 17,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppStrings.logoutButton,
+                                  style: const TextStyle(
+                                    color: Color(0xFFEF4444),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14.5,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+        );
+      },
     );
   }
 
@@ -1226,16 +1234,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required bool value,
     required bool isDark,
     required ValueChanged<bool> onChanged,
+    bool isMonochrome = true,
   }) {
     return Transform.scale(
       scale: 0.85,
       child: CupertinoSwitch(
         value: value,
-        activeTrackColor: isDark ? Colors.white : const Color(0xFF18181B),
-        inactiveTrackColor: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-        thumbColor: isDark
-            ? (value ? const Color(0xFF18181B) : Colors.white)
-            : (value ? Colors.white : const Color(0xFF71717A)),
+        activeTrackColor: isMonochrome
+            ? (isDark ? Colors.white : const Color(0xFF18181B))
+            : AppColors.pastelLime,
+        inactiveTrackColor: isDark
+            ? (isMonochrome ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+            : const Color(0xFFE4E4E7),
+        thumbColor: isMonochrome
+            ? (isDark
+                ? (value ? const Color(0xFF18181B) : Colors.white)
+                : (value ? Colors.white : const Color(0xFF71717A)))
+            : (value ? AppColors.textOnPastel : (isDark ? Colors.white70 : const Color(0xFF71717A))),
         onChanged: onChanged,
       ),
     );

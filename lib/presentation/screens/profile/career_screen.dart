@@ -10,6 +10,7 @@ import '../../../utils/language_manager.dart';
 import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/appliq_loading.dart';
+import '../applications/application_form_screen.dart';
 
 class CareerScreen extends StatefulWidget {
   final JobRepository repository;
@@ -191,386 +192,425 @@ class _CareerScreenState extends State<CareerScreen> {
 
                     Divider(height: 1, color: borderColor),
 
-                    // Form Fields
+                    // Form Fields in Cards like Tambah Lamaran Baru
                     Flexible(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Company Name
-                            _buildInputLabel(AppStrings.companyNameLabel, isDark),
-                            const SizedBox(height: 6),
-                            _buildTextField(
-                              controller: companyCtrl,
-                              hint: 'e.g. Google Indonesia / Tokopedia',
+                            // Section 1: Informasi Lowongan / Pekerjaan
+                            _buildFormSectionCard(
+                              title: LanguageManager.isEnglish ? 'Job & Company Details' : 'Informasi Pekerjaan',
                               icon: CupertinoIcons.building_2_fill,
                               isDark: isDark,
                               isMono: isMono,
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Position Title
-                            _buildInputLabel(AppStrings.positionLabel, isDark),
-                            const SizedBox(height: 6),
-                            _buildTextField(
-                              controller: positionCtrl,
-                              hint: 'e.g. Senior Flutter Developer',
-                              icon: CupertinoIcons.briefcase_fill,
-                              isDark: isDark,
-                              isMono: isMono,
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Location
-                            _buildInputLabel(AppStrings.locationLabel, isDark),
-                            const SizedBox(height: 6),
-                            _buildTextField(
-                              controller: locationCtrl,
-                              hint: 'e.g. Jakarta, Indonesia (Hybrid)',
-                              icon: CupertinoIcons.location_solid,
-                              isDark: isDark,
-                              isMono: isMono,
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Currently Working Toggle
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? const Color(0xFF27272A)
-                                    : const Color(0xFFF4F4F5),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: borderColor, width: 0.8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.briefcase_fill,
-                                    size: 16,
-                                    color: isDark ? AppColors.pastelLime : const Color(0xFF18181B),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      AppStrings.isCurrentlyWorkingCheckbox,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                  CupertinoSwitch(
-                                    value: isCurrent,
-                                    activeTrackColor: primaryColor,
-                                    onChanged: (val) {
-                                      HapticFeedback.selectionClick();
-                                      setModalState(() {
-                                        isCurrent = val;
-                                        if (val) endDate = null;
-                                        if (!val && endDate == null) endDate = DateTime.now();
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Start & End Date Pickers
-                            Row(
                               children: [
-                                // Start Date
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildInputLabel(AppStrings.startDateLabel, isDark),
-                                      const SizedBox(height: 6),
-                                      GestureDetector(
-                                        onTap: () async {
-                                          HapticFeedback.selectionClick();
-                                          final firstDate = DateTime(1990);
-                                          final lastDate = DateTime(2100);
-                                          final initialDate = startDate.isBefore(firstDate)
-                                              ? firstDate
-                                              : (startDate.isAfter(lastDate) ? lastDate : startDate);
-                                          final picked = await showDatePicker(
-                                            context: context,
-                                            initialDate: initialDate,
-                                            firstDate: firstDate,
-                                            lastDate: lastDate,
-                                          );
-                                          if (picked != null) {
-                                            setModalState(() => startDate = picked);
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                          decoration: BoxDecoration(
-                                            color: isDark
-                                                ? const Color(0xFF27272A)
-                                                : const Color(0xFFF4F4F5),
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: borderColor, width: 0.8),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Icon(CupertinoIcons.calendar, size: 15, color: isDark ? AppColors.textHintDark : AppColors.textHint),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                DateFormat('MMM yyyy').format(startDate),
-                                                style: TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                _buildInputLabel(AppStrings.companyNameLabel, isDark),
+                                const SizedBox(height: 6),
+                                _buildTextField(
+                                  controller: companyCtrl,
+                                  hint: 'e.g. Google Indonesia / Tokopedia',
+                                  icon: CupertinoIcons.building_2_fill,
+                                  isDark: isDark,
+                                  isMono: isMono,
                                 ),
-                                const SizedBox(width: 12),
-
-                                // End Date
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildInputLabel(AppStrings.endDateLabel, isDark),
-                                      const SizedBox(height: 6),
-                                      GestureDetector(
-                                        onTap: isCurrent
-                                            ? null
-                                            : () async {
-                                                HapticFeedback.selectionClick();
-                                                final firstDate = DateTime(1990);
-                                                final lastDate = DateTime(2100);
-                                                final targetInitial = endDate ?? (startDate.isAfter(DateTime.now()) ? startDate : DateTime.now());
-                                                final initialDate = targetInitial.isBefore(firstDate)
-                                                    ? firstDate
-                                                    : (targetInitial.isAfter(lastDate) ? lastDate : targetInitial);
-
-                                                final picked = await showDatePicker(
-                                                  context: context,
-                                                  initialDate: initialDate,
-                                                  firstDate: firstDate,
-                                                  lastDate: lastDate,
-                                                );
-                                                if (picked != null) {
-                                                  setModalState(() => endDate = picked);
-                                                }
-                                              },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                          decoration: BoxDecoration(
-                                            color: isCurrent
-                                                ? (isDark ? const Color(0xFF1A191E) : const Color(0xFFEBECEF))
-                                                : (isDark
-                                                    ? const Color(0xFF27272A)
-                                                    : const Color(0xFFF4F4F5)),
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: borderColor, width: 0.8),
+                                const SizedBox(height: 14),
+                                _buildInputLabel(AppStrings.positionLabel, isDark),
+                                const SizedBox(height: 6),
+                                _buildTextField(
+                                  controller: positionCtrl,
+                                  hint: 'e.g. Senior Flutter Developer',
+                                  icon: CupertinoIcons.briefcase_fill,
+                                  isDark: isDark,
+                                  isMono: isMono,
+                                ),
+                                const SizedBox(height: 14),
+                                _buildInputLabel(AppStrings.locationLabel, isDark),
+                                const SizedBox(height: 6),
+                                _buildTextField(
+                                  controller: locationCtrl,
+                                  hint: 'e.g. Jakarta, Indonesia (Hybrid)',
+                                  icon: CupertinoIcons.location_solid,
+                                  isDark: isDark,
+                                  isMono: isMono,
+                                ),
+                                const SizedBox(height: 14),
+                                _buildInputLabel(AppStrings.filterEmploymentType, isDark),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: types.map((t) {
+                                    final isSelected = selectedType.toLowerCase() == t.toLowerCase();
+                                    return GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setModalState(() => selectedType = t);
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? (isMono
+                                                  ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                                  : (isDark ? AppColors.pastelLime.withValues(alpha: 0.18) : AppColors.pastelLime.withValues(alpha: 0.35)))
+                                              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? (isMono
+                                                    ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                                    : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)))
+                                                : borderColor,
+                                            width: isSelected ? 1.2 : 0.8,
                                           ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                isCurrent ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.calendar,
-                                                size: 15,
-                                                color: isCurrent
-                                                    ? (isDark ? AppColors.pastelLime : const Color(0xFF18181B))
-                                                    : (isDark ? AppColors.textHintDark : AppColors.textHint),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                isCurrent
-                                                    ? AppStrings.presentLabel
-                                                    : (endDate != null ? DateFormat('MMM yyyy').format(endDate!) : '-'),
-                                                style: TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: isCurrent
-                                                      ? (isDark ? AppColors.pastelLime : const Color(0xFF18181B))
-                                                      : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary),
-                                                ),
-                                              ),
-                                            ],
+                                        ),
+                                        child: Text(
+                                          t,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                            color: isSelected
+                                                ? (isMono
+                                                    ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                                    : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)))
+                                                : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 14),
 
-                            // Employment Type Chips
-                            _buildInputLabel(AppStrings.filterEmploymentType, isDark),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: types.map((t) {
-                                final isSelected = selectedType.toLowerCase() == t.toLowerCase();
-                                return GestureDetector(
-                                  onTap: () {
-                                    HapticFeedback.selectionClick();
-                                    setModalState(() => selectedType = t);
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? (isMono
-                                              ? (isDark ? Colors.white : const Color(0xFF18181B))
-                                              : (isDark ? AppColors.pastelLime.withValues(alpha: 0.18) : AppColors.pastelLime.withValues(alpha: 0.35)))
-                                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? (isMono
-                                                ? (isDark ? Colors.white : const Color(0xFF18181B))
-                                                : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)))
-                                            : borderColor,
-                                        width: isSelected ? 1.2 : 0.8,
+                            // Section 2: Periode Kerja
+                            _buildFormSectionCard(
+                              title: LanguageManager.isEnglish ? 'Work Period' : 'Periode & Status Kerja',
+                              icon: CupertinoIcons.calendar,
+                              isDark: isDark,
+                              isMono: isMono,
+                              children: [
+                                // Currently Working Toggle
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF4F4F5),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: borderColor, width: 0.8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.briefcase_fill,
+                                        size: 16,
+                                        color: isDark ? AppColors.pastelLime : const Color(0xFF18181B),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          AppStrings.isCurrentlyWorkingCheckbox,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                      CupertinoSwitch(
+                                        value: isCurrent,
+                                        activeTrackColor: primaryColor,
+                                        onChanged: (val) {
+                                          HapticFeedback.selectionClick();
+                                          setModalState(() {
+                                            isCurrent = val;
+                                            if (val) endDate = null;
+                                            if (!val && endDate == null) endDate = DateTime.now();
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+
+                                // Start & End Date Pickers
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel(AppStrings.startDateLabel, isDark),
+                                          const SizedBox(height: 6),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              HapticFeedback.selectionClick();
+                                              final firstDate = DateTime(1990);
+                                              final lastDate = DateTime(2100);
+                                              final initialDate = startDate.isBefore(firstDate)
+                                                  ? firstDate
+                                                  : (startDate.isAfter(lastDate) ? lastDate : startDate);
+                                              final picked = await showDatePicker(
+                                                context: context,
+                                                initialDate: initialDate,
+                                                firstDate: firstDate,
+                                                lastDate: lastDate,
+                                              );
+                                              if (picked != null) {
+                                                setModalState(() => startDate = picked);
+                                              }
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                              decoration: BoxDecoration(
+                                                color: isDark
+                                                    ? const Color(0xFF27272A)
+                                                    : const Color(0xFFF4F4F5),
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(color: borderColor, width: 0.8),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(CupertinoIcons.calendar, size: 15, color: isDark ? AppColors.textHintDark : AppColors.textHint),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    DateFormat('MMM yyyy').format(startDate),
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel(AppStrings.endDateLabel, isDark),
+                                          const SizedBox(height: 6),
+                                          GestureDetector(
+                                            onTap: isCurrent
+                                                ? null
+                                                : () async {
+                                                    HapticFeedback.selectionClick();
+                                                    final firstDate = DateTime(1990);
+                                                    final lastDate = DateTime(2100);
+                                                    final targetInitial = endDate ?? (startDate.isAfter(DateTime.now()) ? startDate : DateTime.now());
+                                                    final initialDate = targetInitial.isBefore(firstDate)
+                                                        ? firstDate
+                                                        : (targetInitial.isAfter(lastDate) ? lastDate : targetInitial);
+
+                                                    final picked = await showDatePicker(
+                                                      context: context,
+                                                      initialDate: initialDate,
+                                                      firstDate: firstDate,
+                                                      lastDate: lastDate,
+                                                    );
+                                                    if (picked != null) {
+                                                      setModalState(() => endDate = picked);
+                                                    }
+                                                  },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                              decoration: BoxDecoration(
+                                                color: isCurrent
+                                                    ? (isDark ? const Color(0xFF1A191E) : const Color(0xFFEBECEF))
+                                                    : (isDark
+                                                        ? const Color(0xFF27272A)
+                                                        : const Color(0xFFF4F4F5)),
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(color: borderColor, width: 0.8),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    isCurrent ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.calendar,
+                                                    size: 15,
+                                                    color: isCurrent
+                                                        ? (isDark ? AppColors.pastelLime : const Color(0xFF18181B))
+                                                        : (isDark ? AppColors.textHintDark : AppColors.textHint),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    isCurrent
+                                                        ? AppStrings.presentLabel
+                                                        : (endDate != null ? DateFormat('MMM yyyy').format(endDate!) : '-'),
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: isCurrent
+                                                          ? (isDark ? AppColors.pastelLime : const Color(0xFF18181B))
+                                                          : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+
+                            // Section 3: Kompensasi & Tanggung Jawab
+                            _buildFormSectionCard(
+                              title: LanguageManager.isEnglish ? 'Compensation & Notes' : 'Kompensasi & Tanggung Jawab',
+                              icon: Icons.payments_outlined,
+                              isDark: isDark,
+                              isMono: isMono,
+                              children: [
+                                _buildInputLabel('${AppStrings.careerMonthlySalary} (Opsional)', isDark),
+                                const SizedBox(height: 6),
+                                _buildTextField(
+                                  controller: salaryCtrl,
+                                  hint: 'Contoh: 15.000.000',
+                                  prefixWidget: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
                                     child: Text(
-                                      t,
+                                      'Rp',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                        color: isSelected
-                                            ? (isMono
-                                                ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                                                : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)))
-                                            : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                                       ),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Monthly Salary (Optional)
-                            _buildInputLabel('${AppStrings.careerMonthlySalary} (Opsional)', isDark),
-                            const SizedBox(height: 6),
-                            _buildTextField(
-                              controller: salaryCtrl,
-                              hint: 'e.g. 15.000.000',
-                              icon: CupertinoIcons.money_dollar_circle,
-                              keyboardType: TextInputType.number,
-                              isDark: isDark,
-                              isMono: isMono,
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Notes / Responsibilities
-                            _buildInputLabel(AppStrings.responsibilitiesLabel, isDark),
-                            const SizedBox(height: 6),
-                            _buildTextField(
-                              controller: notesCtrl,
-                              hint: 'Contoh:\n• Mengembangkan fitur real-time tracking\n• Mengelola tim 4 engineer',
-                              icon: CupertinoIcons.list_bullet,
-                              maxLines: 4,
-                              minLines: 3,
-                              isDark: isDark,
-                              isMono: isMono,
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Save Button
-                            ElevatedButton(
-                              onPressed: () {
-                                final company = companyCtrl.text.trim();
-                                final position = positionCtrl.text.trim();
-                                if (company.isEmpty || position.isEmpty) {
-                                  UIHelper.showErrorSnackBar(context, AppStrings.fillRequiredFields);
-                                  return;
-                                }
-
-                                HapticFeedback.mediumImpact();
-                                final salaryVal = double.tryParse(salaryCtrl.text.replaceAll(RegExp(r'\D'), ''));
-                                final bulletList = notesCtrl.text
-                                    .split('\n')
-                                    .map((e) => e.trim())
-                                    .where((e) => e.isNotEmpty)
-                                    .toList();
-
-                                final formattedP = '${DateFormat('MMM yyyy').format(startDate)} - ${isCurrent ? AppStrings.presentLabel : (endDate != null ? DateFormat('MMM yyyy').format(endDate!) : '')}';
-
-                                final updatedItem = ExperienceItem(
-                                  id: itemToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-                                  companyOrProject: company,
-                                  position: position,
-                                  cityCountry: locationCtrl.text.trim(),
-                                  period: formattedP,
-                                  startDate: startDate,
-                                  endDate: isCurrent ? null : endDate,
-                                  isCurrentlyWorking: isCurrent,
-                                  employmentType: selectedType,
-                                  monthlySalary: salaryVal,
-                                  notes: notesCtrl.text.trim(),
-                                  bulletPoints: bulletList,
-                                );
-
-                                List<ExperienceItem> exps = List.from(_resume?.experiences ?? []);
-                                if (isCurrent) {
-                                  // Mark other items as not currently working if this is active
-                                  exps = exps.map((e) {
-                                    if (itemToEdit != null && e.id == itemToEdit.id) return e;
-                                    return e.copyWith(isCurrentlyWorking: false);
-                                  }).toList();
-                                }
-
-                                if (isEditing) {
-                                  final idx = exps.indexWhere((e) => e.id == itemToEdit.id);
-                                  if (idx != -1) {
-                                    exps[idx] = updatedItem;
-                                  } else {
-                                    exps.insert(0, updatedItem);
-                                  }
-                                } else {
-                                  exps.insert(0, updatedItem);
-                                }
-
-                                final updatedResume = (_resume ??
-                                    UserResume(
-                                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                                      userId: 'current_user',
-                                      fullName: '',
-                                      email: '',
-                                      phoneNumber: '',
-                                      cityCountry: '',
-                                    ))
-                                    .copyWith(experiences: exps);
-
-                                _saveResume(updatedResume);
-                                Navigator.pop(modalCtx);
-                                UIHelper.showSuccessSnackBar(context, AppStrings.resumeSavedSuccess);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryColor,
-                                foregroundColor: isMono
-                                    ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                                    : AppColors.textOnPastel,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              ),
-                              child: Text(
-                                isEditing ? AppStrings.save : AppStrings.addExperienceBtn,
-                                style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
-                              ),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    ThousandsSeparatorInputFormatter(),
+                                  ],
+                                  isDark: isDark,
+                                  isMono: isMono,
+                                ),
+                                const SizedBox(height: 14),
+                                _buildInputLabel(AppStrings.responsibilitiesLabel, isDark),
+                                const SizedBox(height: 6),
+                                _buildTextField(
+                                  controller: notesCtrl,
+                                  hint: 'Contoh:\n• Mengembangkan fitur real-time tracking\n• Mengelola tim 4 engineer',
+                                  icon: CupertinoIcons.list_bullet,
+                                  maxLines: 4,
+                                  minLines: 3,
+                                  isDark: isDark,
+                                  isMono: isMono,
+                                ),
+                              ],
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+
+                    // Docked Bottom Save Button (matching application_form_screen)
+                    Container(
+                      padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.of(modalCtx).padding.bottom),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        border: Border(
+                          top: BorderSide(color: borderColor, width: 0.8),
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final company = companyCtrl.text.trim();
+                          final position = positionCtrl.text.trim();
+                          if (company.isEmpty || position.isEmpty) {
+                            UIHelper.showErrorSnackBar(context, AppStrings.fillRequiredFields);
+                            return;
+                          }
+
+                          HapticFeedback.mediumImpact();
+                          final salaryVal = double.tryParse(salaryCtrl.text.replaceAll(RegExp(r'\D'), ''));
+                          final bulletList = notesCtrl.text
+                              .split('\n')
+                              .map((e) => e.trim())
+                              .where((e) => e.isNotEmpty)
+                              .toList();
+
+                          final formattedP = '${DateFormat('MMM yyyy').format(startDate)} - ${isCurrent ? AppStrings.presentLabel : (endDate != null ? DateFormat('MMM yyyy').format(endDate!) : '')}';
+
+                          final updatedItem = ExperienceItem(
+                            id: itemToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+                            companyOrProject: company,
+                            position: position,
+                            cityCountry: locationCtrl.text.trim(),
+                            period: formattedP,
+                            startDate: startDate,
+                            endDate: isCurrent ? null : endDate,
+                            isCurrentlyWorking: isCurrent,
+                            employmentType: selectedType,
+                            monthlySalary: salaryVal,
+                            notes: notesCtrl.text.trim(),
+                            bulletPoints: bulletList,
+                          );
+
+                          List<ExperienceItem> exps = List.from(_resume?.experiences ?? []);
+                          if (isCurrent) {
+                            // Mark other items as not currently working if this is active
+                            exps = exps.map((e) {
+                              if (itemToEdit != null && e.id == itemToEdit.id) return e;
+                              return e.copyWith(isCurrentlyWorking: false);
+                            }).toList();
+                          }
+
+                          if (isEditing) {
+                            final idx = exps.indexWhere((e) => e.id == itemToEdit.id);
+                            if (idx != -1) {
+                              exps[idx] = updatedItem;
+                            } else {
+                              exps.insert(0, updatedItem);
+                            }
+                          } else {
+                            exps.insert(0, updatedItem);
+                          }
+
+                          final updatedResume = (_resume ??
+                              UserResume(
+                                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                userId: 'current_user',
+                                fullName: '',
+                                email: '',
+                                phoneNumber: '',
+                                cityCountry: '',
+                              ))
+                              .copyWith(experiences: exps);
+
+                          _saveResume(updatedResume);
+                          Navigator.pop(modalCtx);
+                          UIHelper.showSuccessSnackBar(context, AppStrings.resumeSavedSuccess);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: isMono
+                              ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                              : AppColors.textOnPastel,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Text(
+                          isEditing ? AppStrings.save : AppStrings.addExperienceBtn,
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),
@@ -671,14 +711,62 @@ class _CareerScreenState extends State<CareerScreen> {
     );
   }
 
+  Widget _buildFormSectionCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+    required bool isDark,
+    required bool isMono,
+  }) {
+    final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 0.8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isMono
+                    ? (isDark ? Colors.white70 : const Color(0xFF52525B))
+                    : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...children,
+        ],
+      ),
+    );
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
-    required IconData icon,
+    IconData? icon,
+    Widget? prefixWidget,
     required bool isDark,
     required bool isMono,
     TextInputType? keyboardType,
     TextInputAction? textInputAction,
+    List<TextInputFormatter>? inputFormatters,
     int maxLines = 1,
     int minLines = 1,
   }) {
@@ -689,21 +777,24 @@ class _CareerScreenState extends State<CareerScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0xFF27272A)
-            : const Color(0xFFF4F4F5),
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: borderColor, width: 0.8),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: maxLines > 1 ? 10 : 2),
       child: Row(
         crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Padding(
-            padding: EdgeInsets.only(top: maxLines > 1 ? 3 : 0),
-            child: Icon(icon, size: 16, color: isDark ? AppColors.textHintDark : AppColors.textHint),
-          ),
-          const SizedBox(width: 10),
+          if (prefixWidget != null) ...[
+            prefixWidget,
+            const SizedBox(width: 8),
+          ] else if (icon != null) ...[
+            Padding(
+              padding: EdgeInsets.only(top: maxLines > 1 ? 3 : 0),
+              child: Icon(icon, size: 16, color: isDark ? AppColors.textHintDark : AppColors.textHint),
+            ),
+            const SizedBox(width: 10),
+          ],
           Expanded(
             child: TextField(
               controller: controller,
@@ -711,14 +802,17 @@ class _CareerScreenState extends State<CareerScreen> {
               minLines: minLines,
               keyboardType: effectiveKeyboardType,
               textInputAction: effectiveAction,
+              inputFormatters: inputFormatters,
               style: TextStyle(
                 fontSize: 13,
+                fontWeight: FontWeight.w600,
                 color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
               ),
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: TextStyle(
                   fontSize: 12.5,
+                  fontWeight: FontWeight.w400,
                   color: isDark ? AppColors.textHintDark : AppColors.textHint,
                 ),
                 border: InputBorder.none,

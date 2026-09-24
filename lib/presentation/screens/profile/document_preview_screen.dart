@@ -144,7 +144,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
     HapticFeedback.selectionClick();
     final String text;
     if (_tabController.index == 0) {
-      text = CvAtsPdfBuilder.generatePlainText(widget.resume, isEnglish: _isEnglish);
+      text = CvAtsPdfBuilder.generatePlainText(widget.resume,
+          isEnglish: _isEnglish);
     } else {
       text = CoverLetterPdfBuilder.generatePlainText(
         widget.resume,
@@ -160,8 +161,12 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
     UIHelper.showSuccessSnackBar(
       context,
       _isEnglish
-          ? (_tabController.index == 0 ? 'CV plain text copied to clipboard!' : 'Cover letter text copied to clipboard!')
-          : (_tabController.index == 0 ? 'Teks CV berhasil disalin ke clipboard!' : 'Teks Surat Lamaran berhasil disalin ke clipboard!'),
+          ? (_tabController.index == 0
+              ? 'CV plain text copied to clipboard!'
+              : 'Cover letter text copied to clipboard!')
+          : (_tabController.index == 0
+              ? 'Teks CV berhasil disalin ke clipboard!'
+              : 'Teks Surat Lamaran berhasil disalin ke clipboard!'),
     );
   }
 
@@ -171,7 +176,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
       final Uint8List pdfBytes;
       final String fileName;
       if (_tabController.index == 0) {
-        pdfBytes = await CvAtsPdfBuilder.buildPdf(widget.resume, isEnglish: _isEnglish);
+        pdfBytes = await CvAtsPdfBuilder.buildPdf(widget.resume,
+            isEnglish: _isEnglish);
         fileName = 'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}.pdf';
       } else {
         pdfBytes = await CoverLetterPdfBuilder.buildPdf(
@@ -184,7 +190,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
           customAttachments: _attachments,
           isEnglish: _isEnglish,
         );
-        fileName = 'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}.pdf';
+        fileName =
+            'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}.pdf';
       }
       await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
     } catch (e) {
@@ -197,7 +204,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
     try {
       if (_tabController.index == 0) {
         await Printing.layoutPdf(
-          onLayout: (format) => CvAtsPdfBuilder.buildPdf(widget.resume, isEnglish: _isEnglish),
+          onLayout: (format) =>
+              CvAtsPdfBuilder.buildPdf(widget.resume, isEnglish: _isEnglish),
           name: 'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}',
         );
       } else {
@@ -242,14 +250,16 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
               maxHeight: MediaQuery.of(context).size.height * 0.88,
             ),
             padding: EdgeInsets.only(
-              bottom: viewInsetsBottom + (bottomPadding > 0 ? bottomPadding + 16 : 28),
+              bottom: viewInsetsBottom +
+                  (bottomPadding > 0 ? bottomPadding + 16 : 28),
               left: 20,
               right: 20,
               top: 16,
             ),
             decoration: BoxDecoration(
               color: isDark ? AppColors.surfaceDark : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: SingleChildScrollView(
               child: Column(
@@ -261,7 +271,9 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       width: 40,
                       height: 4.5,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                        color: isDark
+                            ? const Color(0xFF3F3F46)
+                            : const Color(0xFFD4D4D8),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -278,7 +290,9 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -288,14 +302,19 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                                 : 'Sesuaikan tujuan surat, tanggal, tanda tangan & lampiran',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondary,
                             ),
                           ),
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
-                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        icon: const Icon(CupertinoIcons.xmark_circle_fill,
+                            size: 22),
+                        color: isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHint,
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -304,12 +323,15 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
 
                   // Section 1: Detail Tujuan
                   Text(
-                    _isEnglish ? 'TARGET COMPANY & ROLE' : 'DETAIL PERUSAHAAN TUJUAN',
+                    _isEnglish
+                        ? 'TARGET COMPANY & ROLE'
+                        : 'DETAIL PERUSAHAAN TUJUAN',
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
-                      color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                      color:
+                          isDark ? AppColors.textHintDark : AppColors.textHint,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -317,13 +339,20 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   // 1. Company Name
                   TextField(
                     controller: _companyNameCtrl,
-                    style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF18181B)),
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white : const Color(0xFF18181B)),
                     decoration: InputDecoration(
-                      labelText: _isEnglish ? 'Target Company Name' : 'Nama Perusahaan Tujuan',
-                      hintText: _isEnglish ? 'e.g. Google / Microsoft' : 'Contoh: PT Telkom Indonesia',
+                      labelText: _isEnglish
+                          ? 'Target Company Name'
+                          : 'Nama Perusahaan Tujuan',
+                      hintText: _isEnglish
+                          ? 'e.g. Google / Microsoft'
+                          : 'Contoh: PT Telkom Indonesia',
                       filled: true,
                       fillColor: cardBg,
-                      prefixIcon: const Icon(CupertinoIcons.building_2_fill, size: 16),
+                      prefixIcon:
+                          const Icon(CupertinoIcons.building_2_fill, size: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: borderColor, width: 0.8),
@@ -335,13 +364,20 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   // 2. Target Position
                   TextField(
                     controller: _targetPositionCtrl,
-                    style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF18181B)),
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white : const Color(0xFF18181B)),
                     decoration: InputDecoration(
-                      labelText: _isEnglish ? 'Applied Position' : 'Posisi yang Dilamar',
-                      hintText: _isEnglish ? 'e.g. Software Engineer' : 'Contoh: Mobile Developer',
+                      labelText: _isEnglish
+                          ? 'Applied Position'
+                          : 'Posisi yang Dilamar',
+                      hintText: _isEnglish
+                          ? 'e.g. Software Engineer'
+                          : 'Contoh: Mobile Developer',
                       filled: true,
                       fillColor: cardBg,
-                      prefixIcon: const Icon(CupertinoIcons.briefcase_fill, size: 16),
+                      prefixIcon:
+                          const Icon(CupertinoIcons.briefcase_fill, size: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: borderColor, width: 0.8),
@@ -353,13 +389,20 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   // 3. Company Address
                   TextField(
                     controller: _companyAddressCtrl,
-                    style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF18181B)),
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white : const Color(0xFF18181B)),
                     decoration: InputDecoration(
-                      labelText: _isEnglish ? 'Company Address / City' : 'Alamat / Kota Perusahaan',
-                      hintText: _isEnglish ? 'e.g. Jakarta, Indonesia' : 'Contoh: Jakarta Selatan',
+                      labelText: _isEnglish
+                          ? 'Company Address / City'
+                          : 'Alamat / Kota Perusahaan',
+                      hintText: _isEnglish
+                          ? 'e.g. Jakarta, Indonesia'
+                          : 'Contoh: Jakarta Selatan',
                       filled: true,
                       fillColor: cardBg,
-                      prefixIcon: const Icon(CupertinoIcons.location_solid, size: 16),
+                      prefixIcon:
+                          const Icon(CupertinoIcons.location_solid, size: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: borderColor, width: 0.8),
@@ -375,7 +418,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
-                      color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                      color:
+                          isDark ? AppColors.textHintDark : AppColors.textHint,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -394,7 +438,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
                         color: cardBg,
                         borderRadius: BorderRadius.circular(12),
@@ -402,14 +447,18 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       ),
                       child: Row(
                         children: [
-                          Icon(CupertinoIcons.calendar, size: 18, color: isDark ? Colors.white70 : Colors.black87),
+                          Icon(CupertinoIcons.calendar,
+                              size: 18,
+                              color: isDark ? Colors.white70 : Colors.black87),
                           const SizedBox(width: 10),
                           Text(
                             '${_letterDate.day}/${_letterDate.month}/${_letterDate.year}',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           const Spacer(),
@@ -418,8 +467,12 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                             style: TextStyle(
                               fontSize: 12,
                               color: isMonochrome
-                                  ? (isDark ? Colors.white : const Color(0xFF18181B))
-                                  : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                                  ? (isDark
+                                      ? Colors.white
+                                      : const Color(0xFF18181B))
+                                  : (isDark
+                                      ? AppColors.pastelLime
+                                      : const Color(0xFF18181B)),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -441,7 +494,9 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
-                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                          color: isDark
+                              ? AppColors.textHintDark
+                              : AppColors.textHint,
                         ),
                       ),
                       TextButton.icon(
@@ -449,15 +504,21 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                           showDialog(
                             context: context,
                             builder: (dCtx) => AlertDialog(
-                              backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+                              backgroundColor:
+                                  isDark ? AppColors.surfaceDark : Colors.white,
                               title: Text(
-                                _isEnglish ? 'Add Attachment' : 'Tambah Lampiran',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                _isEnglish
+                                    ? 'Add Attachment'
+                                    : 'Tambah Lampiran',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w700),
                               ),
                               content: TextField(
                                 controller: newAttachmentCtrl,
                                 decoration: InputDecoration(
-                                  hintText: _isEnglish ? 'e.g. Portfolio PDF' : 'Contoh: Surat Rekomendasi',
+                                  hintText: _isEnglish
+                                      ? 'e.g. Portfolio PDF'
+                                      : 'Contoh: Surat Rekomendasi',
                                 ),
                               ),
                               actions: [
@@ -484,7 +545,9 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                           );
                         },
                         icon: const Icon(CupertinoIcons.plus, size: 14),
-                        label: Text(_isEnglish ? 'Add' : 'Tambah', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                        label: Text(_isEnglish ? 'Add' : 'Tambah',
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
@@ -499,10 +562,12 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _attachments.length,
-                      separatorBuilder: (_, __) => Divider(height: 1, color: borderColor, indent: 32),
+                      separatorBuilder: (_, __) =>
+                          Divider(height: 1, color: borderColor, indent: 32),
                       itemBuilder: (ctx, i) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
                           child: Row(
                             children: [
                               Text(
@@ -510,7 +575,9 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHint,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -519,12 +586,15 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                                   _attachments[i],
                                   style: TextStyle(
                                     fontSize: 12.5,
-                                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                    color: isDark
+                                        ? AppColors.textPrimaryDark
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(CupertinoIcons.trash, size: 16, color: Color(0xFFEF4444)),
+                                icon: const Icon(CupertinoIcons.trash,
+                                    size: 16, color: Color(0xFFEF4444)),
                                 onPressed: () {
                                   setSheetState(() {
                                     _attachments.removeAt(i);
@@ -547,7 +617,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
-                      color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                      color:
+                          isDark ? AppColors.textHintDark : AppColors.textHint,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -555,7 +626,11 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                     _isEnglish
                         ? 'Signature is kept in local memory during PDF generation and never uploaded to cloud.'
                         : 'Tanda tangan hanya diproses di memori lokal saat generate PDF dan tidak disimpan di cloud.',
-                    style: TextStyle(fontSize: 11.5, color: isDark ? AppColors.textHintDark : AppColors.textHint),
+                    style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHint),
                   ),
                   const SizedBox(height: 10),
                   if (_signatureBytes != null) ...[
@@ -568,16 +643,19 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       ),
                       child: Row(
                         children: [
-                          Image.memory(_signatureBytes!, width: 70, height: 40, fit: BoxFit.contain),
+                          Image.memory(_signatureBytes!,
+                              width: 70, height: 40, fit: BoxFit.contain),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               AppStrings.signatureActive,
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w600),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(CupertinoIcons.trash, color: Color(0xFFEF4444)),
+                            icon: const Icon(CupertinoIcons.trash,
+                                color: Color(0xFFEF4444)),
                             onPressed: () {
                               _clearSignature();
                               setSheetState(() {});
@@ -599,10 +677,13 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                             setState(() {});
                           },
                           icon: const Icon(CupertinoIcons.signature, size: 16),
-                          label: Text(_signatureBytes == null ? AppStrings.uploadSignature : AppStrings.changeSignature),
+                          label: Text(_signatureBytes == null
+                              ? AppStrings.uploadSignature
+                              : AppStrings.changeSignature),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -626,9 +707,12 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                             ? (isDark ? const Color(0xFF18181B) : Colors.white)
                             : AppColors.textOnPastel,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text(AppStrings.applyChanges, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+                      child: Text(AppStrings.applyChanges,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 14.5)),
                     ),
                   ),
                 ],
@@ -653,7 +737,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
     final outlinedTextColor = isDark ? Colors.white : const Color(0xFF18181B);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : const Color(0xFFF4F4F5),
+      backgroundColor:
+          isDark ? AppColors.backgroundDark : const Color(0xFFF4F4F5),
       appBar: AppBar(
         title: Text(
           AppStrings.documentPreviewTitle,
@@ -664,7 +749,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
           ),
         ),
         elevation: 0,
-        backgroundColor: isDark ? AppColors.backgroundDark : const Color(0xFFF4F4F5),
+        backgroundColor:
+            isDark ? AppColors.backgroundDark : const Color(0xFFF4F4F5),
         leading: IconButton(
           icon: Icon(
             CupertinoIcons.back,
@@ -683,12 +769,17 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                 setState(() => _isEnglish = !_isEnglish);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                  color: isDark
+                      ? const Color(0xFF27272A)
+                      : const Color(0xFFE4E4E7),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                    color: isDark
+                        ? const Color(0xFF3F3F46)
+                        : const Color(0xFFD4D4D8),
                     width: 0.8,
                   ),
                 ),
@@ -718,7 +809,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
             child: Container(
               height: 42,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                color:
+                    isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TabBar(
@@ -734,8 +826,11 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                 labelColor: isMonochrome
                     ? (isDark ? const Color(0xFF18181B) : Colors.white)
                     : AppColors.textOnPastel,
-                unselectedLabelColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                unselectedLabelColor: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
+                labelStyle:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                 tabs: [
                   Tab(
                     iconMargin: EdgeInsets.zero,
@@ -769,7 +864,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF18181B) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -780,13 +876,17 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                     Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                        color: isDark
+                            ? const Color(0xFF27272A)
+                            : const Color(0xFFF4F4F5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         CupertinoIcons.building_2_fill,
                         size: 14,
-                        color: isDark ? AppColors.pastelLime : const Color(0xFF18181B),
+                        color: isDark
+                            ? AppColors.pastelLime
+                            : const Color(0xFF18181B),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -798,13 +898,17 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                           Text(
                             _companyNameCtrl.text.trim().isNotEmpty
                                 ? _companyNameCtrl.text.trim()
-                                : (_isEnglish ? 'Target Company (Not Set)' : 'Nama Perusahaan (Belum Diisi)'),
+                                : (_isEnglish
+                                    ? 'Target Company (Not Set)'
+                                    : 'Nama Perusahaan (Belum Diisi)'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 1),
@@ -814,7 +918,9 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 11,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -829,16 +935,26 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                         _showCoverLetterSettingsSheet();
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: isMonochrome
-                              ? (isDark ? Colors.white : const Color(0xFF18181B))
-                              : (isDark ? AppColors.pastelLime.withValues(alpha: 0.18) : AppColors.pastelLime.withValues(alpha: 0.4)),
+                              ? (isDark
+                                  ? Colors.white
+                                  : const Color(0xFF18181B))
+                              : (isDark
+                                  ? AppColors.pastelLime.withValues(alpha: 0.18)
+                                  : AppColors.pastelLime
+                                      .withValues(alpha: 0.4)),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isMonochrome
-                                ? (isDark ? Colors.white : const Color(0xFF18181B))
-                                : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                                ? (isDark
+                                    ? Colors.white
+                                    : const Color(0xFF18181B))
+                                : (isDark
+                                    ? AppColors.pastelLime
+                                    : const Color(0xFF18181B)),
                             width: 0.8,
                           ),
                         ),
@@ -849,8 +965,12 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                               CupertinoIcons.slider_horizontal_3,
                               size: 13,
                               color: isMonochrome
-                                  ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                                  : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                                  ? (isDark
+                                      ? const Color(0xFF18181B)
+                                      : Colors.white)
+                                  : (isDark
+                                      ? AppColors.pastelLime
+                                      : const Color(0xFF18181B)),
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -859,8 +979,12 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
                                 color: isMonochrome
-                                    ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                                    : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                                    ? (isDark
+                                        ? const Color(0xFF18181B)
+                                        : Colors.white)
+                                    : (isDark
+                                        ? AppColors.pastelLime
+                                        : const Color(0xFF18181B)),
                               ),
                             ),
                           ],
@@ -888,7 +1012,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   canChangeOrientation: false,
                   canChangePageFormat: false,
                   canDebug: false,
-                  pdfFileName: 'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
+                  pdfFileName:
+                      'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
                 ),
 
                 // Tab 2: Cover Letter Preview
@@ -907,7 +1032,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   canChangeOrientation: false,
                   canChangePageFormat: false,
                   canDebug: false,
-                  pdfFileName: 'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
+                  pdfFileName:
+                      'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
                 ),
               ],
             ),
@@ -944,16 +1070,21 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                 // Copy Plain Text button with clear label
                 OutlinedButton.icon(
                   onPressed: _copyCurrentText,
-                  icon: Icon(CupertinoIcons.doc_on_clipboard, size: 16, color: outlinedTextColor),
+                  icon: Icon(CupertinoIcons.doc_on_clipboard,
+                      size: 16, color: outlinedTextColor),
                   label: Text(_isEnglish ? 'Copy Text' : 'Salin Teks'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: outlinedTextColor,
                     iconColor: outlinedTextColor,
                     side: BorderSide(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                      color: isDark
+                          ? const Color(0xFF3F3F46)
+                          : const Color(0xFFD4D4D8),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -965,8 +1096,11 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   color: isDark ? Colors.white70 : const Color(0xFF52525B),
                   onPressed: _printCurrentPdf,
                   style: IconButton.styleFrom(
-                    backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: isDark
+                        ? const Color(0xFF27272A)
+                        : const Color(0xFFF4F4F5),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.all(12),
                   ),
                 ),
@@ -982,7 +1116,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       color: primaryBtnTextColor,
                     ),
                     label: Text(
-                      _isEnglish ? 'Share / Save PDF' : 'Simpan / Bagikan PDF',
+                      _isEnglish ? 'Share PDF' : 'Bagikan PDF',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13.5,
@@ -997,7 +1131,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       iconColor: primaryBtnTextColor,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),

@@ -186,7 +186,7 @@
       function updateAppVersionUI(ver) {
         const cleanVer = ver.replace(/^v/, "").trim();
         if (!cleanVer) return;
-        const downloadUrl = `https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.3/app-release.apk`;
+        const downloadUrl = `https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.4/app-release.apk`;
         
         const navVer = document.getElementById("nav-version");
         if (navVer) navVer.textContent = `v${cleanVer}`;
@@ -313,11 +313,11 @@
             <div class="flex flex-wrap items-center gap-3">
               <a
                 id="hero-download-btn"
-                href="https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.3/app-release.apk"
+                href="https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.4/app-release.apk"
                 class="bg-white text-black px-6 py-3.5 rounded-2xl no-underline font-extrabold inline-flex items-center gap-2.5 transition-all hover:bg-zinc-100 hover:scale-105 active:scale-95 shadow-xl shadow-white/10 text-xs sm:text-sm"
-                aria-label="Download AppliQ version 1.0.3"
+                aria-label="Download AppliQ version 1.0.4"
               >
-                <span id="hero-version-text">Download APK (v1.0.3)</span>
+                <span id="hero-version-text">Download APK (v1.0.4)</span>
                 <svg
                   width="16"
                   height="16"
@@ -378,14 +378,14 @@
           <!-- QR Code Container -->
           <a
             id="qr-download-link"
-            href="https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.3/app-release.apk"
+            href="https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.4/app-release.apk"
             class="group my-auto p-3.5 bg-white rounded-3xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center relative"
             title="Scan or click to download AppliQ APK"
             aria-label="Scan QR code to install AppliQ APK"
           >
             <img
               id="qr-image"
-              src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.3/app-release.apk"
+              src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=https://github.com/MyusiZ3/AppliQ/releases/download/v1.0.4/app-release.apk"
               alt="Scan QR code to install AppliQ APK"
               class="w-36 h-36 sm:w-40 sm:h-40 rounded-2xl object-contain select-none"
               loading="lazy"

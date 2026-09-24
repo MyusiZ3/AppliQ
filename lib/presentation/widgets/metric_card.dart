@@ -49,7 +49,7 @@ class MetricCard extends StatelessWidget {
 
     final iconFg = foregroundColor ?? (isMono
         ? (isDark ? Colors.white : const Color(0xFF18181B))
-        : (isDark ? AppColors.pastelLavender : const Color(0xFF6B4EE6)));
+        : AppColors.pastelLavender);
 
     return Container(
       padding: const EdgeInsets.all(16),

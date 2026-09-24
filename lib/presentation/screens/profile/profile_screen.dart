@@ -1194,15 +1194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     final isMono = ThemeManager.isMonochrome;
     final defaultMuted = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    Color effectiveIconColor = defaultMuted;
-    if (!isMono && iconColor != null) {
-      if (isDark) {
-        effectiveIconColor = iconColor;
-      } else {
-        final hsl = HSLColor.fromColor(iconColor);
-        effectiveIconColor = hsl.lightness > 0.5 ? hsl.withLightness(0.42).toColor() : iconColor;
-      }
-    }
+    final effectiveIconColor = isMono ? defaultMuted : (iconColor ?? defaultMuted);
 
     return InkWell(
       onTap: onTap,

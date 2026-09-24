@@ -1268,34 +1268,108 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.doc_plaintext, size: 20),
-            color: ThemeManager.isMonochrome
-                ? (isDark ? Colors.white : const Color(0xFF18181B))
-                : const Color(0xFF6366F1),
-            tooltip: LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
-            onPressed: _openCoverLetterGenerator,
-          ),
-          IconButton(
-            icon: const Icon(CupertinoIcons.pencil, size: 20),
-            color: isDark ? Colors.white : const Color(0xFF18181B),
-            tooltip: AppStrings.editApplicationTooltip,
-            onPressed: () async {
-              final updated = await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ApplicationFormScreen(
-                    repository: widget.repository,
-                    applicationToEdit: app,
+          PopupMenuButton<String>(
+            icon: Icon(
+              CupertinoIcons.ellipsis_vertical,
+              size: 20,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+            position: PopupMenuPosition.under,
+            offset: const Offset(0, 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                width: 0.8,
+              ),
+            ),
+            color: isDark ? AppColors.surfaceDark : AppColors.surface,
+            elevation: 4,
+            onSelected: (value) async {
+              if (value == 'cover_letter') {
+                _openCoverLetterGenerator();
+              } else if (value == 'edit') {
+                final updated = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ApplicationFormScreen(
+                      repository: widget.repository,
+                      applicationToEdit: app,
+                    ),
                   ),
-                ),
-              );
-              if (updated == true) _loadData();
+                );
+                if (updated == true) _loadData();
+              } else if (value == 'delete') {
+                _deleteApplication();
+              }
             },
-          ),
-          IconButton(
-            icon: const Icon(CupertinoIcons.trash, color: AppColors.expense, size: 20),
-            tooltip: AppStrings.deleteTooltip,
-            onPressed: _deleteApplication,
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'cover_letter',
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.doc_plaintext,
+                      size: 18,
+                      color: ThemeManager.isMonochrome
+                          ? (isDark ? Colors.white : const Color(0xFF18181B))
+                          : const Color(0xFF6366F1),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.pencil,
+                      size: 18,
+                      color: isDark ? Colors.white : const Color(0xFF18181B),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      AppStrings.edit,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(height: 1),
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(
+                      CupertinoIcons.trash,
+                      size: 18,
+                      color: AppColors.expense,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      AppStrings.delete,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.expense,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1486,102 +1560,6 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 ],
               ],
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // Quick Action: Cover Letter Generator Card
-          // Generate Cover Letter Quick Banner
-          Builder(
-            builder: (context) {
-              final isMonochrome = ThemeManager.isMonochrome;
-
-              return InkWell(
-                onTap: _openCoverLetterGenerator,
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: isMonochrome
-                        ? (isDark ? const Color(0xFF1E1E22) : const Color(0xFFF1F3F5))
-                        : null,
-                    gradient: isMonochrome
-                        ? null
-                        : LinearGradient(
-                            colors: isDark
-                                ? [const Color(0xFF1E1B4B), const Color(0xFF2E1065)]
-                                : [const Color(0xFFEEF2FF), const Color(0xFFFAF5FF)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isMonochrome
-                          ? (isDark ? AppColors.borderDark : AppColors.borderLight)
-                          : const Color(0xFF6366F1).withValues(alpha: isDark ? 0.4 : 0.25),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: isMonochrome
-                              ? (isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7))
-                              : const Color(0xFF6366F1).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          CupertinoIcons.mail_solid,
-                          color: isMonochrome
-                              ? (isDark ? Colors.white : const Color(0xFF18181B))
-                              : const Color(0xFF6366F1),
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              LanguageManager.isEnglish
-                                  ? 'Generate Cover Letter'
-                                  : 'Buat Surat Lamaran Resmi',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.2,
-                                color: isDark ? Colors.white : (isMonochrome ? AppColors.textPrimary : const Color(0xFF1E1B4B)),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              LanguageManager.isEnglish
-                                  ? 'Auto-fill company & position in 1 click'
-                                  : 'Auto-fill nama PT & posisi dalam 1 klik',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        CupertinoIcons.chevron_right,
-                        size: 16,
-                        color: isMonochrome
-                            ? (isDark ? AppColors.textHintDark : AppColors.textHint)
-                            : const Color(0xFF6366F1),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
           ),
 
           if (app.notes != null && app.notes!.isNotEmpty) ...[

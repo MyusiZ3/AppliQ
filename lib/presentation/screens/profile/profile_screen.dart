@@ -980,7 +980,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                           // Experience (CV ATS & Cover Letter)
                           _buildTile(
-                            icon: CupertinoIcons.doc_person_fill,
+                            icon: CupertinoIcons.doc_person,
                             title: AppStrings.menuExperienceTitle,
                             subtitle: AppStrings.menuExperienceSubtitle,
                             isDark: isDark,

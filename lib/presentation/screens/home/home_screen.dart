@@ -388,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
             isDark: isDark,
           ),
           _buildQuickActionItem(
-            icon: CupertinoIcons.doc_person_fill,
+            icon: CupertinoIcons.doc_person,
             label: AppStrings.quickResume,
             onTap: () {
               HapticFeedback.lightImpact();

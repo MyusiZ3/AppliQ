@@ -779,7 +779,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                   backgroundColor: primaryColor,
                   foregroundColor: isMonochrome
                       ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                      : Colors.white,
+                      : AppColors.textOnPastel,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -980,7 +980,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
             activeColor: primaryColor,
             checkColor: isMonochrome
                 ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                : Colors.white,
+                : AppColors.textOnPastel,
             onChanged: (val) {
               setState(() {
                 if (val == true) {
@@ -1173,7 +1173,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                             : primaryColor,
                         foregroundColor: isMonochrome
                             ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                            : Colors.white,
+                            : AppColors.textOnPastel,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1357,7 +1357,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                             : primaryColor,
                         foregroundColor: isMonochrome
                             ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                            : Colors.white,
+                            : AppColors.textOnPastel,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1509,7 +1509,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                             : primaryColor,
                         foregroundColor: isMonochrome
                             ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                            : Colors.white,
+                            : AppColors.textOnPastel,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1644,11 +1644,15 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
     required String label,
     required String hint,
     required bool isDark,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
+    int? maxLines = 1,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
   }) {
     final isMonochrome = ThemeManager.isMonochrome;
     final primaryColor = AppColors.getPrimary(isDark: isDark, isMonochrome: isMonochrome);
+    final isMulti = (maxLines != null && maxLines > 1) || maxLines == null;
+    final effectiveKeyboardType = keyboardType ?? (isMulti ? TextInputType.multiline : TextInputType.text);
+    final effectiveAction = textInputAction ?? (isMulti ? TextInputAction.newline : TextInputAction.next);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1665,7 +1669,8 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
         TextFormField(
           controller: controller,
           maxLines: maxLines,
-          keyboardType: keyboardType,
+          keyboardType: effectiveKeyboardType,
+          textInputAction: effectiveAction,
           style: TextStyle(
             fontSize: 14,
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,

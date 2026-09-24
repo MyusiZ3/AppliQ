@@ -109,8 +109,8 @@ class _CareerScreenState extends State<CareerScreen> {
     final positionCtrl = TextEditingController(text: itemToEdit?.position ?? '');
     final locationCtrl = TextEditingController(text: itemToEdit?.cityCountry ?? '');
     final salaryCtrl = TextEditingController(
-      text: itemToEdit?.monthlySalary != null && itemToEdit!.monthlySalary! > 0
-          ? NumberFormat('#,###', 'id_ID').format(itemToEdit.monthlySalary)
+      text: (itemToEdit?.monthlySalary ?? 0) > 0
+          ? NumberFormat('#,###', 'id_ID').format(itemToEdit!.monthlySalary)
           : '',
     );
     final notesCtrl = TextEditingController(text: itemToEdit?.notes ?? itemToEdit?.bulletPoints.join('\n') ?? '');
@@ -500,7 +500,7 @@ class _CareerScreenState extends State<CareerScreen> {
                                 final salaryVal = double.tryParse(salaryCtrl.text.replaceAll(RegExp(r'\D'), ''));
                                 final bulletList = notesCtrl.text
                                     .split('\n')
-                                    .map((e) => e.replaceAll(RegExp(r'^[•\-\*]\s*'), '').trim())
+                                    .map((e) => e.trim())
                                     .where((e) => e.isNotEmpty)
                                     .toList();
 
@@ -582,6 +582,12 @@ class _CareerScreenState extends State<CareerScreen> {
         );
       },
     );
+
+    companyCtrl.dispose();
+    positionCtrl.dispose();
+    locationCtrl.dispose();
+    salaryCtrl.dispose();
+    notesCtrl.dispose();
   }
 
   Future<void> _endJob(ExperienceItem item) async {
@@ -605,7 +611,8 @@ class _CareerScreenState extends State<CareerScreen> {
       period: updatedPeriod,
     );
 
-    final exps = (_resume?.experiences ?? []).map((e) => e.id == item.id ? updatedItem : e).toList();
+    if (_resume == null) return;
+    final exps = _resume!.experiences.map((e) => e.id == item.id ? updatedItem : e).toList();
     final updatedResume = _resume!.copyWith(experiences: exps);
     await _saveResume(updatedResume);
 
@@ -642,7 +649,8 @@ class _CareerScreenState extends State<CareerScreen> {
     );
 
     if (confirmed == true) {
-      final exps = (_resume?.experiences ?? []).where((e) => e.id != item.id).toList();
+      if (_resume == null) return;
+      final exps = _resume!.experiences.where((e) => e.id != item.id).toList();
       final updatedResume = _resume!.copyWith(experiences: exps);
       await _saveResume(updatedResume);
       if (mounted) {
@@ -669,11 +677,15 @@ class _CareerScreenState extends State<CareerScreen> {
     required IconData icon,
     required bool isDark,
     required bool isMono,
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
     int maxLines = 1,
     int minLines = 1,
   }) {
     final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+    final isMulti = maxLines > 1;
+    final effectiveKeyboardType = keyboardType ?? (isMulti ? TextInputType.multiline : TextInputType.text);
+    final effectiveAction = textInputAction ?? (isMulti ? TextInputAction.newline : TextInputAction.next);
 
     return Container(
       decoration: BoxDecoration(
@@ -697,7 +709,8 @@ class _CareerScreenState extends State<CareerScreen> {
               controller: controller,
               maxLines: maxLines,
               minLines: minLines,
-              keyboardType: keyboardType,
+              keyboardType: effectiveKeyboardType,
+              textInputAction: effectiveAction,
               style: TextStyle(
                 fontSize: 13,
                 color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
@@ -1185,7 +1198,7 @@ class _CareerScreenState extends State<CareerScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '• ',
+                                    pt.startsWith(RegExp(r'^(\d+|[a-zA-Z])[\.\)]')) ? '' : '• ',
                                     style: TextStyle(
                                       color: isDark ? AppColors.pastelLime : const Color(0xFF18181B),
                                       fontWeight: FontWeight.bold,
@@ -1193,7 +1206,7 @@ class _CareerScreenState extends State<CareerScreen> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      pt,
+                                      pt.replaceFirst(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'), ''),
                                       style: TextStyle(
                                         fontSize: 12,
                                         height: 1.4,
@@ -1566,7 +1579,9 @@ class _CareerScreenState extends State<CareerScreen> {
                   (pt) => Padding(
                     padding: const EdgeInsets.only(bottom: 2),
                     child: Text(
-                      '• $pt',
+                      pt.startsWith(RegExp(r'^(\d+|[a-zA-Z])[\.\)]'))
+                          ? pt
+                          : '• ${pt.replaceFirst(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'), '')}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

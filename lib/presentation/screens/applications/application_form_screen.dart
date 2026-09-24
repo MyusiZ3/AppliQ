@@ -1540,9 +1540,14 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     required IconData icon,
     required bool isDark,
     String? Function(String?)? validator,
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
     int maxLines = 1,
   }) {
+    final isMulti = maxLines > 1;
+    final effectiveKeyboardType = keyboardType ?? (isMulti ? TextInputType.multiline : TextInputType.text);
+    final effectiveAction = textInputAction ?? (isMulti ? TextInputAction.newline : TextInputAction.next);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1551,7 +1556,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         TextFormField(
           controller: controller,
           validator: validator,
-          keyboardType: keyboardType,
+          keyboardType: effectiveKeyboardType,
+          textInputAction: effectiveAction,
           maxLines: maxLines,
           style: TextStyle(
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,

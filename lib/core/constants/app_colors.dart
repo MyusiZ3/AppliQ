@@ -76,6 +76,13 @@ class AppColors {
     return pastelLime;
   }
 
+  static Color getOnPrimary({required bool isDark, required bool isMonochrome}) {
+    if (isMonochrome) {
+      return isDark ? const Color(0xFF18181B) : Colors.white;
+    }
+    return textOnPastel;
+  }
+
   static Color getBackground({required bool isDark, required bool isMonochrome}) {
     if (isMonochrome) {
       return isDark ? backgroundDark : background;

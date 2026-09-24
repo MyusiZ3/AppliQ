@@ -509,7 +509,7 @@ class JaLanguage implements BaseLanguage {
   @override
   String get googleEmailLabel => 'Googleアカウントのメール';
   @override
-  String get googleEmailDesc => 'メールアドレスはGoogle認証から自動連携されています。';
+  String get googleEmailDesc => 'Googleから同期';
   @override
   String get fullNameLabel => '氏名';
   @override

@@ -509,7 +509,7 @@ class KoLanguage implements BaseLanguage {
   @override
   String get googleEmailLabel => 'Google 계정 이메일';
   @override
-  String get googleEmailDesc => '이메일은 Google 인증을 통해 자동 동기화됩니다.';
+  String get googleEmailDesc => 'Google에서 동기화됨';
   @override
   String get fullNameLabel => '이름';
   @override

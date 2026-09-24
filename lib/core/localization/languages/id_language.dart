@@ -508,7 +508,7 @@ class IdLanguage implements BaseLanguage {
   @override
   String get googleEmailLabel => 'Email Akun Google';
   @override
-  String get googleEmailDesc => 'Email disinkronkan langsung dari autentikasi Google.';
+  String get googleEmailDesc => 'Disinkronkan dari Google';
   @override
   String get fullNameLabel => 'Nama Lengkap';
   @override

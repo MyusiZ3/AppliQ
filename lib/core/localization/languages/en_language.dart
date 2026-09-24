@@ -508,7 +508,7 @@ class EnLanguage implements BaseLanguage {
   @override
   String get googleEmailLabel => 'Google Account Email';
   @override
-  String get googleEmailDesc => 'Email is synchronized directly from Google authentication.';
+  String get googleEmailDesc => 'Synced from Google';
   @override
   String get fullNameLabel => 'Full Name';
   @override

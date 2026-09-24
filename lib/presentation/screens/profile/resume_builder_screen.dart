@@ -231,7 +231,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                     size: 22,
                     color: isMonochrome
                         ? (isDark ? Colors.white : const Color(0xFF18181B))
-                        : AppColors.pastelLime,
+                        : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
                   ),
             onPressed: _isSaving ? null : () => _saveResume(showToast: true),
           ),

@@ -1829,8 +1829,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         ],
                       ),
                       TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: isDark
+                              ? (isMono ? Colors.white : AppColors.pastelLime)
+                              : const Color(0xFF18181B),
+                        ),
                         icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 14),
-                        label: Text(AppStrings.openUrl),
+                        label: Text(
+                          AppStrings.openUrl,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                         onPressed: () => UIHelper.openUrl(context, app.jobUrl),
                       ),
                     ],
@@ -2057,8 +2065,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 ),
               ),
               TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: isDark
+                      ? (isMono ? Colors.white : AppColors.pastelLime)
+                      : const Color(0xFF18181B),
+                ),
                 icon: const Icon(CupertinoIcons.plus_circle, size: 16),
-                label: Text(AppStrings.addStageBtn),
+                label: Text(
+                  AppStrings.addStageBtn,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 onPressed: _showAddStageSheet,
               ),
             ],

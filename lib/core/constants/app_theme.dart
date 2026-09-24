@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../utils/theme_manager.dart';
@@ -138,6 +139,19 @@ class AppTheme {
             letterSpacing: -0.3,
           ),
         ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: isDark ? primary : const Color(0xFF18181B),
+          textStyle: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ),
+      cupertinoOverrideTheme: CupertinoThemeData(
+        primaryColor: isDark ? primary : const Color(0xFF18181B),
       ),
       cardTheme: CardThemeData(
         color: surface,

@@ -45,10 +45,15 @@ class CalendarHelper {
     );
 
     try {
-      if (await canLaunchUrl(uri)) {
-        return await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (launched) return true;
     } catch (_) {}
+
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      if (launched) return true;
+    } catch (_) {}
+
     return false;
   }
 

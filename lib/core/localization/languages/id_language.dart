@@ -907,7 +907,7 @@ class IdLanguage implements BaseLanguage {
   @override
   String get phoneNumberLabel => 'Nomor Telepon / WA';
   @override
-  String get phoneNumberHint => '0812-3456-7890';
+  String get phoneNumberHint => '0000-0000-0000';
   @override
   String get emailLabel => 'Email';
   @override

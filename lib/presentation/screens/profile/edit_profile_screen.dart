@@ -285,7 +285,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildModernInputField(
                 label: AppStrings.phoneLabel,
                 controller: _phoneController,
-                hint: '0812-3456-7890',
+                hint: AppStrings.phoneNumberHint,
                 icon: CupertinoIcons.phone,
                 keyboardType: TextInputType.phone,
                 isDark: isDark,

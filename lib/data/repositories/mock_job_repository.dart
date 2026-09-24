@@ -28,7 +28,7 @@ class MockJobRepository implements JobRepository {
     fullName: 'Fajar Pratama',
     avatarUrl: '',
     username: '@fajarpratama',
-    phoneNumber: '0812-3456-7890',
+    phoneNumber: '0000-0000-0000',
     targetRole: 'Software Engineer / Product Specialist',
   );
 
@@ -48,7 +48,7 @@ class MockJobRepository implements JobRepository {
       userId: 'mock-user-1',
       fullName: 'Fajar Pratama',
       cityCountry: 'Bandung, Indonesia',
-      phoneNumber: '0812-3456-7890',
+      phoneNumber: '0000-0000-0000',
       email: 'user.demo@appliq.id',
       linkedinUrl: 'https://linkedin.com/in/fajarpratama',
       portfolioUrl: 'https://fajarpratama.dev',
@@ -431,7 +431,7 @@ class MockJobRepository implements JobRepository {
       _currentUser?.id ?? 'mock-user-1',
       fullName: _currentUser?.fullName ?? 'Fajar Pratama',
       email: _currentUser?.email ?? 'user.demo@appliq.id',
-      phone: _currentUser?.phoneNumber ?? '0812-3456-7890',
+      phone: _currentUser?.phoneNumber ?? '0000-0000-0000',
     );
   }
 

@@ -907,7 +907,7 @@ class EnLanguage implements BaseLanguage {
   @override
   String get phoneNumberLabel => 'Phone Number / WhatsApp';
   @override
-  String get phoneNumberHint => '+1 234 567 890';
+  String get phoneNumberHint => '0000-0000-0000';
   @override
   String get emailLabel => 'Email Address';
   @override

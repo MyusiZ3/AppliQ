@@ -765,6 +765,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
   Future<void> _handleSignOut() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
@@ -774,7 +775,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(AppStrings.cancel),
+            child: Text(
+              AppStrings.cancel,
+              style: TextStyle(
+                color: isDark ? Colors.white70 : const Color(0xFF18181B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -1186,22 +1193,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Crafted with ❤️ by Muhamad Sidik • Arch (@Imyusi_)',
+                                '© 2026 Arch Studio. All rights reserved.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w500,
                                   color: isDark
                                       ? AppColors.textHintDark
                                       : AppColors.textHint,
                                 ),
                               ),
-                              const SizedBox(height: 3),
+                              const SizedBox(height: 2),
                               Text(
-                                '© 2026 Arch. All rights reserved.',
+                                'Dev by Muhamad Sidik.',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w600,
                                   color: isDark
                                       ? AppColors.textHintDark
                                       : AppColors.textHint,

@@ -24,6 +24,7 @@ import '../../widgets/notification_sheet.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
 import '../../widgets/app_avatar.dart';
+import '../../widgets/resume_document_icon.dart';
 import '../../../core/utils/calendar_helper.dart';
 import '../../../services/notification_service.dart';
 import '../../../utils/theme_manager.dart';
@@ -388,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
             isDark: isDark,
           ),
           _buildQuickActionItem(
-            icon: CupertinoIcons.doc_person,
+            customIcon: const ResumeDocumentIcon(size: 21, color: Colors.white),
             label: AppStrings.quickResume,
             onTap: () {
               HapticFeedback.lightImpact();
@@ -426,7 +427,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActionItem({
-    required IconData icon,
+    IconData? icon,
+    Widget? customIcon,
     required String label,
     required VoidCallback onTap,
     required bool isDark,
@@ -459,11 +461,14 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 20,
-              ),
+              child: customIcon ??
+                  (icon != null
+                      ? Icon(
+                          icon,
+                          color: iconColor,
+                          size: 20,
+                        )
+                      : const SizedBox.shrink()),
             ),
           ),
           const SizedBox(height: 8),

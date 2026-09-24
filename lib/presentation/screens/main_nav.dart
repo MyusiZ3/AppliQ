@@ -180,14 +180,10 @@ class _MainNavState extends State<MainNav> {
         final isMono = accentMode == AccentThemeMode.monochrome;
 
         final activeBg = isMono ? const Color(0xFFFFFFFF) : AppColors.pastelLime;
-        final inactiveBg = isMono
-            ? const Color(0xFF27272A)
-            : (isDark ? const Color(0xFF201E27) : const Color(0xFF27272A));
+        final inactiveBg = const Color(0xFF27272A);
 
         final activeFg = isMono ? const Color(0xFF18181B) : AppColors.textOnPastel;
-        final inactiveFg = isMono
-            ? const Color(0xFFA1A1AA)
-            : (isDark ? AppColors.textHintDark : const Color(0xFFA1A1AA));
+        final inactiveFg = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
 
         final iconColor = isActive ? activeFg : inactiveFg;
 

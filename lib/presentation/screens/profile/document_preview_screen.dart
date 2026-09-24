@@ -325,7 +325,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                               fontSize: 12,
                               color: isMonochrome
                                   ? (isDark ? Colors.white : const Color(0xFF18181B))
-                                  : AppColors.pastelLavender,
+                                  : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -525,7 +525,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isMonochrome
                             ? (isDark ? Colors.white : const Color(0xFF18181B))
-                            : AppColors.pastelLavender,
+                            : AppColors.pastelLime,
                         foregroundColor: isMonochrome
                             ? (isDark ? const Color(0xFF18181B) : Colors.white)
                             : AppColors.textOnPastel,
@@ -604,7 +604,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
               icon: const Icon(CupertinoIcons.slider_horizontal_3, size: 20),
               color: isMonochrome
                   ? (isDark ? Colors.white : const Color(0xFF18181B))
-                  : AppColors.pastelLavender,
+                  : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
               onPressed: _showCoverLetterSettingsSheet,
             ),
           ],
@@ -613,11 +613,11 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
           controller: _tabController,
           indicatorColor: isMonochrome
               ? (isDark ? Colors.white : const Color(0xFF18181B))
-              : AppColors.pastelLavender,
+              : AppColors.pastelLime,
           indicatorWeight: 3,
           labelColor: isMonochrome
               ? (isDark ? Colors.white : const Color(0xFF18181B))
-              : AppColors.pastelLavender,
+              : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
           unselectedLabelColor: isDark ? AppColors.textHintDark : AppColors.textHint,
           labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
           tabs: [

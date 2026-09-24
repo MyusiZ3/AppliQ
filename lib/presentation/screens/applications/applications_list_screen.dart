@@ -604,9 +604,8 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     final selectedBg = isMono
         ? (isDark ? Colors.white : const Color(0xFF18181B))
         : AppColors.pastelLime;
-    final unselectedBg = isMono
-        ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
-        : (isDark ? const Color(0xFF1E1D24) : const Color(0xFFF4F4F5));
+    final unselectedBg =
+        isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
 
     final selectedFg = isMono
         ? (isDark ? const Color(0xFF18181B) : Colors.white)

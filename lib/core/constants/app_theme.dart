@@ -19,11 +19,11 @@ class AppTheme {
 
     final primary = isMonochrome
         ? (isDark ? Colors.white : const Color(0xFF18181B))
-        : AppColors.pastelLavender;
+        : AppColors.pastelLime;
 
     final secondary = isMonochrome
         ? (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A))
-        : AppColors.pastelLime;
+        : AppColors.pastelLavender;
 
     final background = AppColors.getBackground(isDark: isDark, isMonochrome: isMonochrome);
     final surface = AppColors.getSurface(isDark: isDark, isMonochrome: isMonochrome);

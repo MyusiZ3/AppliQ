@@ -577,8 +577,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               isMono
                                                   ? const Color(0xFF3F3F46)
                                                   : (isDark
-                                                      ? const Color(0xFF666472)
-                                                      : const Color(0xFF9896A4)),
+                                                      ? AppColors.textHintDark
+                                                      : AppColors.textSecondary),
                                               isDark),
                                         ],
                                       ),

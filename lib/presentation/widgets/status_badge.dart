@@ -54,10 +54,10 @@ class StatusBadge extends StatelessWidget {
           border = null;
           break;
         case ApplicationStatus.noResponse:
-          bg = isDark ? const Color(0xFF201E27) : const Color(0xFFF0F1F5);
-          fg = isDark ? AppColors.textHintDark : AppColors.textHint;
+          bg = isDark ? const Color(0xFF27272A) : const Color(0xFFF0F1F5);
+          fg = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
           border = Border.all(
-            color: isDark ? AppColors.darkBorderPastel : AppColors.lightBorderPastel,
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
             width: 0.8,
           );
           break;

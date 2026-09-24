@@ -231,7 +231,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                     size: 22,
                     color: isMonochrome
                         ? (isDark ? Colors.white : const Color(0xFF18181B))
-                        : AppColors.pastelLavender,
+                        : AppColors.pastelLime,
                   ),
             onPressed: _isSaving ? null : () => _saveResume(showToast: true),
           ),
@@ -420,7 +420,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isMonochrome
                           ? (isDark ? Colors.white : const Color(0xFF18181B))
-                          : AppColors.pastelLavender,
+                          : AppColors.pastelLime,
                       foregroundColor: isMonochrome
                           ? (isDark ? const Color(0xFF18181B) : Colors.white)
                           : AppColors.textOnPastel,
@@ -469,7 +469,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
           color: isExpanded
               ? (isMonochrome
                   ? (isDark ? Colors.white54 : const Color(0xFF18181B))
-                  : AppColors.pastelLavender.withValues(alpha: 0.6))
+                  : (isDark ? AppColors.pastelLime.withValues(alpha: 0.6) : AppColors.pastelLime))
               : borderColor,
           width: isExpanded ? 1.4 : 0.8,
         ),
@@ -494,7 +494,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                       color: isExpanded
                           ? (isMonochrome
                               ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.08))
-                              : AppColors.pastelLavender.withValues(alpha: 0.2))
+                              : AppColors.pastelLime.withValues(alpha: 0.2))
                           : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -504,7 +504,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
                       color: isExpanded
                           ? (isMonochrome
                               ? (isDark ? Colors.white : const Color(0xFF18181B))
-                              : AppColors.pastelLavender)
+                              : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)))
                           : (isDark ? Colors.white : const Color(0xFF18181B)),
                     ),
                   ),
@@ -1617,7 +1617,7 @@ class _ResumeBuilderScreenState extends State<ResumeBuilderScreen> {
           border: Border.all(
             color: isMonochrome
                 ? (isDark ? Colors.white38 : Colors.black26)
-                : AppColors.pastelLavender.withValues(alpha: 0.5),
+                : AppColors.pastelLime.withValues(alpha: 0.5),
             style: BorderStyle.solid,
             width: 1.2,
           ),

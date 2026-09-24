@@ -1055,6 +1055,66 @@ class IdLanguage implements BaseLanguage {
   @override
   String get smartParserAutoFillBanner => 'Auto-Fill dari Teks Loker';
 
+  // Career & Currently Working Hub
+  @override
+  String get menuCareerTitle => 'Karir & Pengalaman';
+  @override
+  String get menuCareerSubtitle => 'Pekerjaan Aktif, Riwayat & CV ATS';
+  @override
+  String get careerScreenTitle => 'Perjalanan Karir';
+  @override
+  String get currentlyWorkingHeader => 'Pekerjaan Saat Ini';
+  @override
+  String get currentlyWorkingSubtitle => 'Posisi & tempat kerja aktif Anda';
+  @override
+  String get noCurrentlyWorking => 'Belum ada pekerjaan aktif';
+  @override
+  String get noCurrentlyWorkingDesc => 'Atur posisi Anda saat ini atau ubah status lamaran yang diterima.';
+  @override
+  String get setCurrentlyWorkingBtn => 'Atur Pekerjaan Aktif';
+  @override
+  String get workHistoryHeader => 'Riwayat Pekerjaan';
+  @override
+  String get workHistorySubtitle => 'Jejak pengalaman kerja & magang terdahulu';
+  @override
+  String get noWorkHistory => 'Belum ada riwayat kerja';
+  @override
+  String get noWorkHistoryDesc => 'Catat pengalaman kerja masa lalu untuk melengkapi CV ATS Anda.';
+  @override
+  String get addExperienceBtn => 'Tambah Pengalaman';
+  @override
+  String get isCurrentlyWorkingCheckbox => 'Saya masih bekerja di posisi ini';
+  @override
+  String get startDateLabel => 'Tanggal Mulai';
+  @override
+  String get endDateLabel => 'Tanggal Selesai';
+  @override
+  String get presentLabel => 'Sekarang';
+  @override
+  String get endJobConfirmTitle => 'Selesaikan Pekerjaan Ini?';
+  @override
+  String get endJobConfirmMessage => 'Atur tanggal selesai untuk memindahkannya ke riwayat kerja terdahulu.';
+  @override
+  String get deleteExperienceConfirmTitle => 'Hapus Pengalaman?';
+  @override
+  String get deleteExperienceConfirmMessage => 'Pengalaman kerja ini akan dihapus secara permanen.';
+  @override
+  String get acceptedPromptTitle => 'Selamat atas Pekerjaan Baru!';
+  @override
+  String get acceptedPromptMessage => 'Ingin jadikan lamaran ini sebagai Pekerjaan Aktif (Currently Working)?';
+  @override
+  String get acceptedPromptConfirm => 'Jadikan Pekerjaan Aktif';
+  @override
+  String get acceptedPromptLater => 'Nanti Saja';
+  @override
+  String get activeRoleBadge => 'Pekerjaan Aktif';
+  @override
+  String get careerMonthlySalary => 'Gaji Bulanan';
+  @override
+  String get careerAtsCardTitle => 'Generator Resume & CV ATS';
+  @override
+  String get careerAtsCardDesc => 'Buat CV ATS profesional dalam format PDF dari data karir Anda.';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) => type.label;

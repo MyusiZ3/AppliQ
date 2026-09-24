@@ -13,8 +13,8 @@ import '../../../utils/ui_helper.dart';
 import '../../widgets/app_avatar.dart';
 import '../../widgets/appliq_loading.dart';
 import '../auth/login_screen.dart';
+import 'career_screen.dart';
 import 'edit_profile_screen.dart';
-import 'resume_builder_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final JobRepository repository;
@@ -985,12 +985,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               _buildDivider(borderColor),
 
-                              // Experience (CV ATS & Cover Letter)
+                              // Career & Currently Working Hub
                               _buildTile(
-                                icon: CupertinoIcons.doc_person,
-                                iconColor: AppColors.pastelLavender,
-                                title: AppStrings.menuExperienceTitle,
-                                subtitle: AppStrings.menuExperienceSubtitle,
+                                icon: CupertinoIcons.briefcase_fill,
+                                iconColor: isMono ? null : AppColors.pastelLime,
+                                title: AppStrings.menuCareerTitle,
                                 isDark: isDark,
                                 showChevron: true,
                                 onTap: () {
@@ -998,7 +997,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => ResumeBuilderScreen(
+                                      builder: (_) => CareerScreen(
                                         repository: widget.repository,
                                       ),
                                     ),

@@ -1056,6 +1056,66 @@ class KoLanguage implements BaseLanguage {
   @override
   String get smartParserAutoFillBanner => '채용공고 자동 입력';
 
+  // Career & Currently Working Hub
+  @override
+  String get menuCareerTitle => '경력 및 경험';
+  @override
+  String get menuCareerSubtitle => '현재 직무, 경력 및 ATS 이력서';
+  @override
+  String get careerScreenTitle => '커리어 여정';
+  @override
+  String get currentlyWorkingHeader => '현재 직무';
+  @override
+  String get currentlyWorkingSubtitle => '현재 활동 중인 직무 및 직장';
+  @override
+  String get noCurrentlyWorking => '현재 설정된 직무가 없습니다';
+  @override
+  String get noCurrentlyWorkingDesc => '현재 직무를 추가하거나 합격한 지원서를 연결하세요.';
+  @override
+  String get setCurrentlyWorkingBtn => '현재 직무 설정';
+  @override
+  String get workHistoryHeader => '경력 사항';
+  @override
+  String get workHistorySubtitle => '이전 직무 및 커리어 이력';
+  @override
+  String get noWorkHistory => '이전 경력 사항이 없습니다';
+  @override
+  String get noWorkHistoryDesc => '이전 경력을 기록하여 ATS 이력서를 완성하세요.';
+  @override
+  String get addExperienceBtn => '경력 추가';
+  @override
+  String get isCurrentlyWorkingCheckbox => '현재 이 직무에서 근무 중';
+  @override
+  String get startDateLabel => '시작일';
+  @override
+  String get endDateLabel => '종료일';
+  @override
+  String get presentLabel => '현재';
+  @override
+  String get endJobConfirmTitle => '이 직무를 종료하시겠습니까?';
+  @override
+  String get endJobConfirmMessage => '종료일을 설정하여 이전 경력으로 이동합니다.';
+  @override
+  String get deleteExperienceConfirmTitle => '경력을 삭제하시겠습니까?';
+  @override
+  String get deleteExperienceConfirmMessage => '이 경력 정보는 완전히 삭제됩니다.';
+  @override
+  String get acceptedPromptTitle => '입사를 축하합니다!';
+  @override
+  String get acceptedPromptMessage => '이 지원서를 현재 근무 중(Currently Working) 직무로 등록할까요?';
+  @override
+  String get acceptedPromptConfirm => '현재 직무로 등록';
+  @override
+  String get acceptedPromptLater => '나중에';
+  @override
+  String get activeRoleBadge => '재직 중';
+  @override
+  String get careerMonthlySalary => '월급';
+  @override
+  String get careerAtsCardTitle => 'ATS 이력서 및 경력기술서 생성';
+  @override
+  String get careerAtsCardDesc => '등록된 경력 데이터로 ATS 친화적 PDF 이력서를 생성합니다.';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

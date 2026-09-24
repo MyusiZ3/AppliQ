@@ -551,6 +551,37 @@ class AppStrings {
   static String get smartParserApplyToForm => current.smartParserApplyToForm;
   static String get smartParserAutoFillBanner => current.smartParserAutoFillBanner;
 
+  // Career & Currently Working Hub
+  static String get menuCareerTitle => current.menuCareerTitle;
+  static String get menuCareerSubtitle => current.menuCareerSubtitle;
+  static String get careerScreenTitle => current.careerScreenTitle;
+  static String get currentlyWorkingHeader => current.currentlyWorkingHeader;
+  static String get currentlyWorkingSubtitle => current.currentlyWorkingSubtitle;
+  static String get noCurrentlyWorking => current.noCurrentlyWorking;
+  static String get noCurrentlyWorkingDesc => current.noCurrentlyWorkingDesc;
+  static String get setCurrentlyWorkingBtn => current.setCurrentlyWorkingBtn;
+  static String get workHistoryHeader => current.workHistoryHeader;
+  static String get workHistorySubtitle => current.workHistorySubtitle;
+  static String get noWorkHistory => current.noWorkHistory;
+  static String get noWorkHistoryDesc => current.noWorkHistoryDesc;
+  static String get addExperienceBtn => current.addExperienceBtn;
+  static String get isCurrentlyWorkingCheckbox => current.isCurrentlyWorkingCheckbox;
+  static String get startDateLabel => current.startDateLabel;
+  static String get endDateLabel => current.endDateLabel;
+  static String get presentLabel => current.presentLabel;
+  static String get endJobConfirmTitle => current.endJobConfirmTitle;
+  static String get endJobConfirmMessage => current.endJobConfirmMessage;
+  static String get deleteExperienceConfirmTitle => current.deleteExperienceConfirmTitle;
+  static String get deleteExperienceConfirmMessage => current.deleteExperienceConfirmMessage;
+  static String get acceptedPromptTitle => current.acceptedPromptTitle;
+  static String get acceptedPromptMessage => current.acceptedPromptMessage;
+  static String get acceptedPromptConfirm => current.acceptedPromptConfirm;
+  static String get acceptedPromptLater => current.acceptedPromptLater;
+  static String get activeRoleBadge => current.activeRoleBadge;
+  static String get careerMonthlySalary => current.careerMonthlySalary;
+  static String get careerAtsCardTitle => current.careerAtsCardTitle;
+  static String get careerAtsCardDesc => current.careerAtsCardDesc;
+
   // Helper methods for enums
   static String localizedEmploymentType(EmploymentType type) => current.localizedEmploymentType(type);
   static String localizedWorkSystem(WorkSystem system) => current.localizedWorkSystem(system);

@@ -1056,6 +1056,66 @@ class JaLanguage implements BaseLanguage {
   @override
   String get smartParserAutoFillBanner => '求人テキストから自動入力';
 
+  // Career & Currently Working Hub
+  @override
+  String get menuCareerTitle => 'キャリアと経験';
+  @override
+  String get menuCareerSubtitle => '現在の職務・経歴・ATS履歴書';
+  @override
+  String get careerScreenTitle => 'キャリアの軌跡';
+  @override
+  String get currentlyWorkingHeader => '現在の勤務先';
+  @override
+  String get currentlyWorkingSubtitle => '現在就いている役職と勤務先';
+  @override
+  String get noCurrentlyWorking => '現在の職務は未設定です';
+  @override
+  String get noCurrentlyWorkingDesc => '現在の役職を追加するか、採用された応募をリンクしてください。';
+  @override
+  String get setCurrentlyWorkingBtn => '現在の職務を設定';
+  @override
+  String get workHistoryHeader => '職務経歴';
+  @override
+  String get workHistorySubtitle => '過去の職歴とマイルストーン';
+  @override
+  String get noWorkHistory => '過去の職歴がありません';
+  @override
+  String get noWorkHistoryDesc => '過去の職歴を記録してATS履歴書を完成させましょう。';
+  @override
+  String get addExperienceBtn => '経歴を追加';
+  @override
+  String get isCurrentlyWorkingCheckbox => '現在この役職で勤務中';
+  @override
+  String get startDateLabel => '開始日';
+  @override
+  String get endDateLabel => '終了日';
+  @override
+  String get presentLabel => '現在';
+  @override
+  String get endJobConfirmTitle => 'この職務を終了しますか？';
+  @override
+  String get endJobConfirmMessage => '終了日を設定して過去の職歴に移動します。';
+  @override
+  String get deleteExperienceConfirmTitle => '経歴を削除しますか？';
+  @override
+  String get deleteExperienceConfirmMessage => 'この経歴データは完全に削除されます。';
+  @override
+  String get acceptedPromptTitle => '採用おめでとうございます！';
+  @override
+  String get acceptedPromptMessage => 'この応募を現在の勤務先（Currently Working）として登録しますか？';
+  @override
+  String get acceptedPromptConfirm => '現在の職務に設定';
+  @override
+  String get acceptedPromptLater => 'あとで';
+  @override
+  String get activeRoleBadge => '在籍中';
+  @override
+  String get careerMonthlySalary => '月給';
+  @override
+  String get careerAtsCardTitle => 'ATS履歴書・職務経歴書生成';
+  @override
+  String get careerAtsCardDesc => '登録した経歴データからATS対応PDF履歴書を自動生成します。';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

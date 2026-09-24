@@ -1055,6 +1055,66 @@ class EnLanguage implements BaseLanguage {
   @override
   String get smartParserAutoFillBanner => 'Auto-Fill from Job Text';
 
+  // Career & Currently Working Hub
+  @override
+  String get menuCareerTitle => 'Career & Experience';
+  @override
+  String get menuCareerSubtitle => 'Active Role, History & ATS CV';
+  @override
+  String get careerScreenTitle => 'Career Journey';
+  @override
+  String get currentlyWorkingHeader => 'Currently Working';
+  @override
+  String get currentlyWorkingSubtitle => 'Your active position & workplace';
+  @override
+  String get noCurrentlyWorking => 'No active job set';
+  @override
+  String get noCurrentlyWorkingDesc => 'Set your current position or link an accepted application.';
+  @override
+  String get setCurrentlyWorkingBtn => 'Set Active Role';
+  @override
+  String get workHistoryHeader => 'Work History';
+  @override
+  String get workHistorySubtitle => 'Past roles & career milestones';
+  @override
+  String get noWorkHistory => 'No past work history';
+  @override
+  String get noWorkHistoryDesc => 'Document past roles to build a complete ATS CV.';
+  @override
+  String get addExperienceBtn => 'Add Experience';
+  @override
+  String get isCurrentlyWorkingCheckbox => 'I currently work in this role';
+  @override
+  String get startDateLabel => 'Start Date';
+  @override
+  String get endDateLabel => 'End Date';
+  @override
+  String get presentLabel => 'Present';
+  @override
+  String get endJobConfirmTitle => 'End This Position?';
+  @override
+  String get endJobConfirmMessage => 'Set the end date to move this role to past work history.';
+  @override
+  String get deleteExperienceConfirmTitle => 'Delete Experience?';
+  @override
+  String get deleteExperienceConfirmMessage => 'This experience entry will be permanently removed.';
+  @override
+  String get acceptedPromptTitle => 'Congratulations on the Job!';
+  @override
+  String get acceptedPromptMessage => 'Would you like to set this role as your Currently Working position in Career?';
+  @override
+  String get acceptedPromptConfirm => 'Set as Active Role';
+  @override
+  String get acceptedPromptLater => 'Maybe Later';
+  @override
+  String get activeRoleBadge => 'Active Role';
+  @override
+  String get careerMonthlySalary => 'Monthly Salary';
+  @override
+  String get careerAtsCardTitle => 'ATS Resume & CV Generator';
+  @override
+  String get careerAtsCardDesc => 'Generate professional ATS-friendly CV from your career data.';
+
   // Enums & Dynamic Values
   @override
   String localizedEmploymentType(EmploymentType type) {

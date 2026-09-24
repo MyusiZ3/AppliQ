@@ -523,6 +523,37 @@ abstract class BaseLanguage {
   String get smartParserApplyToForm;
   String get smartParserAutoFillBanner;
 
+  // Career & Currently Working Hub
+  String get menuCareerTitle;
+  String get menuCareerSubtitle;
+  String get careerScreenTitle;
+  String get currentlyWorkingHeader;
+  String get currentlyWorkingSubtitle;
+  String get noCurrentlyWorking;
+  String get noCurrentlyWorkingDesc;
+  String get setCurrentlyWorkingBtn;
+  String get workHistoryHeader;
+  String get workHistorySubtitle;
+  String get noWorkHistory;
+  String get noWorkHistoryDesc;
+  String get addExperienceBtn;
+  String get isCurrentlyWorkingCheckbox;
+  String get startDateLabel;
+  String get endDateLabel;
+  String get presentLabel;
+  String get endJobConfirmTitle;
+  String get endJobConfirmMessage;
+  String get deleteExperienceConfirmTitle;
+  String get deleteExperienceConfirmMessage;
+  String get acceptedPromptTitle;
+  String get acceptedPromptMessage;
+  String get acceptedPromptConfirm;
+  String get acceptedPromptLater;
+  String get activeRoleBadge;
+  String get careerMonthlySalary;
+  String get careerAtsCardTitle;
+  String get careerAtsCardDesc;
+
   // Enums & Dynamic Values
   String localizedEmploymentType(EmploymentType type);
   String localizedWorkSystem(WorkSystem system);

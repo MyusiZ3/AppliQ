@@ -72,8 +72,14 @@ class ExperienceItem {
   final String position;
   final String companyOrProject;
   final String cityCountry;
-  final String period; // e.g. "Sep 2023 - Jul 2025"
+  final String period; // e.g. "Sep 2023 - Jul 2025" or custom
   final List<String> bulletPoints;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final bool isCurrentlyWorking;
+  final String? employmentType; // Full-time, Contract, Internship, Freelance, Part-time
+  final double? monthlySalary;
+  final String? notes;
 
   ExperienceItem({
     required this.id,
@@ -82,9 +88,27 @@ class ExperienceItem {
     required this.cityCountry,
     required this.period,
     List<String>? bulletPoints,
+    this.startDate,
+    this.endDate,
+    this.isCurrentlyWorking = false,
+    this.employmentType,
+    this.monthlySalary,
+    this.notes,
   }) : bulletPoints = bulletPoints ?? [];
 
   factory ExperienceItem.fromJson(Map<String, dynamic> json) {
+    DateTime? parseDate(dynamic val) {
+      if (val == null) return null;
+      if (val is String && val.isNotEmpty) {
+        return DateTime.tryParse(val);
+      }
+      return null;
+    }
+
+    final start = parseDate(json['start_date']);
+    final end = parseDate(json['end_date']);
+    final isCurrent = json['is_currently_working'] as bool? ?? (json['period']?.toString().toLowerCase().contains('sekarang') == true || json['period']?.toString().toLowerCase().contains('present') == true);
+
     return ExperienceItem(
       id: json['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
       position: json['position'] as String? ?? '',
@@ -95,6 +119,12 @@ class ExperienceItem {
               ?.map((e) => e.toString())
               .toList() ??
           [],
+      startDate: start,
+      endDate: end,
+      isCurrentlyWorking: isCurrent,
+      employmentType: json['employment_type'] as String?,
+      monthlySalary: (json['monthly_salary'] as num?)?.toDouble(),
+      notes: json['notes'] as String?,
     );
   }
 
@@ -106,6 +136,12 @@ class ExperienceItem {
       'city_country': cityCountry,
       'period': period,
       'bullet_points': bulletPoints,
+      if (startDate != null) 'start_date': startDate!.toIso8601String(),
+      if (endDate != null) 'end_date': endDate!.toIso8601String(),
+      'is_currently_working': isCurrentlyWorking,
+      if (employmentType != null) 'employment_type': employmentType,
+      if (monthlySalary != null) 'monthly_salary': monthlySalary,
+      if (notes != null) 'notes': notes,
     };
   }
 
@@ -116,6 +152,12 @@ class ExperienceItem {
     String? cityCountry,
     String? period,
     List<String>? bulletPoints,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isCurrentlyWorking,
+    String? employmentType,
+    double? monthlySalary,
+    String? notes,
   }) {
     return ExperienceItem(
       id: id ?? this.id,
@@ -124,6 +166,12 @@ class ExperienceItem {
       cityCountry: cityCountry ?? this.cityCountry,
       period: period ?? this.period,
       bulletPoints: bulletPoints ?? List.from(this.bulletPoints),
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      isCurrentlyWorking: isCurrentlyWorking ?? this.isCurrentlyWorking,
+      employmentType: employmentType ?? this.employmentType,
+      monthlySalary: monthlySalary ?? this.monthlySalary,
+      notes: notes ?? this.notes,
     );
   }
 }

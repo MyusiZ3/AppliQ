@@ -10,6 +10,7 @@ import '../../core/constants/app_enums.dart';
 import '../../core/localization/app_strings.dart';
 import '../../data/models/job_application.dart';
 import '../../utils/language_manager.dart';
+import '../../utils/theme_manager.dart';
 import '../../utils/ui_helper.dart';
 
 class ExportSheet extends StatefulWidget {
@@ -549,12 +550,13 @@ class _ExportSheetState extends State<ExportSheet> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        color: AppColors.getSurface(isDark: isDark, isMonochrome: isMono),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -617,10 +619,12 @@ class _ExportSheetState extends State<ExportSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+              color: isDark
+                  ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfacePastel)
+                  : (isMono ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                color: AppColors.getBorder(isDark: isDark, isMonochrome: isMono),
                 width: 0.8,
               ),
             ),
@@ -660,13 +664,16 @@ class _ExportSheetState extends State<ExportSheet> {
             child: ElevatedButton(
               onPressed: (_isPdfLoading || _isCsvLoading) ? null : _exportPdf,
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isDark ? Colors.white : const Color(0xFF18181B),
-                foregroundColor:
-                    isDark ? const Color(0xFF18181B) : Colors.white,
-                disabledBackgroundColor:
-                    (isDark ? Colors.white : const Color(0xFF18181B))
-                        .withValues(alpha: 0.6),
+                backgroundColor: isMono
+                    ? (isDark ? Colors.white : const Color(0xFF18181B))
+                    : AppColors.pastelLavender,
+                foregroundColor: isMono
+                    ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                    : AppColors.textOnPastel,
+                disabledBackgroundColor: (isMono
+                        ? (isDark ? Colors.white : const Color(0xFF18181B))
+                        : AppColors.pastelLavender)
+                    .withValues(alpha: 0.6),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
@@ -682,8 +689,9 @@ class _ExportSheetState extends State<ExportSheet> {
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.2,
-                          color:
-                              isDark ? const Color(0xFF18181B) : Colors.white,
+                          color: isMono
+                              ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                              : AppColors.textOnPastel,
                         ),
                       ),
                     )
@@ -693,7 +701,9 @@ class _ExportSheetState extends State<ExportSheet> {
                       child: Icon(
                         CupertinoIcons.doc_text_fill,
                         size: 17,
-                        color: isDark ? const Color(0xFF18181B) : Colors.white,
+                        color: isMono
+                            ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                            : AppColors.textOnPastel,
                       ),
                     ),
                   Text(
@@ -705,7 +715,9 @@ class _ExportSheetState extends State<ExportSheet> {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 13.5,
-                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      color: isMono
+                          ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                          : AppColors.textOnPastel,
                     ),
                   ),
                 ],

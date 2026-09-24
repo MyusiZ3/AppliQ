@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../utils/theme_manager.dart';
 
 class EmptyStateView extends StatelessWidget {
   final IconData icon;
@@ -18,6 +19,7 @@ class EmptyStateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -40,14 +42,18 @@ class EmptyStateView extends StatelessWidget {
                       width: 76,
                       height: 76,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                        color: isMono
+                            ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+                            : (isDark ? AppColors.darkSurfaceVariantPastel : AppColors.lightSurfaceVariantPastel),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
                         child: Icon(
                           icon,
                           size: 36,
-                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                          color: isMono
+                              ? (isDark ? AppColors.textHintDark : AppColors.textHint)
+                              : AppColors.pastelLavender,
                         ),
                       ),
                     ),

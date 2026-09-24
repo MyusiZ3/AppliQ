@@ -8,6 +8,7 @@ import '../../data/models/job_application.dart';
 import '../../data/models/application_log.dart';
 import '../../services/notification_service.dart';
 import '../../utils/language_manager.dart';
+import '../../utils/theme_manager.dart';
 import '../../utils/ui_helper.dart';
 import '../widgets/hr_templates_sheet.dart';
 
@@ -75,6 +76,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
     final isEn = LanguageManager.isEnglish;
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final totalAlerts = widget.upcomingSchedules.length + widget.staleApplications.length;
@@ -85,7 +87,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
       ),
       padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        color: AppColors.getSurface(isDark: isDark, isMonochrome: isMono),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -116,13 +118,17 @@ class _NotificationSheetState extends State<NotificationSheet> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                      color: isMono
+                          ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+                          : AppColors.pastelSky.withValues(alpha: 0.18),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       CupertinoIcons.bell_fill,
                       size: 18,
-                      color: isDark ? Colors.white : const Color(0xFF18181B),
+                      color: isMono
+                          ? (isDark ? Colors.white : const Color(0xFF18181B))
+                          : AppColors.pastelSky,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -212,8 +218,12 @@ class _NotificationSheetState extends State<NotificationSheet> {
                 ElevatedButton(
                   onPressed: _isTesting ? null : _testPushNotification,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                    foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                    backgroundColor: isMono
+                        ? (isDark ? Colors.white : const Color(0xFF18181B))
+                        : AppColors.pastelLime,
+                    foregroundColor: isMono
+                        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                        : AppColors.textOnPastel,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
@@ -224,7 +234,9 @@ class _NotificationSheetState extends State<NotificationSheet> {
                           height: 14,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: isDark ? const Color(0xFF18181B) : Colors.white,
+                            color: isMono
+                                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                : AppColors.textOnPastel,
                           ),
                         )
                       : Text(

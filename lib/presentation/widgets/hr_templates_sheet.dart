@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
 import '../../utils/language_manager.dart';
+import '../../utils/theme_manager.dart';
 
 class HrTemplatesSheet extends StatefulWidget {
   final String? defaultCompanyName;
@@ -192,6 +193,7 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
     final templates = _getTemplates();
     final categories = [
       AppStrings.categoryAll,
@@ -209,7 +211,7 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        color: AppColors.getSurface(isDark: isDark, isMonochrome: isMono),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -283,8 +285,12 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? (isDark ? Colors.white : const Color(0xFF18181B))
-                          : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
+                          ? (isMono
+                              ? (isDark ? Colors.white : const Color(0xFF18181B))
+                              : AppColors.pastelLime)
+                          : (isMono
+                              ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+                              : (isDark ? AppColors.darkSurfaceVariantPastel : AppColors.lightSurfaceVariantPastel)),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Text(
@@ -293,7 +299,9 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                         fontSize: 12.5,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                         color: isSelected
-                            ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                            ? (isMono
+                                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                : AppColors.textOnPastel)
                             : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
                       ),
                     ),
@@ -306,7 +314,7 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
           const SizedBox(height: 12),
           Divider(
             height: 1,
-            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            color: AppColors.getBorder(isDark: isDark, isMonochrome: isMono),
           ),
 
           // Templates List
@@ -320,10 +328,12 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                 return Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFFAFAFA),
+                    color: isDark
+                        ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfacePastel)
+                        : (isMono ? const Color(0xFFFAFAFA) : AppColors.lightSurfaceVariantPastel),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                      color: AppColors.getBorder(isDark: isDark, isMonochrome: isMono),
                       width: 0.8,
                     ),
                   ),
@@ -450,8 +460,12 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
                                 style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                                foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                                backgroundColor: isMono
+                                    ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                    : AppColors.pastelLavender,
+                                foregroundColor: isMono
+                                    ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                    : AppColors.textOnPastel,
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
 import '../../core/utils/status_helper.dart';
 import '../../data/models/job_application.dart';
+import '../../utils/theme_manager.dart';
 import 'status_badge.dart';
 
 class ApplicationCard extends StatelessWidget {
@@ -25,6 +26,9 @@ class ApplicationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
+    final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+    final cardBorder = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
     final feedbackText = StatusHelper.getFeedbackText(
       application.status,
       application.appliedDate,
@@ -34,10 +38,10 @@ class ApplicationCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+        color: cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          color: cardBorder,
           width: 0.8,
         ),
       ),
@@ -97,7 +101,7 @@ class ApplicationCard extends StatelessWidget {
                             ? CupertinoIcons.bookmark_fill
                             : CupertinoIcons.bookmark,
                         color: application.isFavorite
-                            ? AppColors.warning
+                            ? (isMono ? AppColors.warning : AppColors.pastelAmber)
                             : (isDark ? AppColors.textHintDark : AppColors.textHint),
                       ),
                       onPressed: () {
@@ -149,7 +153,7 @@ class ApplicationCard extends StatelessWidget {
 
                 Divider(
                   height: 1,
-                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                  color: cardBorder,
                 ),
 
                 const SizedBox(height: 10),
@@ -236,7 +240,7 @@ class ApplicationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant,
+        color: AppColors.getSurfaceVariant(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
         borderRadius: BorderRadius.circular(8),
       ),
       child: content,

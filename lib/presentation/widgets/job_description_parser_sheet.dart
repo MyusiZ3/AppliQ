@@ -174,8 +174,8 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                     height: 38,
                     decoration: BoxDecoration(
                       color: isDark
-                          ? (isMonochrome ? const Color(0xFF27272A) : const Color(0xFF1C2438))
-                          : (isMonochrome ? const Color(0xFFF4F4F5) : const Color(0xFFEEF2F6)),
+                          ? (isMonochrome ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                          : (isMonochrome ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel),
                       borderRadius: BorderRadius.circular(11),
                       border: Border.all(color: cardBorder, width: 0.8),
                     ),
@@ -280,8 +280,8 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                     Container(
                       decoration: BoxDecoration(
                         color: isDark
-                            ? (isMonochrome ? const Color(0xFF27272A).withValues(alpha: 0.6) : AppColors.darkSurfaceVariantIndigo)
-                            : (isMonochrome ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantIndigo),
+                            ? (isMonochrome ? const Color(0xFF27272A).withValues(alpha: 0.6) : AppColors.darkSurfaceVariantPastel)
+                            : (isMonochrome ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: cardBorder,
@@ -442,9 +442,9 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  foregroundColor: (isMonochrome && isDark)
-                      ? const Color(0xFF18181B)
-                      : Colors.white,
+                  foregroundColor: isMonochrome
+                      ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                      : AppColors.textOnPastel,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -467,11 +467,11 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
     required Color primaryColor,
   }) {
     final chipBg = isDark
-        ? (isMonochrome ? const Color(0xFF27272A) : const Color(0xFF1C2438))
-        : (isMonochrome ? const Color(0xFFF4F4F5) : const Color(0xFFEEF2F6));
+        ? (isMonochrome ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+        : (isMonochrome ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel);
     final chipBorder = isDark
-        ? (isMonochrome ? const Color(0xFF3F3F46) : const Color(0xFF263248))
-        : (isMonochrome ? const Color(0xFFE4E4E7) : const Color(0xFFCBD5E1));
+        ? (isMonochrome ? const Color(0xFF3F3F46) : AppColors.darkBorderPastel)
+        : (isMonochrome ? const Color(0xFFE4E4E7) : AppColors.lightBorderPastel);
     final iconColor = isMonochrome
         ? (isDark ? Colors.white70 : const Color(0xFF52525B))
         : primaryColor;

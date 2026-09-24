@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
+import '../../utils/theme_manager.dart';
 
 class NotchedPillCard<T> extends StatelessWidget {
   final List<NotchedPillItem<T>> items;
@@ -19,9 +20,10 @@ class NotchedPillCard<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? AppColors.surfaceDark : AppColors.surface;
-    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final scaffoldBg = isDark ? AppColors.backgroundDark : AppColors.background;
+    final isMono = ThemeManager.isMonochrome;
+    final bgColor = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+    final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+    final scaffoldBg = AppColors.getBackground(isDark: isDark, isMonochrome: isMono);
 
     return Container(
       decoration: BoxDecoration(
@@ -71,7 +73,9 @@ class NotchedPillCard<T> extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                    color: isMono
+                        ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+                        : (isDark ? AppColors.darkSurfaceVariantPastel : AppColors.lightSurfaceVariantPastel),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Row(
@@ -92,7 +96,9 @@ class NotchedPillCard<T> extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 9),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? (isDark ? const Color(0xFF3F3F46) : Colors.white)
+                                  ? (isMono
+                                      ? (isDark ? const Color(0xFF3F3F46) : Colors.white)
+                                      : AppColors.pastelLime)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(100),
                               boxShadow: isSelected
@@ -114,7 +120,7 @@ class NotchedPillCard<T> extends StatelessWidget {
                                     item.icon,
                                     size: 15,
                                     color: isSelected
-                                        ? (item.iconColor ?? (isDark ? Colors.white : const Color(0xFF18181B)))
+                                        ? (item.iconColor ?? (isMono ? (isDark ? Colors.white : const Color(0xFF18181B)) : AppColors.textOnPastel))
                                         : (isDark ? AppColors.textHintDark : AppColors.textHint),
                                   ),
                                   const SizedBox(width: 6),
@@ -128,7 +134,7 @@ class NotchedPillCard<T> extends StatelessWidget {
                                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                     letterSpacing: -0.2,
                                     color: isSelected
-                                        ? (isDark ? Colors.white : AppColors.textPrimary)
+                                        ? (isMono ? (isDark ? Colors.white : AppColors.textPrimary) : AppColors.textOnPastel)
                                         : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
                                   ),
                                 ),
@@ -177,8 +183,9 @@ class NotchedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final effectiveBgColor = backgroundColor ?? (isDark ? AppColors.surfaceDark : AppColors.surface);
-    final effectiveBorderColor = borderColor ?? (isDark ? AppColors.borderDark : AppColors.borderLight);
+    final isMono = ThemeManager.isMonochrome;
+    final effectiveBgColor = backgroundColor ?? AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+    final effectiveBorderColor = borderColor ?? AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
     final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
 
     return Container(

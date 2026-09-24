@@ -119,8 +119,8 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
             UIHelper.showSuccessSnackBar(
               context,
               _isEnglish
-                  ? 'Signature loaded in memory (will not be saved to cloud)'
-                  : 'Tanda tangan berhasil dimuat! (Hanya di memori lokal)',
+                  ? 'Digital signature loaded (in memory only, never saved to cloud)'
+                  : 'Tanda tangan berhasil dimuat! (Hanya di memori lokal, aman)',
             );
           }
         }
@@ -136,35 +136,95 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
     });
     UIHelper.showInfoSnackBar(
       context,
-      _isEnglish ? 'Digital signature cleared' : 'Tanda tangan digital dihapus',
+      _isEnglish ? 'Digital signature removed' : 'Tanda tangan digital dihapus',
     );
   }
 
-  void _copyCoverLetterText() {
-    final text = CoverLetterPdfBuilder.generatePlainText(
-      widget.resume,
-      companyName: _companyNameCtrl.text.trim(),
-      companyAddress: _companyAddressCtrl.text.trim(),
-      targetPosition: _targetPositionCtrl.text.trim(),
-      letterDate: _letterDate,
-      customAttachments: _attachments,
-      isEnglish: _isEnglish,
-    );
+  void _copyCurrentText() {
+    HapticFeedback.selectionClick();
+    final String text;
+    if (_tabController.index == 0) {
+      text = CvAtsPdfBuilder.generatePlainText(widget.resume, isEnglish: _isEnglish);
+    } else {
+      text = CoverLetterPdfBuilder.generatePlainText(
+        widget.resume,
+        companyName: _companyNameCtrl.text.trim(),
+        companyAddress: _companyAddressCtrl.text.trim(),
+        targetPosition: _targetPositionCtrl.text.trim(),
+        letterDate: _letterDate,
+        customAttachments: _attachments,
+        isEnglish: _isEnglish,
+      );
+    }
     Clipboard.setData(ClipboardData(text: text));
-    HapticFeedback.mediumImpact();
     UIHelper.showSuccessSnackBar(
       context,
       _isEnglish
-          ? 'Cover letter text copied to clipboard!'
-          : 'Teks Cover Letter berhasil disalin ke clipboard!',
+          ? (_tabController.index == 0 ? 'CV plain text copied to clipboard!' : 'Cover letter text copied to clipboard!')
+          : (_tabController.index == 0 ? 'Teks CV berhasil disalin ke clipboard!' : 'Teks Surat Lamaran berhasil disalin ke clipboard!'),
     );
+  }
+
+  Future<void> _shareOrSaveCurrentPdf() async {
+    HapticFeedback.mediumImpact();
+    try {
+      final Uint8List pdfBytes;
+      final String fileName;
+      if (_tabController.index == 0) {
+        pdfBytes = await CvAtsPdfBuilder.buildPdf(widget.resume, isEnglish: _isEnglish);
+        fileName = 'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}.pdf';
+      } else {
+        pdfBytes = await CoverLetterPdfBuilder.buildPdf(
+          widget.resume,
+          companyName: _companyNameCtrl.text.trim(),
+          companyAddress: _companyAddressCtrl.text.trim(),
+          targetPosition: _targetPositionCtrl.text.trim(),
+          signatureImageBytes: _signatureBytes,
+          letterDate: _letterDate,
+          customAttachments: _attachments,
+          isEnglish: _isEnglish,
+        );
+        fileName = 'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}.pdf';
+      }
+      await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
+    } catch (e) {
+      if (mounted) UIHelper.handleError(context, e);
+    }
+  }
+
+  Future<void> _printCurrentPdf() async {
+    HapticFeedback.lightImpact();
+    try {
+      if (_tabController.index == 0) {
+        await Printing.layoutPdf(
+          onLayout: (format) => CvAtsPdfBuilder.buildPdf(widget.resume, isEnglish: _isEnglish),
+          name: 'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}',
+        );
+      } else {
+        await Printing.layoutPdf(
+          onLayout: (format) => CoverLetterPdfBuilder.buildPdf(
+            widget.resume,
+            companyName: _companyNameCtrl.text.trim(),
+            companyAddress: _companyAddressCtrl.text.trim(),
+            targetPosition: _targetPositionCtrl.text.trim(),
+            signatureImageBytes: _signatureBytes,
+            letterDate: _letterDate,
+            customAttachments: _attachments,
+            isEnglish: _isEnglish,
+          ),
+          name: 'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}',
+        );
+      }
+    } catch (e) {
+      if (mounted) UIHelper.handleError(context, e);
+    }
   }
 
   void _showCoverLetterSettingsSheet() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMonochrome = ThemeManager.isMonochrome;
-    final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final cardBg = isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
     final newAttachmentCtrl = TextEditingController();
 
     showModalBottomSheet(
@@ -210,13 +270,28 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        AppStrings.customizeCoverLetter,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppStrings.customizeCoverLetter,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _isEnglish
+                                ? 'Customize recipient, date, signature & attachments'
+                                : 'Sesuaikan tujuan surat, tanggal, tanda tangan & lampiran',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                       IconButton(
                         icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
@@ -225,19 +300,33 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+
+                  // Section 1: Detail Tujuan
+                  Text(
+                    _isEnglish ? 'TARGET COMPANY & ROLE' : 'DETAIL PERUSAHAAN TUJUAN',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                      color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
 
                   // 1. Company Name
                   TextField(
                     controller: _companyNameCtrl,
+                    style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF18181B)),
                     decoration: InputDecoration(
                       labelText: _isEnglish ? 'Target Company Name' : 'Nama Perusahaan Tujuan',
                       hintText: _isEnglish ? 'e.g. Google / Microsoft' : 'Contoh: PT Telkom Indonesia',
                       filled: true,
                       fillColor: cardBg,
+                      prefixIcon: const Icon(CupertinoIcons.building_2_fill, size: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: borderColor),
+                        borderSide: BorderSide(color: borderColor, width: 0.8),
                       ),
                     ),
                   ),
@@ -246,14 +335,16 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   // 2. Target Position
                   TextField(
                     controller: _targetPositionCtrl,
+                    style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF18181B)),
                     decoration: InputDecoration(
                       labelText: _isEnglish ? 'Applied Position' : 'Posisi yang Dilamar',
                       hintText: _isEnglish ? 'e.g. Software Engineer' : 'Contoh: Mobile Developer',
                       filled: true,
                       fillColor: cardBg,
+                      prefixIcon: const Icon(CupertinoIcons.briefcase_fill, size: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: borderColor),
+                        borderSide: BorderSide(color: borderColor, width: 0.8),
                       ),
                     ),
                   ),
@@ -262,29 +353,32 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   // 3. Company Address
                   TextField(
                     controller: _companyAddressCtrl,
+                    style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF18181B)),
                     decoration: InputDecoration(
                       labelText: _isEnglish ? 'Company Address / City' : 'Alamat / Kota Perusahaan',
                       hintText: _isEnglish ? 'e.g. Jakarta, Indonesia' : 'Contoh: Jakarta Selatan',
                       filled: true,
                       fillColor: cardBg,
+                      prefixIcon: const Icon(CupertinoIcons.location_solid, size: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: borderColor),
+                        borderSide: BorderSide(color: borderColor, width: 0.8),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
 
-                  // 4. Letter Date Picker
+                  // Section 2: Tanggal Surat
                   Text(
-                    _isEnglish ? 'Letter Date' : 'Tanggal Surat',
+                    _isEnglish ? 'LETTER DATE' : 'TANGGAL SURAT',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                      letterSpacing: 0.5,
+                      color: isDark ? AppColors.textHintDark : AppColors.textHint,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   InkWell(
                     onTap: () async {
                       final picked = await showDatePicker(
@@ -304,7 +398,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       decoration: BoxDecoration(
                         color: cardBg,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: borderColor),
+                        border: Border.all(color: borderColor, width: 0.8),
                       ),
                       child: Row(
                         children: [
@@ -326,7 +420,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                               color: isMonochrome
                                   ? (isDark ? Colors.white : const Color(0xFF18181B))
                                   : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -335,18 +429,19 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // 5. Enclosed Attachments List
+                  // Section 3: Daftar Lampiran
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         _isEnglish
-                            ? 'Enclosed Attachments (${_attachments.length} items)'
-                            : 'Daftar Lampiran (${_attachments.length} berkas)',
+                            ? 'ENCLOSED ATTACHMENTS (${_attachments.length})'
+                            : 'DAFTAR LAMPIRAN BERKAS (${_attachments.length})',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          letterSpacing: 0.5,
+                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
                         ),
                       ),
                       TextButton.icon(
@@ -389,7 +484,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                           );
                         },
                         icon: const Icon(CupertinoIcons.plus, size: 14),
-                        label: Text(_isEnglish ? 'Add' : 'Tambah', style: const TextStyle(fontSize: 12)),
+                        label: Text(_isEnglish ? 'Add' : 'Tambah', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
@@ -398,16 +493,16 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                     decoration: BoxDecoration(
                       color: cardBg,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: borderColor),
+                      border: Border.all(color: borderColor, width: 0.8),
                     ),
                     child: ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _attachments.length,
-                      separatorBuilder: (_, __) => Divider(height: 1, color: borderColor),
+                      separatorBuilder: (_, __) => Divider(height: 1, color: borderColor, indent: 32),
                       itemBuilder: (ctx, i) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                           child: Row(
                             children: [
                               Text(
@@ -445,13 +540,14 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // 6. Transient Digital Signature
+                  // Section 4: Digital Signature
                   Text(
-                    AppStrings.digitalSignature,
+                    _isEnglish ? 'DIGITAL SIGNATURE' : 'TANDA TANGAN DIGITAL',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                      letterSpacing: 0.5,
+                      color: isDark ? AppColors.textHintDark : AppColors.textHint,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -468,7 +564,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       decoration: BoxDecoration(
                         color: cardBg,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: borderColor),
+                        border: Border.all(color: borderColor, width: 0.8),
                       ),
                       child: Row(
                         children: [
@@ -512,7 +608,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 20),
 
                   // Apply Button
                   SizedBox(
@@ -532,7 +628,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text(AppStrings.applyChanges, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      child: Text(AppStrings.applyChanges, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
                     ),
                   ),
                 ],
@@ -541,13 +637,20 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
           );
         },
       ),
-    );
+    ).whenComplete(() {
+      newAttachmentCtrl.dispose();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMonochrome = ThemeManager.isMonochrome;
+    final cardBorder = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final primaryBtnTextColor = isMonochrome
+        ? (isDark ? const Color(0xFF18181B) : Colors.white)
+        : AppColors.textOnPastel;
+    final outlinedTextColor = isDark ? Colors.white : const Color(0xFF18181B);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : const Color(0xFFF4F4F5),
@@ -570,99 +673,336 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          // Language switcher (available on both tabs)
+          // Language Switcher Pill Toggle
           Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: ActionChip(
-              avatar: Text(_isEnglish ? '🇬🇧' : '🇮🇩', style: const TextStyle(fontSize: 14)),
-              label: Text(
-                _isEnglish ? 'English' : 'Indonesia',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : const Color(0xFF18181B),
-                ),
-              ),
-              backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-              side: BorderSide.none,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              onPressed: () {
+            padding: const EdgeInsets.only(right: 14),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
                 HapticFeedback.selectionClick();
                 setState(() => _isEnglish = !_isEnglish);
               },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _isEnglish ? '🇬🇧 English' : '🇮🇩 Indonesia',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : const Color(0xFF18181B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          if (_tabController.index == 1) ...[
-            IconButton(
-              tooltip: _isEnglish ? 'Copy Plain Text' : 'Salin Teks Lengkap',
-              icon: const Icon(CupertinoIcons.doc_on_clipboard, size: 20),
-              color: isDark ? Colors.white : const Color(0xFF18181B),
-              onPressed: _copyCoverLetterText,
-            ),
-            IconButton(
-              tooltip: _isEnglish ? 'Letter Settings' : 'Pengaturan Surat',
-              icon: const Icon(CupertinoIcons.slider_horizontal_3, size: 20),
-              color: isMonochrome
-                  ? (isDark ? Colors.white : const Color(0xFF18181B))
-                  : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
-              onPressed: _showCoverLetterSettingsSheet,
-            ),
-          ],
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: isMonochrome
-              ? (isDark ? Colors.white : const Color(0xFF18181B))
-              : AppColors.pastelLime,
-          indicatorWeight: 3,
-          labelColor: isMonochrome
-              ? (isDark ? Colors.white : const Color(0xFF18181B))
-              : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
-          unselectedLabelColor: isDark ? AppColors.textHintDark : AppColors.textHint,
-          labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-          tabs: [
-            Tab(
-              icon: const Icon(CupertinoIcons.doc_text, size: 18),
-              text: AppStrings.previewCvAts,
-            ),
-            Tab(
-              icon: const Icon(CupertinoIcons.mail, size: 18),
-              text: AppStrings.coverLetterTitle,
-            ),
-          ],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          // Tab 1: CV ATS Preview
-          PdfPreview(
-            build: (format) => CvAtsPdfBuilder.buildPdf(
-              widget.resume,
-              isEnglish: _isEnglish,
+          // 1. Sleek Segmented Switcher (CV ATS vs Cover Letter)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Container(
+              height: 42,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: isMonochrome
+                      ? (isDark ? Colors.white : const Color(0xFF18181B))
+                      : AppColors.pastelLime,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                labelColor: isMonochrome
+                    ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                    : AppColors.textOnPastel,
+                unselectedLabelColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                tabs: [
+                  Tab(
+                    iconMargin: EdgeInsets.zero,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(CupertinoIcons.doc_text_fill, size: 15),
+                        const SizedBox(width: 6),
+                        Text(AppStrings.previewCvAts),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    iconMargin: EdgeInsets.zero,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(CupertinoIcons.mail_solid, size: 15),
+                        const SizedBox(width: 6),
+                        Text(AppStrings.coverLetterTitle),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            canChangeOrientation: false,
-            canChangePageFormat: false,
-            canDebug: false,
-            pdfFileName: 'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
           ),
 
-          // Tab 2: Cover Letter Preview
-          PdfPreview(
-            build: (format) => CoverLetterPdfBuilder.buildPdf(
-              widget.resume,
-              companyName: _companyNameCtrl.text.trim(),
-              companyAddress: _companyAddressCtrl.text.trim(),
-              targetPosition: _targetPositionCtrl.text.trim(),
-              signatureImageBytes: _signatureBytes,
-              letterDate: _letterDate,
-              customAttachments: _attachments,
-              isEnglish: _isEnglish,
+          // 2. Contextual Cover Letter Target Info Banner (Only when Cover Letter tab is active)
+          if (_tabController.index == 1) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF18181B) : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: cardBorder, width: 0.8),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        CupertinoIcons.building_2_fill,
+                        size: 14,
+                        color: isDark ? AppColors.pastelLime : const Color(0xFF18181B),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _companyNameCtrl.text.trim().isNotEmpty
+                                ? _companyNameCtrl.text.trim()
+                                : (_isEnglish ? 'Target Company (Not Set)' : 'Nama Perusahaan (Belum Diisi)'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            '${_targetPositionCtrl.text.trim().isNotEmpty ? _targetPositionCtrl.text.trim() : (_isEnglish ? 'Position' : 'Posisi')} • ${_letterDate.day}/${_letterDate.month}/${_letterDate.year}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        _showCoverLetterSettingsSheet();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isMonochrome
+                              ? (isDark ? Colors.white : const Color(0xFF18181B))
+                              : (isDark ? AppColors.pastelLime.withValues(alpha: 0.18) : AppColors.pastelLime.withValues(alpha: 0.4)),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isMonochrome
+                                ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.slider_horizontal_3,
+                              size: 13,
+                              color: isMonochrome
+                                  ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                  : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _isEnglish ? 'Customize' : 'Atur Surat',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: isMonochrome
+                                    ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                                    : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            canChangeOrientation: false,
-            canChangePageFormat: false,
-            canDebug: false,
-            pdfFileName: 'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
+          ],
+
+          // 3. Document View Area
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: CV ATS Preview
+                PdfPreview(
+                  build: (format) => CvAtsPdfBuilder.buildPdf(
+                    widget.resume,
+                    isEnglish: _isEnglish,
+                  ),
+                  useActions: false,
+                  canChangeOrientation: false,
+                  canChangePageFormat: false,
+                  canDebug: false,
+                  pdfFileName: 'CV_ATS_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
+                ),
+
+                // Tab 2: Cover Letter Preview
+                PdfPreview(
+                  build: (format) => CoverLetterPdfBuilder.buildPdf(
+                    widget.resume,
+                    companyName: _companyNameCtrl.text.trim(),
+                    companyAddress: _companyAddressCtrl.text.trim(),
+                    targetPosition: _targetPositionCtrl.text.trim(),
+                    signatureImageBytes: _signatureBytes,
+                    letterDate: _letterDate,
+                    customAttachments: _attachments,
+                    isEnglish: _isEnglish,
+                  ),
+                  useActions: false,
+                  canChangeOrientation: false,
+                  canChangePageFormat: false,
+                  canDebug: false,
+                  pdfFileName: 'Cover_Letter_${widget.resume.fullName.replaceAll(' ', '_')}.pdf',
+                ),
+              ],
+            ),
+          ),
+
+          // 4. Sleek Floating Bottom Action Dock
+          Container(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              10,
+              16,
+              MediaQuery.of(context).padding.bottom > 0
+                  ? MediaQuery.of(context).padding.bottom
+                  : 14,
+            ),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF18181B) : Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: cardBorder,
+                  width: 0.8,
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Copy Plain Text button with clear label
+                OutlinedButton.icon(
+                  onPressed: _copyCurrentText,
+                  icon: Icon(CupertinoIcons.doc_on_clipboard, size: 16, color: outlinedTextColor),
+                  label: Text(_isEnglish ? 'Copy Text' : 'Salin Teks'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: outlinedTextColor,
+                    iconColor: outlinedTextColor,
+                    side: BorderSide(
+                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Print button
+                IconButton(
+                  tooltip: _isEnglish ? 'Print Document' : 'Cetak Dokumen',
+                  icon: const Icon(CupertinoIcons.printer, size: 18),
+                  color: isDark ? Colors.white70 : const Color(0xFF52525B),
+                  onPressed: _printCurrentPdf,
+                  style: IconButton.styleFrom(
+                    backgroundColor: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Primary Share / Save PDF Button
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _shareOrSaveCurrentPdf,
+                    icon: Icon(
+                      CupertinoIcons.share,
+                      size: 18,
+                      color: primaryBtnTextColor,
+                    ),
+                    label: Text(
+                      _isEnglish ? 'Share / Save PDF' : 'Simpan / Bagikan PDF',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: primaryBtnTextColor,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isMonochrome
+                          ? (isDark ? Colors.white : const Color(0xFF18181B))
+                          : AppColors.pastelLime,
+                      foregroundColor: primaryBtnTextColor,
+                      iconColor: primaryBtnTextColor,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../utils/theme_manager.dart';
+import 'appliq_loading.dart';
 
 class EmptyStateView extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? customIcon;
   final String title;
   final String message;
   final Widget? action;
+  final bool useAppLogo;
+  final double logoSize;
 
   const EmptyStateView({
     super.key,
-    required this.icon,
+    this.icon,
+    this.customIcon,
     required this.title,
     required this.message,
     this.action,
+    this.useAppLogo = true,
+    this.logoSize = 88,
   });
 
   @override
@@ -38,26 +45,33 @@ class EmptyStateView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 76,
-                      height: 76,
-                      decoration: BoxDecoration(
-                        color: isMono
-                            ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
-                            : (isDark ? AppColors.darkSurfaceVariantPastel : AppColors.lightSurfaceVariantPastel),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          icon,
-                          size: 36,
+                    if (customIcon != null)
+                      customIcon!
+                    else if (useAppLogo)
+                      AppliqLoading(
+                        size: logoSize,
+                      )
+                    else if (icon != null)
+                      Container(
+                        width: 76,
+                        height: 76,
+                        decoration: BoxDecoration(
                           color: isMono
-                              ? (isDark ? AppColors.textHintDark : AppColors.textHint)
-                              : AppColors.pastelLavender,
+                              ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+                              : (isDark ? AppColors.darkSurfaceVariantPastel : AppColors.lightSurfaceVariantPastel),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            icon,
+                            size: 36,
+                            color: isMono
+                                ? (isDark ? AppColors.textHintDark : AppColors.textHint)
+                                : AppColors.pastelLavender,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 14),
                     Text(
                       title,
                       textAlign: TextAlign.center,

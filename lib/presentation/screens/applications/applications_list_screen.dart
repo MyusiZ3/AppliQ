@@ -904,8 +904,52 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         ? (isDark ? const Color(0xFF18181B) : Colors.white)
         : AppColors.textOnPastel;
 
+    final isFiltered = _searchQuery.isNotEmpty ||
+        _selectedStatusFilter != null ||
+        _onlyFavorites;
+
+    if (isFiltered) {
+      return EmptyStateView(
+        title: isEn ? 'No Applications Found' : 'Lamaran Tidak Ditemukan',
+        message: isEn
+            ? 'No applications match your search query or filter settings.'
+            : 'Tidak ada lamaran yang cocok dengan kata kunci atau filter saat ini.',
+        action: ElevatedButton.icon(
+          onPressed: () {
+            closeSearch();
+            setState(() {
+              _searchQuery = '';
+              _selectedStatusFilter = null;
+              _onlyFavorites = false;
+            });
+          },
+          icon: Icon(
+            CupertinoIcons.clear,
+            size: 16,
+            color: btnFg,
+          ),
+          label: Text(
+            isEn ? 'Reset Filters' : 'Reset Filter',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: btnFg,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: btnBg,
+            foregroundColor: btnFg,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(100)),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+          ),
+        ),
+      );
+    }
+
     return EmptyStateView(
-      icon: CupertinoIcons.tray,
       title: isEn ? 'No Applications Yet' : 'Belum Ada Lamaran',
       message: isEn
           ? 'Start tracking your job applications and interview stages neatly.'

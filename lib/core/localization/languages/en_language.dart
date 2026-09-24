@@ -702,8 +702,8 @@ class EnLanguage implements BaseLanguage {
       'content': 'AppliQ provides an integrated job application tracking tool (Job Tracker), interview scheduling, conversion rate statistics calculation, and career management records. This service is provided "as is" to assist your job hunting productivity.',
     },
     {
-      'title': '4. Intellectual Property Rights',
-      'content': 'All interface elements, graphic designs, AppliQ logos, source code, and associated documentation are protected by copyright and intellectual property laws. Reproduction, redistribution, or reverse engineering without prior written consent is strictly prohibited.',
+      'title': '4. Intellectual Property & Copyright',
+      'content': 'All user interface elements (UI/UX), illustrations, 3D cat mascot, AppliQ branding, system architecture, and source code are original works and the exclusive intellectual property of Muhamad Sidik / Arch Studio (@Imyusi_). Copying, reproducing, redistributing, reverse-engineering, or claiming ownership of this application without prior express written permission is strictly prohibited.',
     },
     {
       'title': '5. Limitation of Liability & Warranties',

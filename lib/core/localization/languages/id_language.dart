@@ -702,8 +702,8 @@ class IdLanguage implements BaseLanguage {
       'content': 'AppliQ menyediakan perangkat lunak pelacak lamaran kerja terpadu (Job Tracker), pencatatan jadwal interview, kalkulasi statistik tingkat konversi, serta penyimpanan data pendukung karir. Layanan ini disediakan sebagaimana adanya ("as is") untuk membantu produktivitas pencarian kerja Anda.',
     },
     {
-      'title': '4. Hak Kekayaan Intelektual',
-      'content': 'Seluruh elemen antarmuka, desain grafis, logo AppliQ, kode sumber, dan dokumentasi terkait dilindungi oleh hak cipta dan hukum kekayaan intelektual. Anda dilarang mereproduksi, mendistribusikan ulang, atau merekayasa balik tanpa izin tertulis.',
+      'title': '4. Hak Kekayaan Intelektual & Hak Cipta',
+      'content': 'Seluruh elemen antarmuka (UI/UX), desain grafis, maskot kucing 3D, logo AppliQ, arsitektur, dan kode sumber adalah karya orisinil serta hak cipta eksklusif milik Muhamad Sidik / Arch Studio (@Imyusi_). Dilarang keras menyalin, mereproduksi, mendistribusikan ulang, merekayasa balik (reverse-engineer), atau mengklaim kepemilikan atas aplikasi ini tanpa izin tertulis resmi dari pemilik hak cipta.',
     },
     {
       'title': '5. Batasan Tanggung Jawab & Jaminan',

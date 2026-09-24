@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_strings.dart';
@@ -7,6 +6,7 @@ import '../../../data/repositories/job_repository.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/animated_logo_mascot.dart';
 import '../../widgets/google_logo.dart';
+import '../../widgets/legal_sheets.dart';
 import '../main_nav.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -43,57 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  void _showPolicySheet(String title, String content) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    HapticFeedback.lightImpact();
-
-    UIHelper.showPremiumBottomSheet(
-      context: context,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                    color: isDark
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimary,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
-                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              content,
-              style: TextStyle(
-                fontSize: 13.5,
-                height: 1.55,
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 18),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -230,10 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => _showPolicySheet(
-                            AppStrings.termsOfService,
-                            AppStrings.termsContent,
-                          ),
+                          onTap: () => LegalSheets.showTermsOfService(context),
                           child: Text(
                             AppStrings.termsOfService,
                             style: TextStyle(
@@ -256,10 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => _showPolicySheet(
-                            AppStrings.privacyPolicy,
-                            AppStrings.privacyContent,
-                          ),
+                          onTap: () => LegalSheets.showPrivacyPolicy(context),
                           child: Text(
                             AppStrings.privacyPolicy,
                             style: TextStyle(
@@ -287,6 +230,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 10, top: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '© 2026 Arch Studio. All rights reserved.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.1,
+                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Dev by Muhamad Sidik.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.1,
+                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                ),
+              ),
+            ],
           ),
         ),
       ),

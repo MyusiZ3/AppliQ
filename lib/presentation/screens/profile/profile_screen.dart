@@ -12,6 +12,7 @@ import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/app_avatar.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../widgets/legal_sheets.dart';
 import '../auth/login_screen.dart';
 import 'career_screen.dart';
 import 'edit_profile_screen.dart';
@@ -355,250 +356,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showTermsOfService() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
-    final icons = [
-      CupertinoIcons.checkmark_shield_fill,
-      CupertinoIcons.lock_shield_fill,
-      CupertinoIcons.briefcase_fill,
-      CupertinoIcons.star_circle_fill,
-      CupertinoIcons.exclamationmark_triangle_fill,
-      CupertinoIcons.arrow_2_circlepath_circle_fill,
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: false,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.85,
-          ),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.backgroundDark : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: SafeArea(
-            top: false,
-            bottom: true,
-            child: Column(
-              children: [
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppStrings.termsModalTitle,
-                              style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.4,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 8,
-                              runSpacing: 4,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF4285F4).withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Text(
-                                    'Versi 2.0 • 2026',
-                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Color(0xFF4285F4)),
-                                  ),
-                                ),
-                                Text(
-                                  AppStrings.termsModalSubtitle,
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
-                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                    itemCount: AppStrings.termsCards.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final card = AppStrings.termsCards[index];
-                      return _buildLegalCard(
-                        title: card['title'] ?? '',
-                        content: card['content'] ?? '',
-                        icon: icons[index % icons.length],
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    LegalSheets.showTermsOfService(context);
   }
 
   void _showPrivacyPolicy() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
-    final icons = [
-      CupertinoIcons.person_badge_plus_fill,
-      CupertinoIcons.gear_alt_fill,
-      CupertinoIcons.lock_shield_fill,
-      CupertinoIcons.hand_raised_fill,
-      CupertinoIcons.trash_circle_fill,
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: false,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.85,
-          ),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.backgroundDark : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: SafeArea(
-            top: false,
-            bottom: true,
-            child: Column(
-              children: [
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppStrings.privacyModalTitle,
-                              style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.4,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 8,
-                              runSpacing: 4,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Text(
-                                    'GDPR & PDP Compliant',
-                                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Color(0xFF10B981)),
-                                  ),
-                                ),
-                                Text(
-                                  AppStrings.privacyModalSubtitle,
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
-                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                    itemCount: AppStrings.privacyCards.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final card = AppStrings.privacyCards[index];
-                      return _buildLegalCard(
-                        title: card['title'] ?? '',
-                        content: card['content'] ?? '',
-                        icon: icons[index % icons.length],
-                        cardBg: cardBg,
-                        borderColor: borderColor,
-                        isDark: isDark,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    LegalSheets.showPrivacyPolicy(context);
   }
 
   void _showFaqSheet() {
@@ -731,58 +493,276 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLegalCard({
-    required String title,
-    required String content,
-    required IconData icon,
-    required Color cardBg,
-    required Color borderColor,
-    required bool isDark,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: 0.8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: const Color(0xFF4285F4),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+  void _showAboutAppSheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
+    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final isEn = LanguageManager.isEnglish;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: false,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.85,
+          ),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.backgroundDark : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            top: false,
+            bottom: true,
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            content,
-            style: TextStyle(
-              fontSize: 13.5,
-              height: 1.55,
-              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isEn ? 'About AppliQ' : 'Tentang AppliQ',
+                              style: TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.4,
+                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              isEn ? 'Application Details & Creator' : 'Informasi Aplikasi & Kreator',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
+                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                    children: [
+                      // Mascot & Branding Header
+                      Center(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 8),
+                            const AppliqLoading(size: 92),
+                            const SizedBox(height: 12),
+                            Text(
+                              'AppliQ',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              isEn
+                                  ? 'Smart Job Application Tracker & ATS Companion'
+                                  : 'Pelacak Lamaran Kerja Pintar & Sahabat Karir ATS',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Text(
+                                'v1.0.4 (Build 1) • com.arch.appliq',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white70 : const Color(0xFF3F3F46),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Card 1: Creator & Studio Info
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: borderColor, width: 0.8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.pastelMint.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    CupertinoIcons.person_crop_circle_fill,
+                                    size: 20,
+                                    color: AppColors.pastelMint,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isEn ? 'Developer & Studio' : 'Pengembang & Studio',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Muhamad Sidik (@Imyusi_) • Arch',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? AppColors.pastelLavender : const Color(0xFF7C3AED),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              isEn
+                                  ? 'AppliQ was independently created, designed, and engineered by Muhamad Sidik under Arch Studio to provide modern job hunters with a seamless, private, and aesthetic workflow.'
+                                  : 'AppliQ dirancang, didesain, dan dikembangkan secara independen oleh Muhamad Sidik di bawah naungan Arch Studio untuk mempermudah para jobseeker mengelola lamaran kerja dan karir secara rapi dan estetis.',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                height: 1.5,
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Card 2: Intellectual Property & Copyright Notice
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: borderColor, width: 0.8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.pastelLavender.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    CupertinoIcons.shield_lefthalf_fill,
+                                    size: 20,
+                                    color: AppColors.pastelLavender,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isEn ? 'Copyright & Legal Protection' : 'Hak Cipta & Perlindungan Hukum',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '© 2026 Arch. All rights reserved.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              isEn
+                                  ? 'All intellectual property rights including source code, branding, 3D mascot assets, visual designs, and database structures are proprietary and owned exclusively by Muhamad Sidik / Arch. Unauthorized redistribution, cloning, or plagiarism is strictly prohibited.'
+                                  : 'Seluruh hak kekayaan intelektual meliputi kode sumber, aset desain 3D, maskot, arsitektur data, dan identitas merek AppliQ dilindungi hak cipta eksklusif milik Muhamad Sidik / Arch. Dilarang keras menyalin, menjiplak, atau mendistribusikan ulang tanpa izin resmi.',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                height: 1.5,
+                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
+
+
 
   Future<void> _handleSignOut() async {
     final confirmed = await showCupertinoDialog<bool>(
@@ -1117,6 +1097,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   _showPrivacyPolicy();
                                 },
                               ),
+                              _buildDivider(borderColor),
+                              _buildTile(
+                                icon: CupertinoIcons.sparkles,
+                                iconColor: AppColors.pastelLime,
+                                title: LanguageManager.isEnglish
+                                    ? 'About AppliQ'
+                                    : 'Tentang AppliQ',
+                                isDark: isDark,
+                                showChevron: true,
+                                onTap: () {
+                                  _triggerHaptic();
+                                  _showAboutAppSheet();
+                                },
+                              ),
                             ],
                           ),
                         ),
@@ -1172,6 +1166,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                         ),
+
+                        const SizedBox(height: 24),
+
+                        // App Version & Copyright Footer
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                'AppliQ v1.0.4',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.2,
+                                  color: isDark
+                                      ? AppColors.textSecondaryDark
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Crafted with ❤️ by Muhamad Sidik • Arch (@Imyusi_)',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHint,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '© 2026 Arch. All rights reserved.',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w400,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHint,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),

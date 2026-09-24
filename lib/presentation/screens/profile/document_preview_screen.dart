@@ -1067,29 +1067,36 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
             ),
             child: Row(
               children: [
-                // Copy Plain Text button with clear label
-                OutlinedButton.icon(
-                  onPressed: _copyCurrentText,
-                  icon: Icon(CupertinoIcons.doc_on_clipboard,
-                      size: 16, color: outlinedTextColor),
-                  label: Text(_isEnglish ? 'Copy Text' : 'Salin Teks'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: outlinedTextColor,
-                    iconColor: outlinedTextColor,
-                    side: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF3F3F46)
-                          : const Color(0xFFD4D4D8),
+                // 1. Copy Plain Text button (Expanded)
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _copyCurrentText,
+                    icon: Icon(CupertinoIcons.doc_on_clipboard,
+                        size: 16, color: outlinedTextColor),
+                    label: Text(
+                      _isEnglish ? 'Copy Text' : 'Salin Teks',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: outlinedTextColor,
+                      iconColor: outlinedTextColor,
+                      side: BorderSide(
+                        color: isDark
+                            ? const Color(0xFF3F3F46)
+                            : const Color(0xFFD4D4D8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
 
-                // Print button
+                // 2. Print button (Centered)
                 IconButton(
                   tooltip: _isEnglish ? 'Print Document' : 'Cetak Dokumen',
                   icon: const Icon(CupertinoIcons.printer, size: 18),
@@ -1106,7 +1113,7 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
                 ),
                 const SizedBox(width: 8),
 
-                // Primary Share / Save PDF Button
+                // 3. Primary Share PDF Button (Expanded - symmetric width)
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _shareOrSaveCurrentPdf,

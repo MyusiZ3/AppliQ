@@ -973,6 +973,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // Notifications Toggle Tile
                               _buildTile(
                                 icon: CupertinoIcons.bell_fill,
+                                iconColor: AppColors.pastelSky,
                                 title: AppStrings.notificationsSetting,
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
@@ -987,6 +988,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // Experience (CV ATS & Cover Letter)
                               _buildTile(
                                 icon: CupertinoIcons.doc_person,
+                                iconColor: AppColors.pastelLavender,
                                 title: AppStrings.menuExperienceTitle,
                                 subtitle: AppStrings.menuExperienceSubtitle,
                                 isDark: isDark,
@@ -1014,6 +1016,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                                   return _buildTile(
                                     icon: CupertinoIcons.moon,
+                                    iconColor: AppColors.pastelAmber,
                                     title: AppStrings.darkModeTitle,
                                     isDark: isDark,
                                     trailing: _buildCustomSwitch(
@@ -1035,6 +1038,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // Monochrome Mode Switch Tile
                               _buildTile(
                                 icon: CupertinoIcons.circle_righthalf_fill,
+                                iconColor: AppColors.pastelLime,
                                 title: AppStrings.monochromeTitle,
                                 isDark: isDark,
                                 trailing: _buildCustomSwitch(
@@ -1054,6 +1058,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // Language Tile
                               _buildTile(
                                 icon: CupertinoIcons.globe,
+                                iconColor: AppColors.pastelMint,
                                 title: AppStrings.languageSetting,
                                 isDark: isDark,
                                 subtitle: _selectedLanguage,
@@ -1080,6 +1085,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               _buildTile(
                                 icon: CupertinoIcons.question_circle,
+                                iconColor: AppColors.pastelLavender,
                                 title: 'FAQ',
                                 isDark: isDark,
                                 showChevron: true,
@@ -1091,6 +1097,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildDivider(borderColor),
                               _buildTile(
                                 icon: CupertinoIcons.info_circle,
+                                iconColor: AppColors.pastelSky,
                                 title: AppStrings.termsOfService,
                                 isDark: isDark,
                                 showChevron: true,
@@ -1102,6 +1109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildDivider(borderColor),
                               _buildTile(
                                 icon: CupertinoIcons.shield,
+                                iconColor: AppColors.pastelMint,
                                 title: AppStrings.privacyPolicy,
                                 isDark: isDark,
                                 showChevron: true,
@@ -1178,11 +1186,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String title,
     required bool isDark,
+    Color? iconColor,
     String? subtitle,
     Widget? trailing,
     bool showChevron = false,
     VoidCallback? onTap,
   }) {
+    final isMono = ThemeManager.isMonochrome;
+    final defaultMuted = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    Color effectiveIconColor = defaultMuted;
+    if (!isMono && iconColor != null) {
+      if (isDark) {
+        effectiveIconColor = iconColor;
+      } else {
+        final hsl = HSLColor.fromColor(iconColor);
+        effectiveIconColor = hsl.lightness > 0.5 ? hsl.withLightness(0.42).toColor() : iconColor;
+      }
+    }
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -1193,7 +1214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(
               icon,
               size: 20,
-              color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+              color: effectiveIconColor,
             ),
             const SizedBox(width: 14),
             Expanded(

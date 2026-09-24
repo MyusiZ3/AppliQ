@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
-import '../../core/utils/status_helper.dart';
 import '../../data/models/job_application.dart';
 import '../../utils/theme_manager.dart';
 import 'status_badge.dart';
@@ -29,10 +28,6 @@ class ApplicationCard extends StatelessWidget {
     final isMono = ThemeManager.isMonochrome;
     final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
     final cardBorder = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
-    final feedbackText = StatusHelper.getFeedbackText(
-      application.status,
-      application.appliedDate,
-    );
     final formattedDate = _cardDateFormat.format(application.appliedDate);
 
     return Container(
@@ -162,29 +157,25 @@ class ApplicationCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Icon(
-                            CupertinoIcons.clock,
-                            size: 13,
-                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.clock,
+                          size: 13,
+                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          formattedDate,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -0.1,
                           ),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              '$formattedDate • $feedbackText',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: -0.1,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     const SizedBox(width: 8),
                     StatusBadge(status: application.status, isCompact: true),

@@ -1360,6 +1360,11 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         );
       },
     );
+
+    stageNameController.dispose();
+    interviewerController.dispose();
+    linkController.dispose();
+    notesController.dispose();
   }
 
   Widget _buildInsetRow({

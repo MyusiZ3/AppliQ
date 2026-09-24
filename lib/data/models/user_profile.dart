@@ -29,7 +29,7 @@ class UserProfile {
       username: json['username'] as String?,
       phoneNumber: json['phone_number'] as String?,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? (DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
     );
   }

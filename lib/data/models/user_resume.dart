@@ -321,15 +321,18 @@ class UserResume {
     }
 
     final eduList = parseJsonList(json['educations'])
-        .map((e) => EducationItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .whereType<Map>()
+        .map((e) => EducationItem.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
     final expList = parseJsonList(json['experiences'])
-        .map((e) => ExperienceItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .whereType<Map>()
+        .map((e) => ExperienceItem.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
     final certList = parseJsonList(json['certifications'])
-        .map((e) => CertificationItem.fromJson(Map<String, dynamic>.from(e as Map)))
+        .whereType<Map>()
+        .map((e) => CertificationItem.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
     final techList = parseJsonList(json['technical_skills'])

@@ -30,14 +30,14 @@ class ApplicationLog {
       userId: json['user_id'] as String,
       stageName: json['stage_name'] as String? ?? '',
       scheduledAt: json['scheduled_at'] != null
-          ? DateTime.parse(json['scheduled_at'] as String)
+          ? DateTime.tryParse(json['scheduled_at'].toString())
           : null,
       interviewerName: json['interviewer_name'] as String?,
       meetingLink: json['meeting_link'] as String?,
       notes: json['notes'] as String?,
       result: json['result'] as String? ?? 'Waiting',
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? (DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
     );
   }

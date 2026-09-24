@@ -60,7 +60,7 @@ class JobApplication {
       jobUrl: json['job_url'] as String?,
       status: ApplicationStatus.fromString(json['status'] as String? ?? 'Applied'),
       appliedDate: json['applied_date'] != null
-          ? DateTime.parse(json['applied_date'] as String)
+          ? (DateTime.tryParse(json['applied_date'].toString()) ?? DateTime.now())
           : DateTime.now(),
       salaryExpectation: json['salary_expectation'] != null
           ? double.tryParse(json['salary_expectation'].toString())
@@ -75,10 +75,10 @@ class JobApplication {
           json['is_favorite'] == 'true' ||
           json['is_favorite'] == 1,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? (DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? (DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
     );
   }

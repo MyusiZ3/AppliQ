@@ -19,11 +19,11 @@ class AppTheme {
 
     final primary = isMonochrome
         ? (isDark ? Colors.white : const Color(0xFF18181B))
-        : (isDark ? AppColors.primaryIndigo : AppColors.primaryCobalt);
+        : AppColors.pastelLavender;
 
     final secondary = isMonochrome
         ? (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A))
-        : (isDark ? AppColors.cyanAccent : AppColors.primaryIndigo);
+        : AppColors.pastelLime;
 
     final background = AppColors.getBackground(isDark: isDark, isMonochrome: isMonochrome);
     final surface = AppColors.getSurface(isDark: isDark, isMonochrome: isMonochrome);
@@ -37,13 +37,13 @@ class AppTheme {
     final colorScheme = ColorScheme(
       brightness: brightness,
       primary: primary,
-      onPrimary: isMonochrome ? (isDark ? const Color(0xFF18181B) : Colors.white) : Colors.white,
+      onPrimary: isMonochrome ? (isDark ? const Color(0xFF18181B) : Colors.white) : AppColors.textOnPastel,
       secondary: secondary,
-      onSecondary: Colors.white,
+      onSecondary: AppColors.textOnPastel,
       surface: surface,
       onSurface: textPrimary,
       error: AppColors.expense,
-      onError: Colors.white,
+      onError: AppColors.textOnPastel,
     );
 
     return ThemeData(
@@ -109,7 +109,9 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
-          foregroundColor: isMonochrome && isDark ? const Color(0xFF18181B) : Colors.white,
+          foregroundColor: isMonochrome
+              ? (isDark ? const Color(0xFF18181B) : Colors.white)
+              : AppColors.textOnPastel,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(

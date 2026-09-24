@@ -146,34 +146,48 @@ class CvAtsPdfBuilder {
   }
 
   static pw.Widget _buildEducationItem(EducationItem edu, bool isEnglish) {
+    final degreeMajorBuffer = StringBuffer();
+    if (edu.degreeAndMajor.isNotEmpty) {
+      degreeMajorBuffer.write(edu.degreeAndMajor);
+    }
+    if (edu.cityCountry.isNotEmpty) {
+      final loc = edu.cityCountry.trim();
+      if (degreeMajorBuffer.isNotEmpty) {
+        if (!degreeMajorBuffer.toString().toLowerCase().contains(loc.toLowerCase())) {
+          degreeMajorBuffer.write(', $loc');
+        }
+      } else {
+        degreeMajorBuffer.write(loc);
+      }
+    }
+    final degreeMajorStr = degreeMajorBuffer.toString().trim();
+
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 8),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
+          // Line 1: Institution Name in BOLD
+          pw.Text(
+            edu.institution,
+            style: pw.TextStyle(
+              fontSize: 10.5,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+          pw.SizedBox(height: 1.5),
+
+          // Line 2: Degree/Major (Left) & Period (Right) in ITALIC
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               pw.Expanded(
-                child: pw.RichText(
-                  text: pw.TextSpan(
-                    text: edu.institution,
-                    style: pw.TextStyle(
-                      fontSize: 10,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                    children: [
-                      if (edu.degreeAndMajor.isNotEmpty)
-                        pw.TextSpan(
-                          text: '  -  ${edu.degreeAndMajor}',
-                          style: pw.TextStyle(
-                            fontSize: 9.5,
-                            fontWeight: pw.FontWeight.normal,
-                            fontStyle: pw.FontStyle.italic,
-                          ),
-                        ),
-                    ],
+                child: pw.Text(
+                  degreeMajorStr,
+                  style: pw.TextStyle(
+                    fontSize: 9.5,
+                    fontStyle: pw.FontStyle.italic,
                   ),
                 ),
               ),
@@ -181,22 +195,24 @@ class CvAtsPdfBuilder {
                 pw.Text(
                   edu.period,
                   style: pw.TextStyle(
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 9.5,
+                    fontStyle: pw.FontStyle.italic,
                   ),
                 ),
             ],
           ),
-          if (edu.gpa != null && edu.gpa!.isNotEmpty) ...[
-            pw.SizedBox(height: 2),
+
+          if (edu.gpa != null && edu.gpa!.trim().isNotEmpty) ...[
+            pw.SizedBox(height: 1.5),
             pw.Text(
-              '${isEnglish ? "GPA" : "IPK"}: ${edu.gpa}',
+              '${isEnglish ? "GPA" : "IPK"}: ${edu.gpa!.trim()}',
               style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey800),
             ),
           ],
+
           if (edu.bulletPoints.isNotEmpty) ...[
             pw.SizedBox(height: 3),
-            ...edu.bulletPoints.map((point) => _buildBulletPoint(point)),
+            ..._buildSmartContentLines(edu.bulletPoints),
           ],
         ],
       ),
@@ -204,41 +220,48 @@ class CvAtsPdfBuilder {
   }
 
   static pw.Widget _buildExperienceItem(ExperienceItem exp) {
+    final companyLocationBuffer = StringBuffer();
+    if (exp.companyOrProject.isNotEmpty) {
+      companyLocationBuffer.write(exp.companyOrProject);
+    }
+    if (exp.cityCountry.isNotEmpty) {
+      final loc = exp.cityCountry.trim();
+      if (companyLocationBuffer.isNotEmpty) {
+        if (!companyLocationBuffer.toString().toLowerCase().contains(loc.toLowerCase())) {
+          companyLocationBuffer.write(', $loc');
+        }
+      } else {
+        companyLocationBuffer.write(loc);
+      }
+    }
+    final companyLocationStr = companyLocationBuffer.toString().trim();
+
     return pw.Padding(
-      padding: const pw.EdgeInsets.only(bottom: 8),
+      padding: const pw.EdgeInsets.only(bottom: 9),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
+          // Line 1: Job Title / Position in BOLD
+          pw.Text(
+            exp.position,
+            style: pw.TextStyle(
+              fontSize: 10.5,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+          pw.SizedBox(height: 1.5),
+
+          // Line 2: Company/Location (Left) & Period (Right) in ITALIC
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               pw.Expanded(
-                child: pw.RichText(
-                  text: pw.TextSpan(
-                    text: exp.position,
-                    style: pw.TextStyle(
-                      fontSize: 10,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                    children: [
-                      if (exp.companyOrProject.isNotEmpty)
-                        pw.TextSpan(
-                          text: '  |  ${exp.companyOrProject}',
-                          style: pw.TextStyle(
-                            fontSize: 9.5,
-                            fontWeight: pw.FontWeight.normal,
-                          ),
-                        ),
-                      if (exp.cityCountry.isNotEmpty)
-                        pw.TextSpan(
-                          text: ' (${exp.cityCountry})',
-                          style: pw.TextStyle(
-                            fontSize: 9,
-                            color: PdfColors.grey700,
-                          ),
-                        ),
-                    ],
+                child: pw.Text(
+                  companyLocationStr,
+                  style: pw.TextStyle(
+                    fontSize: 9.5,
+                    fontStyle: pw.FontStyle.italic,
                   ),
                 ),
               ),
@@ -246,19 +269,71 @@ class CvAtsPdfBuilder {
                 pw.Text(
                   exp.period,
                   style: pw.TextStyle(
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 9.5,
+                    fontStyle: pw.FontStyle.italic,
                   ),
                 ),
             ],
           ),
-          if (exp.bulletPoints.isNotEmpty) ...[
-            pw.SizedBox(height: 3),
-            ...exp.bulletPoints.map((point) => _buildBulletPoint(point)),
-          ],
+          pw.SizedBox(height: 3),
+
+          // Line 3+: Bullet points, numbered lists, or descriptions
+          if (exp.bulletPoints.isNotEmpty)
+            ..._buildSmartContentLines(exp.bulletPoints),
         ],
       ),
     );
+  }
+
+  static List<pw.Widget> _buildSmartContentLines(List<String> rawLines) {
+    if (rawLines.isEmpty) return [];
+
+    final lines = rawLines.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    if (lines.isEmpty) return [];
+
+    final widgets = <pw.Widget>[];
+
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final isBullet = line.startsWith(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'));
+      final isNumberList = line.startsWith(RegExp(r'^(\d+|[a-zA-Z])[\.\)]\s+'));
+      final isColonHeader = line.endsWith(':') && line.length < 40;
+
+      if (isBullet) {
+        final cleanText = line.replaceFirst(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'), '').trim();
+        widgets.add(_buildBulletPoint(cleanText));
+      } else if (isNumberList) {
+        widgets.add(
+          pw.Padding(
+            padding: const pw.EdgeInsets.only(left: 6, bottom: 2.5),
+            child: pw.Text(
+              line,
+              style: const pw.TextStyle(fontSize: 9.5, lineSpacing: 1.25),
+              textAlign: pw.TextAlign.left,
+            ),
+          ),
+        );
+      } else if (isColonHeader) {
+        widgets.add(
+          pw.Padding(
+            padding: const pw.EdgeInsets.only(top: 2, bottom: 2),
+            child: pw.Text(
+              line,
+              style: pw.TextStyle(
+                fontSize: 9.5,
+                fontWeight: pw.FontWeight.bold,
+                lineSpacing: 1.2,
+              ),
+            ),
+          ),
+        );
+      } else {
+        // Setiap baris baru yang dibuat dengan enter otomatis dibuatkan dot
+        widgets.add(_buildBulletPoint(line));
+      }
+    }
+
+    return widgets;
   }
 
   static pw.Widget _buildCertificationItem(CertificationItem cert) {
@@ -312,9 +387,61 @@ class CvAtsPdfBuilder {
   }
 
   static pw.Widget _buildSkillsWrap(List<String> skills) {
-    return pw.Text(
-      skills.join('  •  '),
-      style: pw.TextStyle(fontSize: 9.5, lineSpacing: 1.3),
+    if (skills.isEmpty) return pw.SizedBox();
+
+    pw.Widget buildSkillLine(List<String> rowSkills) {
+      return pw.Wrap(
+        spacing: 10,
+        runSpacing: 4.5,
+        children: rowSkills.map((skill) {
+          return pw.Row(
+            mainAxisSize: pw.MainAxisSize.min,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Container(
+                width: 3,
+                height: 3,
+                margin: const pw.EdgeInsets.only(right: 4.5),
+                decoration: const pw.BoxDecoration(
+                  color: PdfColors.black,
+                  shape: pw.BoxShape.circle,
+                ),
+              ),
+              pw.Text(
+                skill.trim(),
+                style: const pw.TextStyle(fontSize: 9.5),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    if (skills.length <= 1) {
+      return buildSkillLine(skills);
+    }
+
+    // Urutan dari atas ke bawah, lalu mulai lagi dari atas ke bawah (2 row):
+    // Baris 1 (Atas): Index 0, 2, 4, 6...
+    // Baris 2 (Bawah): Index 1, 3, 5, 7...
+    final row1Skills = <String>[];
+    final row2Skills = <String>[];
+
+    for (var i = 0; i < skills.length; i++) {
+      if (i % 2 == 0) {
+        row1Skills.add(skills[i]);
+      } else {
+        row2Skills.add(skills[i]);
+      }
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        buildSkillLine(row1Skills),
+        pw.SizedBox(height: 4.5),
+        buildSkillLine(row2Skills),
+      ],
     );
   }
 
@@ -364,11 +491,92 @@ class CvAtsPdfBuilder {
             child: pw.Text(
               text,
               style: pw.TextStyle(fontSize: fontSize, lineSpacing: 1.25),
-              textAlign: pw.TextAlign.justify,
+              textAlign: pw.TextAlign.left,
             ),
           ),
         ],
       ),
     );
+  }
+
+  static String generatePlainText(UserResume resume, {required bool isEnglish}) {
+    final sb = StringBuffer();
+    sb.writeln(resume.fullName.toUpperCase());
+    final contactParts = [
+      if (resume.phoneNumber.isNotEmpty) resume.phoneNumber,
+      if (resume.email.isNotEmpty) resume.email,
+      if (resume.cityCountry.isNotEmpty) resume.cityCountry,
+      if (resume.linkedinUrl != null && resume.linkedinUrl!.isNotEmpty) resume.linkedinUrl!,
+      if (resume.portfolioUrl != null && resume.portfolioUrl!.isNotEmpty) resume.portfolioUrl!,
+    ];
+    if (contactParts.isNotEmpty) sb.writeln(contactParts.join(' | '));
+    sb.writeln();
+
+    if (resume.summary != null && resume.summary!.trim().isNotEmpty) {
+      sb.writeln(isEnglish ? 'PROFESSIONAL SUMMARY' : 'RINGKASAN PROFESIONAL');
+      sb.writeln(resume.summary!.trim());
+      sb.writeln();
+    }
+
+    if (resume.experiences.isNotEmpty) {
+      sb.writeln(isEnglish ? 'WORK EXPERIENCE' : 'PENGALAMAN KERJA');
+      for (var exp in resume.experiences) {
+        sb.writeln(exp.position);
+        final loc = exp.cityCountry.isNotEmpty ? ', ${exp.cityCountry}' : '';
+        sb.writeln('${exp.companyOrProject}$loc\t${exp.period}');
+        final lines = exp.bulletPoints.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+        for (var b in lines) {
+          final isBullet = b.startsWith(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'));
+          final isNumberList = b.startsWith(RegExp(r'^(\d+|[a-zA-Z])[\.\)]\s+'));
+          if (isBullet) {
+            final clean = b.replaceFirst(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'), '').trim();
+            sb.writeln('• $clean');
+          } else if (isNumberList) {
+            sb.writeln('  $b');
+          } else {
+            sb.writeln('• $b');
+          }
+        }
+        sb.writeln();
+      }
+    }
+
+    if (resume.educations.isNotEmpty) {
+      sb.writeln(isEnglish ? 'EDUCATION' : 'PENDIDIKAN');
+      for (var edu in resume.educations) {
+        sb.writeln(edu.institution);
+        final loc = edu.cityCountry.isNotEmpty ? ', ${edu.cityCountry}' : '';
+        sb.writeln('${edu.degreeAndMajor}$loc\t${edu.period}');
+        if (edu.gpa != null && edu.gpa!.trim().isNotEmpty) {
+          sb.writeln('${isEnglish ? "GPA" : "IPK"}: ${edu.gpa!.trim()}');
+        }
+        for (var b in edu.bulletPoints) {
+          final isBullet = b.startsWith(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'));
+          final isNumberList = b.startsWith(RegExp(r'^(\d+|[a-zA-Z])[\.\)]\s+'));
+          if (isBullet) {
+            final clean = b.replaceFirst(RegExp(r'^[•\-\*\u2022\u2023\u25E6\u2043\u2219]\s*'), '').trim();
+            sb.writeln('• $clean');
+          } else if (isNumberList) {
+            sb.writeln('  $b');
+          } else {
+            sb.writeln('• $b');
+          }
+        }
+        sb.writeln();
+      }
+    }
+
+    if (resume.technicalSkills.isNotEmpty || resume.softSkills.isNotEmpty) {
+      sb.writeln(isEnglish ? 'SKILLS' : 'KEAHLIAN');
+      if (resume.technicalSkills.isNotEmpty) {
+        sb.writeln('${isEnglish ? "Technical Skills: " : "Keahlian Teknis: "}${resume.technicalSkills.join(", ")}');
+      }
+      if (resume.softSkills.isNotEmpty) {
+        sb.writeln('${isEnglish ? "Soft Skills: " : "Soft Skills: "}${resume.softSkills.join(", ")}');
+      }
+      sb.writeln();
+    }
+
+    return sb.toString().trim();
   }
 }

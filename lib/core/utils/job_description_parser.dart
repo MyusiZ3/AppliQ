@@ -204,21 +204,25 @@ class JobDescriptionParser {
   }
 
   static double? _extractSalary(String text) {
-    // 1. Match range like "Rp 8.000.000 - 15.000.000" or "IDR 10 - 15 jt"
+    // 1. Match range like "Rp 8.000.000,00 - 15.000.000,00" or "IDR 10 - 15 jt" or "20k - 30k" or "Rp 20.000,- s/d Rp 30.000,-"
     final rangeRegex = RegExp(
-      r'(?:rp|idr|gaji|salary)\.?\s*([0-9\.,]+)\s*(?:jt|juta|million|mio)?\s*(?:-|–|sampai|to|s/d)\s*(?:rp|idr)?\.?\s*([0-9\.,]+)\s*(jt|juta|million|mio)?',
+      r'(?:rp|idr|gaji|salary)?\.?\s*([0-9\.,]+(?:,-|,\s*-)?)\s*(jt|juta|million|mio|k|rb|ribu|thousand)?\s*(?:-|–|sampai|to|s/d)\s*(?:rp|idr)?\.?\s*([0-9\.,]+(?:,-|,\s*-)?)\s*(jt|juta|million|mio|k|rb|ribu|thousand)?',
       caseSensitive: false,
     );
-    final rangeMatch = rangeRegex.firstMatch(text);
-    if (rangeMatch != null) {
-      final rawNum = rangeMatch.group(1);
-      final suffix = rangeMatch.group(3) ?? rangeMatch.group(0);
-      return _parseNumberToRupiah(rawNum, suffix);
+    for (final match in rangeRegex.allMatches(text)) {
+      final fullMatch = match.group(0) ?? '';
+      final hasIndicator = RegExp(r'rp|idr|gaji|salary|jt|juta|mio|k|rb|ribu', caseSensitive: false).hasMatch(fullMatch);
+      if (hasIndicator) {
+        final rawNum = match.group(1);
+        final suffix = match.group(4) ?? match.group(2) ?? fullMatch;
+        final res = _parseNumberToRupiah(rawNum, suffix);
+        if (res != null && res > 0) return res;
+      }
     }
 
-    // 2. Match single salary like "Rp 12.000.000" or "15 jt"
+    // 2. Match single salary like "Rp 20.000,00" or "Rp 12.000.000,-" or "15 jt" or "20k"
     final singleRegex = RegExp(
-      r'(?:rp|idr|gaji|salary)\.?\s*([0-9\.,]+)\s*(jt|juta|million|mio)?',
+      r'(?:rp|idr|gaji|salary)\.?\s*([0-9\.,]+(?:,-|,\s*-)?)\s*(jt|juta|million|mio|k|rb|ribu|thousand)?',
       caseSensitive: false,
     );
     final singleMatch = singleRegex.firstMatch(text);
@@ -228,19 +232,94 @@ class JobDescriptionParser {
       return _parseNumberToRupiah(rawNum, suffix);
     }
 
+    // 3. Fallback: match standalone "20k" or "15jt" or "15 juta" or "20 rb"
+    final standaloneRegex = RegExp(
+      r'\b([0-9\.,]+)\s*(jt|juta|million|mio|k|rb|ribu|thousand)\b',
+      caseSensitive: false,
+    );
+    final standaloneMatch = standaloneRegex.firstMatch(text);
+    if (standaloneMatch != null) {
+      final rawNum = standaloneMatch.group(1);
+      final suffix = standaloneMatch.group(2);
+      return _parseNumberToRupiah(rawNum, suffix);
+    }
+
     return null;
   }
 
   static double? _parseNumberToRupiah(String? rawNum, String? suffix) {
     if (rawNum == null) return null;
-    final clean = rawNum.replaceAll(RegExp(r'[^\d]'), '');
-    if (clean.isEmpty) return null;
+    var s = rawNum.trim();
+    if (s.isEmpty) return null;
 
-    double val = double.tryParse(clean) ?? 0;
-    if (val <= 0) return null;
+    // Strip trailing ',-' or ', -' or '.-'
+    s = s.replaceAll(RegExp(r'[\.,]\s*-$'), '');
 
+    double? baseValue;
+
+    // Detect and handle decimal places (e.g. 20.000,00 or 20,000.00 or 8,5 or 8.5)
+    final hasComma = s.contains(',');
+    final hasDot = s.contains('.');
+
+    if (hasComma && hasDot) {
+      final lastComma = s.lastIndexOf(',');
+      final lastDot = s.lastIndexOf('.');
+      if (lastComma > lastDot) {
+        // Indonesian format: 20.000,00 or 1.500.000,50
+        final afterComma = s.substring(lastComma + 1);
+        if (afterComma.length <= 2 && RegExp(r'^\d+$').hasMatch(afterComma)) {
+          final intPart = s.substring(0, lastComma).replaceAll('.', '');
+          baseValue = double.tryParse('$intPart.$afterComma');
+        } else {
+          final clean = s.replaceAll(RegExp(r'[^\d]'), '');
+          baseValue = double.tryParse(clean);
+        }
+      } else {
+        // US format: 20,000.00 or 1,500,000.50
+        final afterDot = s.substring(lastDot + 1);
+        if (afterDot.length <= 2 && RegExp(r'^\d+$').hasMatch(afterDot)) {
+          final intPart = s.substring(0, lastDot).replaceAll(',', '');
+          baseValue = double.tryParse('$intPart.$afterDot');
+        } else {
+          final clean = s.replaceAll(RegExp(r'[^\d]'), '');
+          baseValue = double.tryParse(clean);
+        }
+      }
+    } else if (hasComma) {
+      final parts = s.split(',');
+      // If single comma followed by 1 or 2 digits (e.g. "20,00" or "8,5"):
+      if (parts.length == 2 && parts[1].length <= 2 && RegExp(r'^\d+$').hasMatch(parts[1])) {
+        baseValue = double.tryParse('${parts[0]}.${parts[1]}');
+      } else {
+        // Thousands separator like "20,000"
+        final clean = s.replaceAll(',', '');
+        baseValue = double.tryParse(clean);
+      }
+    } else if (hasDot) {
+      final parts = s.split('.');
+      // If single dot followed by 1 or 2 digits (e.g. "8.5" or "20.00"):
+      if (parts.length == 2 && parts[1].length <= 2 && RegExp(r'^\d+$').hasMatch(parts[1])) {
+        baseValue = double.tryParse('${parts[0]}.${parts[1]}');
+      } else {
+        // Thousands separator like "20.000" or "20.000.000"
+        final clean = s.replaceAll('.', '');
+        baseValue = double.tryParse(clean);
+      }
+    } else {
+      final clean = s.replaceAll(RegExp(r'[^\d]'), '');
+      baseValue = double.tryParse(clean);
+    }
+
+    if (baseValue == null || baseValue <= 0) return null;
+
+    double val = baseValue;
     final sLower = suffix?.toLowerCase() ?? '';
-    if (sLower.contains('jt') || sLower.contains('juta') || sLower.contains('million') || sLower.contains('mio')) {
+
+    if (sLower.contains('k') || sLower.contains('rb') || sLower.contains('ribu') || sLower.contains('thousand')) {
+      if (val < 100000) {
+        val = val * 1000;
+      }
+    } else if (sLower.contains('jt') || sLower.contains('juta') || sLower.contains('million') || sLower.contains('mio')) {
       if (val < 1000) {
         val = val * 1000000;
       }
@@ -248,6 +327,7 @@ class JobDescriptionParser {
       // e.g. "Gaji 12 - 15" -> likely 12jt
       val = val * 1000000;
     }
+
     return val;
   }
 

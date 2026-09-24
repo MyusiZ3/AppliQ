@@ -71,7 +71,9 @@ class JobApplication {
       notes: json['notes'] as String?,
       cvFileUrl: json['cv_file_url'] as String?,
       cvFileName: json['cv_file_name'] as String?,
-      isFavorite: json['is_favorite'] as bool? ?? false,
+      isFavorite: json['is_favorite'] == true ||
+          json['is_favorite'] == 'true' ||
+          json['is_favorite'] == 1,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),

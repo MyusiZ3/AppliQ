@@ -75,32 +75,44 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
     }
   }
 
+  final Set<String> _togglingIds = {};
+
   Future<void> _toggleFavorite(JobApplication app) async {
+    if (_togglingIds.contains(app.id)) return;
+    _togglingIds.add(app.id);
+
+    HapticFeedback.selectionClick();
+    final index = _applications.indexWhere((a) => a.id == app.id);
+    final currentFav =
+        index != -1 ? _applications[index].isFavorite : app.isFavorite;
+    final newFav = !currentFav;
+
+    setState(() {
+      if (index != -1) {
+        _applications[index] =
+            _applications[index].copyWith(isFavorite: newFav);
+      }
+    });
+
     try {
       await widget.repository.toggleFavorite(app.id);
     } catch (e) {
-      if (mounted) UIHelper.handleError(context, e);
+      if (mounted) {
+        setState(() {
+          final freshIndex = _applications.indexWhere((a) => a.id == app.id);
+          if (freshIndex != -1) {
+            _applications[freshIndex] =
+                _applications[freshIndex].copyWith(isFavorite: currentFav);
+          }
+        });
+        UIHelper.handleError(context, e);
+      }
+    } finally {
+      _togglingIds.remove(app.id);
     }
   }
 
-  String _lastFilterQuery = '';
-  ApplicationStatus? _lastFilterStatus;
-  bool _lastFilterOnlyFav = false;
-  String _lastFilterSortBy = '';
-  int _lastFilterAppHash = 0;
-  List<JobApplication> _cachedFilteredApps = [];
-
   List<JobApplication> get _filteredApplications {
-    final currentHash = Object.hash(_applications.length, _applications.isNotEmpty ? _applications.first.id : 0);
-    if (_cachedFilteredApps.isNotEmpty &&
-        _lastFilterQuery == _searchQuery &&
-        _lastFilterStatus == _selectedStatusFilter &&
-        _lastFilterOnlyFav == _onlyFavorites &&
-        _lastFilterSortBy == _sortBy &&
-        _lastFilterAppHash == currentHash) {
-      return _cachedFilteredApps;
-    }
-
     final query = _searchQuery.trim().toLowerCase();
     var list = _applications.where((app) {
       final matchesSearch = query.isEmpty ||
@@ -131,13 +143,6 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
       list.sort((a, b) =>
           a.companyName.toLowerCase().compareTo(b.companyName.toLowerCase()));
     }
-
-    _lastFilterQuery = _searchQuery;
-    _lastFilterStatus = _selectedStatusFilter;
-    _lastFilterOnlyFav = _onlyFavorites;
-    _lastFilterSortBy = _sortBy;
-    _lastFilterAppHash = currentHash;
-    _cachedFilteredApps = list;
 
     return list;
   }
@@ -423,6 +428,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                                 itemBuilder: (context, index) {
                                   final app = filtered[index];
                                   return ApplicationCard(
+                                    key: ValueKey('${app.id}_${app.isFavorite}'),
                                     application: app,
                                     onTap: () async {
                                       closeSearch();
@@ -814,6 +820,7 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                                     ),
                                   ),
                                   child: ApplicationCard(
+                                    key: ValueKey('kanban_${app.id}_${app.isFavorite}'),
                                     application: app,
                                     onTap: () async {
                                       closeSearch();

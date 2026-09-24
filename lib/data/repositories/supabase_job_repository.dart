@@ -303,33 +303,53 @@ class SupabaseJobRepository implements JobRepository {
     notifyDataChanged();
   }
 
+  final Set<String> _inFlightFavoriteToggles = {};
+
   @override
   Future<void> toggleFavorite(String id) async {
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return;
+    if (_inFlightFavoriteToggles.contains(id)) return;
+    _inFlightFavoriteToggles.add(id);
 
-    final app = await _supabase
-        .from('job_applications')
-        .select('is_favorite')
-        .eq('id', id)
-        .eq('user_id', userId)
-        .single();
-    final current = app['is_favorite'] as bool? ?? false;
-    await _supabase
-        .from('job_applications')
-        .update({'is_favorite': !current})
-        .eq('id', id)
-        .eq('user_id', userId);
+    try {
+      // 1. Fetch current status directly from Supabase
+      final currentRes = await _supabase
+          .from('job_applications')
+          .select('is_favorite')
+          .eq('id', id)
+          .maybeSingle();
 
-    // Update in local cache
-    if (_cachedApplications != null) {
-      final index = _cachedApplications!.indexWhere((a) => a.id == id);
-      if (index != -1) {
-        final existing = _cachedApplications![index];
-        _cachedApplications![index] = existing.copyWith(isFavorite: !current);
+      final bool currentFav = currentRes?['is_favorite'] == true ||
+          currentRes?['is_favorite'] == 'true' ||
+          currentRes?['is_favorite'] == 1;
+      final bool newFavorite = !currentFav;
+
+      // 2. Persist directly to Supabase
+      await _supabase
+          .from('job_applications')
+          .update({
+            'is_favorite': newFavorite,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', id);
+
+      // 3. Update memory cache if present
+      if (_cachedApplications != null) {
+        final freshIndex = _cachedApplications!.indexWhere((a) => a.id == id);
+        if (freshIndex != -1) {
+          final existing = _cachedApplications![freshIndex];
+          _cachedApplications![freshIndex] = existing.copyWith(
+            isFavorite: newFavorite,
+            updatedAt: DateTime.now(),
+          );
+        }
       }
+      notifyDataChanged();
+    } catch (e) {
+      debugPrint('Error in toggleFavorite: $e');
+      rethrow;
+    } finally {
+      _inFlightFavoriteToggles.remove(id);
     }
-    notifyDataChanged();
   }
 
   @override

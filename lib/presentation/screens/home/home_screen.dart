@@ -188,12 +188,40 @@ class _HomeScreenState extends State<HomeScreen> {
         .then((_) => _loadDashboardData(isSilent: true));
   }
 
+  final Set<String> _togglingIds = {};
+
   Future<void> _toggleFavorite(JobApplication app) async {
+    if (_togglingIds.contains(app.id)) return;
+    _togglingIds.add(app.id);
+
     HapticFeedback.selectionClick();
+    final index = _applications.indexWhere((a) => a.id == app.id);
+    final currentFav =
+        index != -1 ? _applications[index].isFavorite : app.isFavorite;
+    final newFav = !currentFav;
+
+    setState(() {
+      if (index != -1) {
+        _applications[index] =
+            _applications[index].copyWith(isFavorite: newFav);
+      }
+    });
+
     try {
       await widget.repository.toggleFavorite(app.id);
     } catch (e) {
-      if (mounted) UIHelper.handleError(context, e);
+      if (mounted) {
+        setState(() {
+          final freshIndex = _applications.indexWhere((a) => a.id == app.id);
+          if (freshIndex != -1) {
+            _applications[freshIndex] =
+                _applications[freshIndex].copyWith(isFavorite: currentFav);
+          }
+        });
+        UIHelper.handleError(context, e);
+      }
+    } finally {
+      _togglingIds.remove(app.id);
     }
   }
 
@@ -1211,186 +1239,199 @@ class _HomeScreenState extends State<HomeScreen> {
         app.companyName.isNotEmpty ? app.companyName[0].toUpperCase() : 'J';
 
     return RepaintBoundary(
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context)
-              .push(
-                MaterialPageRoute(
-                  builder: (_) => ApplicationDetailScreen(
-                    applicationId: app.id,
-                    repository: widget.repository,
-                  ),
-                ),
-              )
-              .then((_) => _loadDashboardData(isSilent: true));
-        },
-        child: Container(
-          width: 215,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? AppColors.borderDark : AppColors.borderLight,
-              width: 0.8,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+      child: Container(
+        width: 215,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            width: 0.8,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Top Row: Logo, Title & Favorite
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF27272A)
-                          : const Color(0xFFF4F4F5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(
-                        companyInitial,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color:
-                              isDark ? Colors.white : const Color(0xFF18181B),
-                        ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context)
+                  .push(
+                    MaterialPageRoute(
+                      builder: (_) => ApplicationDetailScreen(
+                        applicationId: app.id,
+                        repository: widget.repository,
                       ),
                     ),
+                  )
+                  .then((_) => _loadDashboardData(isSilent: true));
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top Row: Logo, Title & Favorite IconButton
+                  Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF27272A)
+                              : const Color(0xFFF4F4F5),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            companyInitial,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color:
+                                  isDark ? Colors.white : const Color(0xFF18181B),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              app.positionTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.3,
+                                color: isDark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              app.companyName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        iconSize: 20,
+                        splashRadius: 20,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints:
+                            const BoxConstraints(minWidth: 36, minHeight: 36),
+                        icon: Icon(
+                          app.isFavorite
+                              ? CupertinoIcons.bookmark_fill
+                              : CupertinoIcons.bookmark,
+                          size: 19,
+                          color: app.isFavorite
+                              ? AppColors.warning
+                              : (isDark
+                                  ? AppColors.textHintDark
+                                  : AppColors.textHint),
+                        ),
+                        onPressed: () => _toggleFavorite(app),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          app.positionTitle,
+
+                  // Chips / Tags (WorkSystem & Status)
+                  Wrap(
+                    spacing: 5,
+                    runSpacing: 4,
+                    children: [
+                      _buildTag(
+                          AppStrings.localizedWorkSystem(app.workSystem), isDark),
+                      _buildTag(
+                          AppStrings.localizedJobPortal(app.jobPortal), isDark),
+                      _buildStatusTag(AppStrings.localizedStatus(app.status),
+                          StatusHelper.getStatusColor(app.status), isDark),
+                    ],
+                  ),
+
+                  // Bottom Row: Location & Salary
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        flex: 1,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.location_solid,
+                              size: 12,
+                              color: isDark
+                                  ? AppColors.textHintDark
+                                  : AppColors.textHint,
+                            ),
+                            const SizedBox(width: 3),
+                            Flexible(
+                              child: Text(
+                                app.location?.isNotEmpty == true
+                                    ? (app.location!.trim().length > 14
+                                        ? '${app.location!.trim().substring(0, 14)}...'
+                                        : app.location!.trim())
+                                    : 'Indonesia',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHint,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        flex: 1,
+                        child: Text(
+                          _formatSalary(app.salaryOffered ?? app.salaryExpectation),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
                           style: TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.3,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
                             color: isDark
                                 ? AppColors.textPrimaryDark
                                 : AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 1),
-                        Text(
-                          app.companyName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark
-                                ? AppColors.textSecondaryDark
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => _toggleFavorite(app),
-                    child: Icon(
-                      app.isFavorite
-                          ? CupertinoIcons.heart_fill
-                          : CupertinoIcons.heart,
-                      size: 18,
-                      color: app.isFavorite
-                          ? AppColors.expense
-                          : (isDark
-                              ? AppColors.textHintDark
-                              : AppColors.textHint),
-                    ),
-                  ),
-                ],
-              ),
-
-              // Chips / Tags (WorkSystem & Status)
-              Wrap(
-                spacing: 5,
-                runSpacing: 4,
-                children: [
-                  _buildTag(
-                      AppStrings.localizedWorkSystem(app.workSystem), isDark),
-                  _buildTag(
-                      AppStrings.localizedJobPortal(app.jobPortal), isDark),
-                  _buildStatusTag(AppStrings.localizedStatus(app.status),
-                      StatusHelper.getStatusColor(app.status), isDark),
-                ],
-              ),
-
-              // Bottom Row: Location & Salary
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CupertinoIcons.location_solid,
-                          size: 12,
-                          color: isDark
-                              ? AppColors.textHintDark
-                              : AppColors.textHint,
-                        ),
-                        const SizedBox(width: 3),
-                        Flexible(
-                          child: Text(
-                            app.location?.isNotEmpty == true
-                                ? app.location!
-                                : 'Indonesia',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isDark
-                                  ? AppColors.textHintDark
-                                  : AppColors.textHint,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    flex: 1,
-                    child: Text(
-                      _formatSalary(app.salaryOffered ?? app.salaryExpectation),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                        color: isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimary,
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),

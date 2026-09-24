@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
@@ -30,17 +31,16 @@ class ApplicationCard extends StatelessWidget {
     );
     final formattedDate = _cardDateFormat.format(application.appliedDate);
 
-    return RepaintBoundary(
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isDark ? AppColors.borderDark : AppColors.borderLight,
-            width: 0.8,
-          ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          width: 0.8,
         ),
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -51,7 +51,7 @@ class ApplicationCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header: Position & Bookmark
+                // Header: Position Title & Company Name with Bookmark IconButton
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -85,7 +85,13 @@ class ApplicationCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
                     IconButton(
+                      iconSize: 22,
+                      splashRadius: 24,
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                       icon: Icon(
                         application.isFavorite
                             ? CupertinoIcons.bookmark_fill
@@ -93,39 +99,48 @@ class ApplicationCard extends StatelessWidget {
                         color: application.isFavorite
                             ? AppColors.warning
                             : (isDark ? AppColors.textHintDark : AppColors.textHint),
-                        size: 20,
                       ),
-                      onPressed: onToggleFavorite,
-                      constraints: const BoxConstraints(),
-                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        onToggleFavorite();
+                      },
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 12),
 
-                // Tags
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+                // Tags (Location, Work System, Portal) - strictly 1 line so card heights stay identical!
+                Row(
                   children: [
-                    if (application.location != null && application.location!.isNotEmpty)
-                      _buildMetaTag(
-                        CupertinoIcons.location_solid,
-                        application.location!,
-                        isDark,
-                        maxWidth: 150,
+                    if (application.location != null && application.location!.trim().isNotEmpty) ...[
+                      Flexible(
+                        flex: 3,
+                        child: _buildMetaTag(
+                          CupertinoIcons.location_solid,
+                          _truncate(application.location!, 14),
+                          isDark,
+                          maxWidth: 100,
+                        ),
                       ),
+                      const SizedBox(width: 6),
+                    ],
                     _buildMetaTag(
                       CupertinoIcons.briefcase,
                       AppStrings.localizedWorkSystem(application.workSystem),
                       isDark,
                     ),
-                    _buildMetaTag(
-                      CupertinoIcons.globe,
-                      application.jobPortalCustom ?? AppStrings.localizedJobPortal(application.jobPortal),
-                      isDark,
-                      maxWidth: 130,
+                    const SizedBox(width: 6),
+                    Flexible(
+                      flex: 3,
+                      child: _buildMetaTag(
+                        CupertinoIcons.globe,
+                        _truncate(
+                          application.jobPortalCustom ?? AppStrings.localizedJobPortal(application.jobPortal),
+                          12,
+                        ),
+                        isDark,
+                        maxWidth: 90,
+                      ),
                     ),
                   ],
                 ),
@@ -176,9 +191,14 @@ class ApplicationCard extends StatelessWidget {
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
+  static String _truncate(String text, int maxLength) {
+    final trimmed = text.trim();
+    if (trimmed.length <= maxLength) return trimmed;
+    return '${trimmed.substring(0, maxLength)}...';
+  }
 
   Widget _buildMetaTag(IconData icon, String label, bool isDark, {double? maxWidth}) {
     Widget content = Row(

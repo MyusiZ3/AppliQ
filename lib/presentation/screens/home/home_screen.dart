@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../../core/utils/status_helper.dart';
+import '../../widgets/status_badge.dart';
 import '../../../data/models/application_log.dart';
 import '../../../data/models/job_application.dart';
 import '../../../data/models/user_profile.dart';
@@ -432,9 +432,18 @@ class _HomeScreenState extends State<HomeScreen> {
     required bool isDark,
     bool isPrimary = false,
   }) {
+    final isMono = ThemeManager.isMonochrome;
     final circleBg = isPrimary
-        ? (isDark ? const Color(0xFF6366F1) : const Color(0xFF4F46E5))
+        ? (isMono
+            ? (isDark ? Colors.white : const Color(0xFF18181B))
+            : AppColors.pastelLime)
         : (isDark ? const Color(0xFF2C2C30) : const Color(0xFF27272A));
+
+    final iconColor = isPrimary
+        ? (isMono
+            ? (isDark ? const Color(0xFF18181B) : Colors.white)
+            : AppColors.textOnPastel)
+        : Colors.white;
 
     return GestureDetector(
       onTap: onTap,
@@ -452,7 +461,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Center(
               child: Icon(
                 icon,
-                color: Colors.white,
+                color: iconColor,
                 size: 20,
               ),
             ),
@@ -968,10 +977,10 @@ class _HomeScreenState extends State<HomeScreen> {
       int total, int interview, int offering, bool isDark, bool isMono) {
     final heroBg = isMono
         ? (isDark ? const Color(0xFF1E1E22) : const Color(0xFF18181B))
-        : (isDark ? const Color(0xFF4F46E5) : const Color(0xFF4338CA));
+        : (isDark ? AppColors.darkSurfacePastel : const Color(0xFF17161B));
     final heroBorder = isMono
         ? (isDark ? const Color(0xFF323238) : const Color(0x1F000000))
-        : Colors.white.withValues(alpha: 0.18);
+        : (isDark ? AppColors.darkBorderPastel : const Color(0x22FFFFFF));
 
     return NotchedCard(
       showTopNotch: true,
@@ -1035,6 +1044,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: _buildBannerStat(
                   icon: CupertinoIcons.briefcase_fill,
+                  iconColor: isMono ? null : AppColors.pastelLime,
                   value: '$total',
                   label: AppStrings.appliedLabel,
                 ),
@@ -1048,6 +1058,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: _buildBannerStat(
                   icon: CupertinoIcons.videocam_fill,
+                  iconColor: isMono ? null : AppColors.pastelLavender,
                   value: '$interview',
                   label: AppStrings.statInterview,
                 ),
@@ -1061,6 +1072,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: _buildBannerStat(
                   icon: CupertinoIcons.gift_fill,
+                  iconColor: isMono ? null : AppColors.pastelMint,
                   value: '$offering',
                   label: AppStrings.statOffering,
                 ),
@@ -1076,6 +1088,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required String value,
     required String label,
+    Color? iconColor,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -1084,7 +1097,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 16),
+              Icon(icon, color: iconColor ?? Colors.white.withValues(alpha: 0.85), size: 16),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
@@ -1242,10 +1255,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         width: 215,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surface,
+          color: AppColors.getSurface(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            color: AppColors.getBorder(isDark: isDark, isMonochrome: ThemeManager.isMonochrome),
             width: 0.8,
           ),
           boxShadow: [
@@ -1348,7 +1361,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               : CupertinoIcons.bookmark,
                           size: 19,
                           color: app.isFavorite
-                              ? AppColors.warning
+                              ? (ThemeManager.isMonochrome
+                                  ? AppColors.warning
+                                  : AppColors.pastelAmber)
                               : (isDark
                                   ? AppColors.textHintDark
                                   : AppColors.textHint),
@@ -1362,13 +1377,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   Wrap(
                     spacing: 5,
                     runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       _buildTag(
                           AppStrings.localizedWorkSystem(app.workSystem), isDark),
                       _buildTag(
                           AppStrings.localizedJobPortal(app.jobPortal), isDark),
-                      _buildStatusTag(AppStrings.localizedStatus(app.status),
-                          StatusHelper.getStatusColor(app.status), isDark),
+                      StatusBadge(status: app.status, isCompact: true),
                     ],
                   ),
 
@@ -1456,23 +1471,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatusTag(String text, Color color, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 10.5,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
-    );
-  }
 
   Widget _buildCompaniesList(bool isDark) {
     final Map<String, List<JobApplication>> companyApps = {};

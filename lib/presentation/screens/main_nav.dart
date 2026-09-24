@@ -7,7 +7,9 @@ import 'dashboard/dashboard_screen.dart';
 import 'home/home_screen.dart';
 import 'schedule/schedule_screen.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
+import '../../utils/theme_manager.dart';
 
 class MainNav extends StatefulWidget {
   final JobRepository repository;
@@ -172,67 +174,78 @@ class _MainNavState extends State<MainNav> {
     final item = _navItems[index];
     final isActive = _currentIndex == index;
 
-    final activeBg = const Color(0xFFFFFFFF);
-    final inactiveBg = const Color(0xFF27272A);
+    return ValueListenableBuilder<AccentThemeMode>(
+      valueListenable: ThemeManager.accentNotifier,
+      builder: (context, accentMode, _) {
+        final isMono = accentMode == AccentThemeMode.monochrome;
 
-    final activeFg = const Color(0xFF18181B);
-    final inactiveFg = const Color(0xFFA1A1AA);
+        final activeBg = isMono ? const Color(0xFFFFFFFF) : AppColors.pastelLime;
+        final inactiveBg = isMono
+            ? const Color(0xFF27272A)
+            : (isDark ? const Color(0xFF201E27) : const Color(0xFF27272A));
 
-    final iconColor = isActive ? activeFg : inactiveFg;
+        final activeFg = isMono ? const Color(0xFF18181B) : AppColors.textOnPastel;
+        final inactiveFg = isMono
+            ? const Color(0xFFA1A1AA)
+            : (isDark ? AppColors.textHintDark : const Color(0xFFA1A1AA));
 
-    final iconWidget = Icon(
-      item.icon,
-      size: 20,
-      color: iconColor,
-    );
+        final iconColor = isActive ? activeFg : inactiveFg;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => _onTabTapped(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        width: isActive ? 104 : 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: isActive ? activeBg : inactiveBg,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              iconWidget,
-              if (isActive) ...[
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    _getNavLabel(index),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: activeFg,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.3,
+        final iconWidget = Icon(
+          item.icon,
+          size: 20,
+          color: iconColor,
+        );
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _onTabTapped(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            width: isActive ? 104 : 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: isActive ? activeBg : inactiveBg,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  iconWidget,
+                  if (isActive) ...[
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        _getNavLabel(index),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: activeFg,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            ],
+                  ],
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

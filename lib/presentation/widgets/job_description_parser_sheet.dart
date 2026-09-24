@@ -119,7 +119,9 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMonochrome = ThemeManager.isMonochrome;
-    final primaryColor = AppColors.getPrimary(isDark: isDark, isMonochrome: isMonochrome);
+    final primaryColor = isMonochrome
+        ? (isDark ? Colors.white : const Color(0xFF18181B))
+        : AppColors.pastelLime;
     final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMonochrome);
     final cardBorder = AppColors.getBorder(isDark: isDark, isMonochrome: isMonochrome);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -241,10 +243,18 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                       children: [
                         OutlinedButton.icon(
                           onPressed: _pasteFromClipboard,
-                          icon: const Icon(CupertinoIcons.doc_on_clipboard, size: 14),
+                          icon: Icon(
+                            CupertinoIcons.doc_on_clipboard,
+                            size: 14,
+                            color: isDark ? Colors.white : const Color(0xFF18181B),
+                          ),
                           label: Text(
                             AppStrings.smartParserPasteClipboard,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : const Color(0xFF18181B),
+                            ),
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: isDark ? Colors.white : const Color(0xFF18181B),
@@ -280,11 +290,12 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                     Container(
                       decoration: BoxDecoration(
                         color: isDark
-                            ? (isMonochrome ? const Color(0xFF27272A).withValues(alpha: 0.6) : AppColors.darkSurfaceVariantPastel)
-                            : (isMonochrome ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel),
+                            ? (isMonochrome ? const Color(0xFF27272A).withValues(alpha: 0.6) : const Color(0xFF1A191F))
+                            : const Color(0xFFF4F4F5),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: cardBorder,
+                          color: isDark ? const Color(0xFF33323B) : const Color(0xFFE4E4E7),
+                          width: 0.8,
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -317,7 +328,7 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                           Icon(
                             CupertinoIcons.text_badge_checkmark,
                             size: 16,
-                            color: primaryColor,
+                            color: isDark ? AppColors.pastelLime : const Color(0xFF18181B),
                           ),
                           const SizedBox(width: 7),
                           Text(
@@ -333,8 +344,8 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? (isMonochrome ? const Color(0xFF3F3F46) : AppColors.primaryIndigo.withValues(alpha: 0.2))
-                                  : (isMonochrome ? const Color(0xFFE4E4E7) : AppColors.indigoSubtle),
+                                  ? (isMonochrome ? const Color(0xFF3F3F46) : AppColors.pastelLime.withValues(alpha: 0.18))
+                                  : (isMonochrome ? const Color(0xFFE4E4E7) : AppColors.pastelLime.withValues(alpha: 0.3)),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -342,7 +353,7 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: primaryColor,
+                                color: isDark ? AppColors.pastelLime : const Color(0xFF18181B),
                               ),
                             ),
                           ),
@@ -428,18 +439,8 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
             // Bottom Action Button
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
-              child: ElevatedButton.icon(
+              child: ElevatedButton(
                 onPressed: _applyToForm,
-                icon: const Icon(CupertinoIcons.arrow_down_doc_fill, size: 16),
-                label: Text(
-                  _textController.text.isEmpty
-                      ? AppStrings.smartParserButton
-                      : AppStrings.smartParserApplyToForm,
-                  style: const TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: isMonochrome
@@ -449,6 +450,15 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  _textController.text.isEmpty
+                      ? AppStrings.smartParserButton
+                      : AppStrings.smartParserApplyToForm,
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -467,14 +477,14 @@ class _JobDescriptionParserSheetState extends State<JobDescriptionParserSheet> {
     required Color primaryColor,
   }) {
     final chipBg = isDark
-        ? (isMonochrome ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
-        : (isMonochrome ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel);
+        ? (isMonochrome ? const Color(0xFF27272A) : const Color(0xFF1A191F))
+        : const Color(0xFFF4F4F5);
     final chipBorder = isDark
-        ? (isMonochrome ? const Color(0xFF3F3F46) : AppColors.darkBorderPastel)
-        : (isMonochrome ? const Color(0xFFE4E4E7) : AppColors.lightBorderPastel);
+        ? (isMonochrome ? const Color(0xFF3F3F46) : const Color(0xFF33323B))
+        : const Color(0xFFE4E4E7);
     final iconColor = isMonochrome
         ? (isDark ? Colors.white70 : const Color(0xFF52525B))
-        : primaryColor;
+        : (isDark ? AppColors.pastelLime : const Color(0xFF18181B));
     final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
 
     return Container(

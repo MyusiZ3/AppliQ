@@ -469,7 +469,6 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final isMonochrome = ThemeManager.isMonochrome;
         final isEditing = widget.applicationToEdit != null;
-        final primaryColor = AppColors.getPrimary(isDark: isDark, isMonochrome: isMonochrome);
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -581,7 +580,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                             ),
                             child: Icon(
                               CupertinoIcons.doc_text_search,
-                              color: primaryColor,
+                              color: isMonochrome
+                                  ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                  : (isDark ? AppColors.pastelLime : const Color(0xFF18181B)),
                               size: 18,
                             ),
                           ),

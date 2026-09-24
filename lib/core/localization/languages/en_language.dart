@@ -224,11 +224,11 @@ class EnLanguage implements BaseLanguage {
   @override
   String get stageNotesLabel => 'Notes / Feedback / Questions Asked';
   @override
-  String get cvAttachmentTitle => 'Attached CV / Portfolio';
+  String get cvAttachmentTitle => 'Attached Document';
   @override
   String get savedInDrive => 'Saved in Google Drive';
   @override
-  String get uploadCvToDrive => 'Upload CV / Resume to Google Drive';
+  String get uploadCvToDrive => 'Upload Document';
   @override
   String get manageAttachment => 'Manage Document Attachment';
   @override
@@ -1030,6 +1030,30 @@ class EnLanguage implements BaseLanguage {
   String get obtainedYear => 'Year Obtained';
   @override
   String get yearHint => 'e.g. 2024';
+
+  // Smart Job Parser
+  @override
+  String get smartParserTitle => 'Smart Parser';
+  @override
+  String get smartParserSubtitle => 'Paste job description to auto-fill form.';
+  @override
+  String get smartParserPasteHint => 'Paste job vacancy description here...';
+  @override
+  String get smartParserButton => 'Extract & Fill';
+  @override
+  String get smartParserPasteClipboard => 'Paste Clipboard';
+  @override
+  String get smartParserClear => 'Clear';
+  @override
+  String get smartParserSuccess => 'Job details extracted successfully!';
+  @override
+  String get smartParserNoText => 'Job description text is empty.';
+  @override
+  String get smartParserDetectedBadge => 'Detected';
+  @override
+  String get smartParserApplyToForm => 'Apply to Form';
+  @override
+  String get smartParserAutoFillBanner => 'Auto-Fill from Job Text';
 
   // Enums & Dynamic Values
   @override

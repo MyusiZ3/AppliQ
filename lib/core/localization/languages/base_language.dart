@@ -510,6 +510,19 @@ abstract class BaseLanguage {
   String get obtainedYear;
   String get yearHint;
 
+  // Smart Job Parser
+  String get smartParserTitle;
+  String get smartParserSubtitle;
+  String get smartParserPasteHint;
+  String get smartParserButton;
+  String get smartParserPasteClipboard;
+  String get smartParserClear;
+  String get smartParserSuccess;
+  String get smartParserNoText;
+  String get smartParserDetectedBadge;
+  String get smartParserApplyToForm;
+  String get smartParserAutoFillBanner;
+
   // Enums & Dynamic Values
   String localizedEmploymentType(EmploymentType type);
   String localizedWorkSystem(WorkSystem system);

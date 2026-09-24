@@ -225,11 +225,11 @@ class KoLanguage implements BaseLanguage {
   @override
   String get stageNotesLabel => '면접 질문, 소감, 피드백';
   @override
-  String get cvAttachmentTitle => '첨부 서류 (이력서 및 포트폴리오)';
+  String get cvAttachmentTitle => '첨부 문서';
   @override
   String get savedInDrive => 'Google 드라이브에 저장됨';
   @override
-  String get uploadCvToDrive => '이력서 서류 Google 드라이브에 업로드';
+  String get uploadCvToDrive => '문서 업로드';
   @override
   String get manageAttachment => '첨부 파일 관리';
   @override
@@ -1031,6 +1031,30 @@ class KoLanguage implements BaseLanguage {
   String get obtainedYear => '취득 연월';
   @override
   String get yearHint => '예: 2024년';
+
+  // Smart Job Parser
+  @override
+  String get smartParserTitle => '스마트 파서';
+  @override
+  String get smartParserSubtitle => '채용공고 텍스트를 붙여넣어 자동 입력';
+  @override
+  String get smartParserPasteHint => '채용공고 텍스트를 여기에 붙여넣기...';
+  @override
+  String get smartParserButton => '자동 추출';
+  @override
+  String get smartParserPasteClipboard => '클립보드 붙여넣기';
+  @override
+  String get smartParserClear => '지우기';
+  @override
+  String get smartParserSuccess => '채용공고 정보가 추출되었습니다!';
+  @override
+  String get smartParserNoText => '채용공고 텍스트가 비어있습니다.';
+  @override
+  String get smartParserDetectedBadge => '감지된 항목';
+  @override
+  String get smartParserApplyToForm => '양식에 적용';
+  @override
+  String get smartParserAutoFillBanner => '채용공고 자동 입력';
 
   // Enums & Dynamic Values
   @override

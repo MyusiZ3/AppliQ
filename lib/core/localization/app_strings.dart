@@ -538,6 +538,19 @@ class AppStrings {
   static String get obtainedYear => current.obtainedYear;
   static String get yearHint => current.yearHint;
 
+  // Smart Job Parser
+  static String get smartParserTitle => current.smartParserTitle;
+  static String get smartParserSubtitle => current.smartParserSubtitle;
+  static String get smartParserPasteHint => current.smartParserPasteHint;
+  static String get smartParserButton => current.smartParserButton;
+  static String get smartParserPasteClipboard => current.smartParserPasteClipboard;
+  static String get smartParserClear => current.smartParserClear;
+  static String get smartParserSuccess => current.smartParserSuccess;
+  static String get smartParserNoText => current.smartParserNoText;
+  static String get smartParserDetectedBadge => current.smartParserDetectedBadge;
+  static String get smartParserApplyToForm => current.smartParserApplyToForm;
+  static String get smartParserAutoFillBanner => current.smartParserAutoFillBanner;
+
   // Helper methods for enums
   static String localizedEmploymentType(EmploymentType type) => current.localizedEmploymentType(type);
   static String localizedWorkSystem(WorkSystem system) => current.localizedWorkSystem(system);

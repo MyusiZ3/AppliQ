@@ -224,11 +224,11 @@ class IdLanguage implements BaseLanguage {
   @override
   String get stageNotesLabel => 'Catatan / Pertanyaan / Feedback';
   @override
-  String get cvAttachmentTitle => 'Lampiran CV / Portofolio';
+  String get cvAttachmentTitle => 'Attached Document';
   @override
   String get savedInDrive => 'Tersimpan di Google Drive';
   @override
-  String get uploadCvToDrive => 'Upload CV / Berkas ke Google Drive';
+  String get uploadCvToDrive => 'Upload Dokumen';
   @override
   String get manageAttachment => 'Kelola Berkas Lampiran';
   @override
@@ -1030,6 +1030,30 @@ class IdLanguage implements BaseLanguage {
   String get obtainedYear => 'Tahun Perolehan';
   @override
   String get yearHint => 'Contoh: 2024';
+
+  // Smart Job Parser
+  @override
+  String get smartParserTitle => 'Smart Parser';
+  @override
+  String get smartParserSubtitle => 'Tempel teks deskripsi lowongan untuk auto-fill form.';
+  @override
+  String get smartParserPasteHint => 'Tempel deskripsi lowongan di sini...';
+  @override
+  String get smartParserButton => 'Ekstrak & Isi';
+  @override
+  String get smartParserPasteClipboard => 'Tempel Clipboard';
+  @override
+  String get smartParserClear => 'Hapus';
+  @override
+  String get smartParserSuccess => 'Data lowongan berhasil diekstrak!';
+  @override
+  String get smartParserNoText => 'Teks lowongan masih kosong.';
+  @override
+  String get smartParserDetectedBadge => 'Terdeteksi';
+  @override
+  String get smartParserApplyToForm => 'Terapkan ke Form';
+  @override
+  String get smartParserAutoFillBanner => 'Auto-Fill dari Teks Loker';
 
   // Enums & Dynamic Values
   @override

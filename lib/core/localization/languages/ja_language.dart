@@ -225,11 +225,11 @@ class JaLanguage implements BaseLanguage {
   @override
   String get stageNotesLabel => '面接内容・質問・フィードバック';
   @override
-  String get cvAttachmentTitle => '添付書類 (履歴書・職務経歴書)';
+  String get cvAttachmentTitle => '添付書類';
   @override
   String get savedInDrive => 'Google ドライブに保存済み';
   @override
-  String get uploadCvToDrive => '履歴書・書類をGoogle ドライブにアップロード';
+  String get uploadCvToDrive => '書類をアップロード';
   @override
   String get manageAttachment => '添付書類を管理';
   @override
@@ -1031,6 +1031,30 @@ class JaLanguage implements BaseLanguage {
   String get obtainedYear => '取得年月';
   @override
   String get yearHint => '例: 2024年3月';
+
+  // Smart Job Parser
+  @override
+  String get smartParserTitle => 'スマートパーサー';
+  @override
+  String get smartParserSubtitle => '求人テキストを貼付して自動入力';
+  @override
+  String get smartParserPasteHint => '求人案内テキストをここに貼り付け...';
+  @override
+  String get smartParserButton => '自動抽出';
+  @override
+  String get smartParserPasteClipboard => 'クリップボード貼付';
+  @override
+  String get smartParserClear => 'クリア';
+  @override
+  String get smartParserSuccess => '求人情報を抽出しました！';
+  @override
+  String get smartParserNoText => '求人テキストを入力してください。';
+  @override
+  String get smartParserDetectedBadge => '検出情報';
+  @override
+  String get smartParserApplyToForm => 'フォームに適用';
+  @override
+  String get smartParserAutoFillBanner => '求人テキストから自動入力';
 
   // Enums & Dynamic Values
   @override

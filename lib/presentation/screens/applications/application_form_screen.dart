@@ -9,8 +9,10 @@ import '../../../data/models/job_application.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../services/google_drive_service.dart';
 import '../../../utils/language_manager.dart';
+import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
+import '../../widgets/job_description_parser_sheet.dart';
 
 class ApplicationFormScreen extends StatefulWidget {
   final JobRepository repository;
@@ -240,6 +242,57 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     }
   }
 
+  Future<void> _openSmartParser() async {
+    HapticFeedback.lightImpact();
+    final parsed = await JobDescriptionParserSheet.show(
+      context,
+      userCompanies: _userCompanies,
+      userPositions: _userPositions,
+      userLocations: _userLocations,
+    );
+
+    if (parsed == null || !mounted) return;
+
+    setState(() {
+      if (parsed.companyName != null && parsed.companyName!.isNotEmpty) {
+        _companyController.text = parsed.companyName!;
+      }
+      if (parsed.positionTitle != null && parsed.positionTitle!.isNotEmpty) {
+        _positionController.text = parsed.positionTitle!;
+      }
+      if (parsed.location != null && parsed.location!.isNotEmpty) {
+        _locationController.text = parsed.location!;
+      }
+      if (parsed.workSystem != null) {
+        _workSystem = parsed.workSystem!;
+      }
+      if (parsed.employmentType != null) {
+        _employmentType = parsed.employmentType!;
+      }
+      if (parsed.jobPortal != null) {
+        _jobPortal = parsed.jobPortal!;
+      }
+      if (parsed.jobUrl != null && parsed.jobUrl!.isNotEmpty) {
+        _urlController.text = parsed.jobUrl!;
+      }
+      if (parsed.salaryExpectation != null && parsed.salaryExpectation! > 0) {
+        final formatted = NumberFormat('#,###', 'id_ID').format(parsed.salaryExpectation);
+        _salaryExpectationController.text = 'Rp $formatted';
+      }
+      if (parsed.notes != null && parsed.notes!.isNotEmpty) {
+        if (_notesController.text.trim().isEmpty) {
+          _notesController.text = parsed.notes!;
+        } else {
+          _notesController.text = '${_notesController.text.trim()}\n\n${parsed.notes!}';
+        }
+      }
+    });
+
+    if (mounted) {
+      UIHelper.showSuccessSnackBar(context, AppStrings.smartParserSuccess);
+    }
+  }
+
   Future<void> _handleDriveUpload() async {
     final isEn = LanguageManager.isEnglish;
     final company = _companyController.text.trim();
@@ -411,7 +464,9 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMonochrome = ThemeManager.isMonochrome;
     final isEditing = widget.applicationToEdit != null;
+    final primaryColor = AppColors.getPrimary(isDark: isDark, isMonochrome: isMonochrome);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -481,6 +536,86 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
+            // Smart Parser Auto-Fill Banner
+            if (!isEditing)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _openSmartParser,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.getSurface(isDark: isDark, isMonochrome: isMonochrome),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.getBorder(isDark: isDark, isMonochrome: isMonochrome),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? (isMonochrome ? const Color(0xFF27272A) : const Color(0xFF1C2438))
+                                  : (isMonochrome ? const Color(0xFFF4F4F5) : const Color(0xFFEEF2F6)),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppColors.getBorder(isDark: isDark, isMonochrome: isMonochrome),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Icon(
+                              CupertinoIcons.doc_text_search,
+                              color: primaryColor,
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppStrings.smartParserAutoFillBanner,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  AppStrings.smartParserSubtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 15,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
             // Section 1: Informasi Lowongan
             _buildSectionCard(
               title: AppStrings.vacancyInfoSection,
@@ -1034,8 +1169,8 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                       const SizedBox(height: 4),
                       Text(
                         LanguageManager.isEnglish
-                            ? 'CV & resume files will be neatly organized in folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Company"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Position"}'
-                            : 'File CV & berkas akan otomatis disimpan rapi di folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Perusahaan"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Posisi"}',
+                            ? 'Document files will be neatly organized in folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Company"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Position"}'
+                            : 'File dokumen akan otomatis disimpan rapi di folder:\nAppliQ / ${_companyController.text.trim().isNotEmpty ? _companyController.text.trim() : "Perusahaan"}_${_positionController.text.trim().isNotEmpty ? _positionController.text.trim() : "Posisi"}',
                         style: TextStyle(
                           fontSize: 11.5,
                           height: 1.4,
@@ -1139,15 +1274,6 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
                                   strokeWidth: 2,
                                   color: isDark ? Colors.white : const Color(0xFF18181B),
                                 ),
-                              ),
-                            )
-                          else
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Icon(
-                                CupertinoIcons.cloud_upload,
-                                size: 17,
-                                color: isDark ? Colors.white : const Color(0xFF18181B),
                               ),
                             ),
                           Text(

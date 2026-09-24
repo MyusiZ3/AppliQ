@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../data/models/application_log.dart';
@@ -753,10 +752,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 children: [
                   if (log.meetingLink != null && log.meetingLink!.isNotEmpty)
                     GestureDetector(
-                      onTap: () => launchUrl(
-                        Uri.parse(log.meetingLink!),
-                        mode: LaunchMode.externalApplication,
-                      ),
+                      onTap: () => UIHelper.openUrl(context, log.meetingLink),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),

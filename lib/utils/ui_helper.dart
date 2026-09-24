@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -245,6 +246,9 @@ class UIHelper {
 
   /// Global Error Handler untuk menangani berbagai jenis exception secara ramah pengguna
   static String parseErrorMessage(dynamic error) {
+    if (kDebugMode) {
+      debugPrint('UIHelper.handleError caught: $error');
+    }
     if (error is AuthException) {
       if (error.message.contains('Invalid login credentials')) {
         return 'Email atau kata sandi tidak sesuai.';
@@ -253,17 +257,25 @@ class UIHelper {
       }
       return 'Gagal masuk akun. Silakan coba lagi.';
     } else if (error is PostgrestException) {
-      debugPrint('PostgrestException details: code=${error.code}, message=${error.message}, details=${error.details}, hint=${error.hint}');
+      if (kDebugMode) {
+        debugPrint('PostgrestException details: code=${error.code}, message=${error.message}, details=${error.details}, hint=${error.hint}');
+      }
       if (error.code == '42P01') {
-        return 'Tabel database belum ditemukan. Silakan jalankan script SQL di Supabase.';
+        return kReleaseMode
+            ? 'Layanan sedang dalam pemeliharaan. Silakan coba lagi nanti.'
+            : 'Tabel database belum ditemukan. Silakan jalankan script SQL di Supabase.';
       } else if (error.code == '42501' || error.message.toLowerCase().contains('row-level security') || error.message.toLowerCase().contains('permission denied')) {
-        return 'Akses ditolak oleh RLS Supabase. Pastikan RLS policy telah dibuat untuk tabel ini.';
+        return 'Akses ditolak. Pastikan Anda memiliki izin untuk mengakses data ini.';
       } else if (error.code == '42703') {
-        return 'Struktur kolom database belum sesuai: ${error.message}';
+        return kReleaseMode
+            ? 'Terjadi ketidaksesuaian versi data. Silakan perbarui aplikasi.'
+            : 'Struktur kolom database belum sesuai: ${error.message}';
       } else if (error.code == 'PGRST301') {
         return 'Sesi masuk telah berakhir. Silakan masuk kembali.';
       }
-      return error.message.isNotEmpty ? error.message : 'Gagal memproses data. Silakan coba beberapa saat lagi.';
+      return kReleaseMode
+          ? 'Gagal memproses data. Silakan coba beberapa saat lagi.'
+          : (error.message.isNotEmpty ? error.message : 'Gagal memproses data.');
     } else if (error is SocketException) {
       return 'Koneksi internet terputus. Periksa jaringan Anda.';
     } else if (error is TimeoutException) {
@@ -274,7 +286,12 @@ class UIHelper {
       }
       return error.message ?? 'Terjadi kendala pada sistem. Silakan coba lagi.';
     }
-    return error.toString().replaceFirst('Exception: ', '');
+
+    final str = error.toString().replaceFirst('Exception: ', '').trim();
+    if (str.isEmpty || str.startsWith('Instance of') || (kReleaseMode && str.contains('Exception'))) {
+      return 'Terjadi kendala pada sistem. Silakan coba lagi.';
+    }
+    return str;
   }
 
   static void handleError(BuildContext context, dynamic error) {

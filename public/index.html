@@ -107,14 +107,19 @@
         },
       };
     </script>
-    <style type="text/tailwindcss">
-      @layer components {
-        .bento-card {
-          @apply bg-white p-7 md:p-8 rounded-3xl border border-zinc-200/80 flex flex-col justify-between transition-all duration-300 relative overflow-hidden dark:bg-[#141417] dark:border-white/10 dark:backdrop-blur-xl shadow-sm hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5;
-        }
-        .bento-card:hover {
-          @apply -translate-y-1 border-zinc-400/60 dark:border-white/20;
-        }
+    <style>
+      .bento-card {
+        padding: 1.75rem;
+        border-radius: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .bento-card:hover {
+        transform: translateY(-0.25rem);
       }
 
       * {

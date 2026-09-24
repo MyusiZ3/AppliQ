@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../data/repositories/job_repository.dart';
-import 'applications/application_form_screen.dart';
 import 'applications/applications_list_screen.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'home/home_screen.dart';
@@ -74,15 +73,6 @@ class _MainNavState extends State<MainNav> {
       } catch (_) {}
     }
     setState(() => _currentIndex = index);
-  }
-
-  void _showAddApplication() {
-    HapticFeedback.lightImpact();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ApplicationFormScreen(repository: widget.repository),
-      ),
-    );
   }
 
   @override

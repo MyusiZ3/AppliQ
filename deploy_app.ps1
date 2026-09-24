@@ -42,7 +42,11 @@ if ($shouldBuild) {
     }
     
     Write-Host "Memulai Build APK (Release v$versionName) ---" -ForegroundColor Yellow
-    flutter build apk --release --obfuscate --split-debug-info=build/app/outputs/symbols
+    $buildArgs = @("build", "apk", "--release", "--obfuscate", "--split-debug-info=build/app/outputs/symbols")
+    if (Test-Path ".env") {
+        $buildArgs += "--dart-define-from-file=.env"
+    }
+    flutter @buildArgs
     
     if ($LASTEXITCODE -eq 0) {
         if (!(Test-Path "build\app\outputs\flutter-apk")) { New-Item -ItemType Directory -Path "build\app\outputs\flutter-apk" -Force }

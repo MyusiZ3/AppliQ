@@ -5,19 +5,25 @@ class AppConfig {
   static String supabaseAnonKey = '';
   static String googleWebClientId = '';
   static bool useMockData = true;
-
   static Future<void> initialize() async {
+    // Prioritaskan compile-time environment variables (--dart-define / --dart-define-from-file)
+    const envUrl = String.fromEnvironment('SUPABASE_URL');
+    const envAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+    const envGoogleClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+    const envMock = String.fromEnvironment('USE_MOCK_DATA');
+
     try {
       await dotenv.load(fileName: '.env');
     } catch (_) {
       // Jika .env tidak ditemukan, gunakan fallback default / mock mode
     }
 
-    supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
-    supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
-    googleWebClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
+    supabaseUrl = envUrl.isNotEmpty ? envUrl : (dotenv.env['SUPABASE_URL'] ?? '');
+    supabaseAnonKey = envAnonKey.isNotEmpty ? envAnonKey : (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+    googleWebClientId = envGoogleClientId.isNotEmpty ? envGoogleClientId : (dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '');
     
-    final mockFlag = dotenv.env['USE_MOCK_DATA']?.toLowerCase() == 'true';
+    final mockStr = envMock.isNotEmpty ? envMock : (dotenv.env['USE_MOCK_DATA'] ?? '');
+    final mockFlag = mockStr.toLowerCase() == 'true';
     useMockData = mockFlag || supabaseUrl.isEmpty || supabaseAnonKey.isEmpty;
   }
 

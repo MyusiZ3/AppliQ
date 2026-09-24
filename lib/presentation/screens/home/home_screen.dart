@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_enums.dart';
 import '../../../core/localization/app_strings.dart';
@@ -47,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
   UserProfile? _userProfile;
   List<JobApplication> _applications = [];
   List<Map<String, dynamic>> _upcomingSchedules = [];
-  Map<String, dynamic> _stats = {};
   bool _isLoading = true;
   bool _isFollowUpDismissed = false;
   bool _hasReadNotifications = false;
@@ -91,12 +89,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final results = await Future.wait([
         widget.repository.getCurrentUserProfile(forceRefresh: forceRefresh),
         widget.repository.getApplications(forceRefresh: forceRefresh),
-        widget.repository.getDashboardStats(forceRefresh: forceRefresh),
         widget.repository.getAllApplicationLogs(forceRefresh: forceRefresh),
       ]);
 
       final apps = (results[1] as List<JobApplication>?) ?? [];
-      final allLogs = (results[3] as List<ApplicationLog>?) ?? [];
+      final allLogs = (results[2] as List<ApplicationLog>?) ?? [];
       final upcoming = <Map<String, dynamic>>[];
       final now = DateTime.now();
       final appMap = {for (var a in apps) a.id: a};
@@ -168,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _userProfile = results[0] as UserProfile?;
           _applications = apps;
           _upcomingSchedules = upcoming;
-          _stats = (results[2] as Map<String, dynamic>?) ?? {};
           _hasReadNotifications = !hasUnreadAlert;
           _isLoading = false;
         });
@@ -221,9 +217,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final staleApplications = _applications.where((app) {
       if (app.status != ApplicationStatus.applied &&
-          app.status != ApplicationStatus.noResponse) return false;
-      if (app.appliedDate == null) return false;
-      final days = DateTime.now().difference(app.appliedDate!).inDays;
+          app.status != ApplicationStatus.noResponse) {
+        return false;
+      }
+      final days = DateTime.now().difference(app.appliedDate).inDays;
       return days >= 7;
     }).toList();
 
@@ -586,13 +583,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   if (log.meetingLink != null && log.meetingLink!.isNotEmpty) ...[
                     GestureDetector(
-                      onTap: () async {
+                      onTap: () {
                         HapticFeedback.lightImpact();
-                        final uri = Uri.parse(log.meetingLink!);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri,
-                              mode: LaunchMode.externalApplication);
-                        }
+                        UIHelper.openUrl(context, log.meetingLink);
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(

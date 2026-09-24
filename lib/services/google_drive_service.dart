@@ -47,6 +47,12 @@ class GoogleDriveService {
 
     final pickedFile = result.files.first;
 
+    // Batasi ukuran file maksimal 25 MB untuk mencegah OOM / pemborosan kuota
+    const maxFileSizeBytes = 25 * 1024 * 1024;
+    if (pickedFile.size > maxFileSizeBytes) {
+      throw Exception('Ukuran berkas melebihi batas maksimal 25 MB.');
+    }
+
     // Authenticate with Google Drive Scope
     GoogleSignInAccount? googleUser = _googleSignIn.currentUser;
     googleUser ??= await _googleSignIn.signInSilently();
@@ -85,10 +91,11 @@ class GoogleDriveService {
     final cleanCompany = companyName.trim().isEmpty ? 'Company' : companyName.trim();
     final cleanPosition = positionTitle.trim().isEmpty ? 'Job' : positionTitle.trim();
     final subFolderName = '${cleanCompany}_$cleanPosition'
-        .replaceAll(RegExp(r'[/\\?%*:|"<> ]'), '_');
+        .replaceAll(RegExp(r"['""/\\?%*:|<> ]"), '_');
+    final safeQueryName = subFolderName.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
 
     final subFolderQuery = await driveApi.files.list(
-      q: "mimeType = 'application/vnd.google-apps.folder' and name = '$subFolderName' and '$appliQFolderId' in parents and trashed = false",
+      q: "mimeType = 'application/vnd.google-apps.folder' and name = '$safeQueryName' and '$appliQFolderId' in parents and trashed = false",
       $fields: 'files(id, name)',
       spaces: 'drive',
     );

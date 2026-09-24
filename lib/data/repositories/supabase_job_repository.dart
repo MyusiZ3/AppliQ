@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/config/app_config.dart';
@@ -88,11 +89,19 @@ class SupabaseJobRepository implements JobRepository {
     final user = _supabase.auth.currentUser;
     if (user != null) {
       try {
-        await _supabase.from('applications').delete().eq('user_id', user.id);
+        await _supabase.from('user_resumes').delete().eq('user_id', user.id);
         await _supabase.from('application_logs').delete().eq('user_id', user.id);
+        await _supabase.from('job_applications').delete().eq('user_id', user.id);
         await _supabase.from('profiles').delete().eq('id', user.id);
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Error during account deletion: $e');
+      }
     }
+    _cachedApplications = null;
+    _cachedResume = null;
+    _cachedLogs.clear();
+    _cachedAllLogs = null;
+    _cachedStats = null;
     await signOut();
   }
 
@@ -252,10 +261,14 @@ class SupabaseJobRepository implements JobRepository {
       'updated_at': DateTime.now().toIso8601String(),
     };
 
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('Pengguna belum terautentikasi');
+
     final response = await _supabase
         .from('job_applications')
         .update(updateData)
         .eq('id', application.id)
+        .eq('user_id', userId)
         .select()
         .maybeSingle();
 
@@ -275,7 +288,15 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<void> deleteApplication(String id) async {
-    await _supabase.from('job_applications').delete().eq('id', id);
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    await _supabase
+        .from('job_applications')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
+
     _cachedApplications?.removeWhere((a) => a.id == id);
     _cachedLogs.remove(id);
     _cachedStats = null;
@@ -284,16 +305,21 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<void> toggleFavorite(String id) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
     final app = await _supabase
         .from('job_applications')
         .select('is_favorite')
         .eq('id', id)
+        .eq('user_id', userId)
         .single();
     final current = app['is_favorite'] as bool? ?? false;
     await _supabase
         .from('job_applications')
         .update({'is_favorite': !current})
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', userId);
 
     // Update in local cache
     if (_cachedApplications != null) {
@@ -411,7 +437,15 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<void> deleteApplicationLog(String id) async {
-    await _supabase.from('application_logs').delete().eq('id', id);
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    await _supabase
+        .from('application_logs')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
+
     for (var list in _cachedLogs.values) {
       list.removeWhere((l) => l.id == id);
     }
@@ -528,8 +562,10 @@ class SupabaseJobRepository implements JobRepository {
 
       _cachedResume = UserResume.fromJson(response);
     } catch (e) {
-      // Offline fallback: keep in memory
+      // Offline fallback: keep in memory so input isn't lost during session
       _cachedResume = resume.copyWith(userId: user.id);
+      debugPrint('Error saving resume to Supabase: $e');
+      rethrow;
     }
 
     notifyDataChanged();

@@ -390,6 +390,15 @@ class MockJobRepository implements JobRepository {
     final rejected = _applications.where((a) => a.status == ApplicationStatus.rejected).length;
     final noResponse = _applications.where((a) => a.status == ApplicationStatus.noResponse).length;
 
+    // Funnel counts (cumulative achievements in the hiring journey)
+    final interviewFunnel = _applications.where((a) =>
+        a.status == ApplicationStatus.interview ||
+        a.status == ApplicationStatus.offering ||
+        a.status == ApplicationStatus.accepted).length;
+    final offeringFunnel = _applications.where((a) =>
+        a.status == ApplicationStatus.offering ||
+        a.status == ApplicationStatus.accepted).length;
+
     final byWorkSystem = <String, int>{};
     for (var app in _applications) {
       byWorkSystem[app.workSystem.label] = (byWorkSystem[app.workSystem.label] ?? 0) + 1;
@@ -411,6 +420,8 @@ class MockJobRepository implements JobRepository {
       'accepted_count': accepted,
       'rejected_count': rejected,
       'no_response_count': noResponse,
+      'interview_funnel_count': interviewFunnel,
+      'offering_funnel_count': offeringFunnel,
       'by_work_system': byWorkSystem,
       'by_portal': byPortal,
     };

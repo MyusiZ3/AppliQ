@@ -491,6 +491,15 @@ class SupabaseJobRepository implements JobRepository {
     final rejected = apps.where((a) => a.status.name == 'rejected').length;
     final noResponse = apps.where((a) => a.status.name == 'noResponse').length;
 
+    // Funnel counts (cumulative achievements in the hiring journey)
+    final interviewFunnel = apps.where((a) =>
+        a.status.name == 'interview' ||
+        a.status.name == 'offering' ||
+        a.status.name == 'accepted').length;
+    final offeringFunnel = apps.where((a) =>
+        a.status.name == 'offering' ||
+        a.status.name == 'accepted').length;
+
     final byWorkSystem = <String, int>{};
     for (var app in apps) {
       byWorkSystem[app.workSystem.label] = (byWorkSystem[app.workSystem.label] ?? 0) + 1;
@@ -512,6 +521,8 @@ class SupabaseJobRepository implements JobRepository {
       'accepted_count': accepted,
       'rejected_count': rejected,
       'no_response_count': noResponse,
+      'interview_funnel_count': interviewFunnel,
+      'offering_funnel_count': offeringFunnel,
       'by_work_system': byWorkSystem,
       'by_portal': byPortal,
     };

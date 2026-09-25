@@ -88,13 +88,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final rejected = _stats['rejected_count'] as int? ?? 0;
     final noResponse = _stats['no_response_count'] as int? ?? 0;
 
+    final interviewFunnel =
+        _stats['interview_funnel_count'] as int? ?? interview;
+    final offeringFunnel =
+        _stats['offering_funnel_count'] as int? ?? offering;
+
     final byWorkSystem =
         Map<String, dynamic>.from(_stats['by_work_system'] as Map? ?? {});
     final byPortal =
         Map<String, dynamic>.from(_stats['by_portal'] as Map? ?? {});
 
     final interviewRate = total > 0
-        ? ((interview + offering + accepted) / total * 100).toStringAsFixed(1)
+        ? (interviewFunnel / total * 100).toStringAsFixed(1)
         : '0';
     final successRate =
         total > 0 ? (accepted / total * 100).toStringAsFixed(1) : '0';
@@ -434,7 +439,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               child: MetricCard(
                                                 label: AppStrings
                                                     .interviewStageMetric,
-                                                value: '$interview',
+                                                value: '$interviewFunnel',
                                                 icon: CupertinoIcons.mic_fill,
                                                 accentColor:
                                                     AppColors.pastelLavender,
@@ -460,7 +465,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               child: MetricCard(
                                                 label:
                                                     AppStrings.offeringMetric,
-                                                value: '$offering',
+                                                value: '$offeringFunnel',
                                                 icon: CupertinoIcons.gift_fill,
                                                 accentColor: AppColors.pastelSky,
                                                 backgroundColor: isMono

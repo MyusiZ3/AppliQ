@@ -238,9 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .where((a) => a.status == ApplicationStatus.interview)
         .length;
     final offering = _applications
-        .where((a) =>
-            a.status == ApplicationStatus.offering ||
-            a.status == ApplicationStatus.accepted)
+        .where((a) => a.status == ApplicationStatus.offering)
         .length;
 
     final staleApplications = _applications.where((app) {

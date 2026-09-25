@@ -1,10 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:excel/excel.dart' hide Border;
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_enums.dart';
 import '../../core/localization/app_strings.dart';
@@ -33,63 +37,129 @@ class ExportSheet extends StatefulWidget {
 
 class _ExportSheetState extends State<ExportSheet> {
   bool _isPdfLoading = false;
-  bool _isCsvLoading = false;
+  bool _isExcelLoading = false;
 
-  String _generateCsv() {
-    final buffer = StringBuffer();
-    final isEn = LanguageManager.isEnglish;
-    // CSV Header
-    buffer.writeln(isEn
-        ? 'No,Company,Position,Work System,Job Portal,Status,Applied Date,Salary Expectation,Salary Offered,Location,Notes'
-        : 'No,Perusahaan,Posisi,Sistem Kerja,Portal Lowongan,Status,Tanggal Melamar,Ekspektasi Gaji,Gaji Ditawarkan,Lokasi,Catatan');
-
-    final dateFormat = DateFormat('yyyy-MM-dd');
-
-    for (int i = 0; i < widget.applications.length; i++) {
-      final app = widget.applications[i];
-      final applied = dateFormat.format(app.appliedDate);
-      final expSalary = app.salaryExpectation?.toStringAsFixed(0) ?? '-';
-      final offSalary = app.salaryOffered?.toStringAsFixed(0) ?? '-';
-      final notes =
-          (app.notes ?? '-').replaceAll('\n', ' ').replaceAll(',', ';');
-      final location = (app.location ?? '-').replaceAll(',', ';');
-      final workSys = AppStrings.localizedWorkSystem(app.workSystem);
-      final portal = app.jobPortalCustom ?? AppStrings.localizedJobPortal(app.jobPortal);
-      final status = AppStrings.localizedStatus(app.status);
-
-      buffer.writeln(
-        '"${i + 1}","${app.companyName}","${app.positionTitle}","$workSys","$portal","$status","$applied","$expSalary","$offSalary","$location","$notes"',
-      );
-    }
-
-    return buffer.toString();
-  }
-
-  Future<void> _copyCsv() async {
-    if (_isCsvLoading || _isPdfLoading) return;
-    setState(() => _isCsvLoading = true);
+  Future<void> _exportExcel() async {
+    if (_isExcelLoading || _isPdfLoading) return;
+    setState(() => _isExcelLoading = true);
     HapticFeedback.lightImpact();
 
     try {
-      final csv = _generateCsv();
-      await Clipboard.setData(ClipboardData(text: csv));
+      final isEn = LanguageManager.isEnglish;
+      final excel = Excel.createExcel();
+      final defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
+      final sheetName = isEn ? 'Job Applications' : 'Laporan Lamaran';
+      excel.rename(defaultSheet, sheetName);
+      final sheet = excel[sheetName];
+
+      // Header row
+      final headers = isEn
+          ? [
+              'No',
+              'Company',
+              'Position',
+              'Work System',
+              'Job Portal',
+              'Status',
+              'Applied Date',
+              'Salary Expectation',
+              'Salary Offered',
+              'Location',
+              'Notes'
+            ]
+          : [
+              'No',
+              'Perusahaan',
+              'Posisi',
+              'Sistem Kerja',
+              'Portal Lowongan',
+              'Status',
+              'Tanggal Melamar',
+              'Ekspektasi Gaji',
+              'Gaji Ditawarkan',
+              'Lokasi',
+              'Catatan'
+            ];
+
+      sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
+
+      final dateFormat = DateFormat('yyyy-MM-dd');
+
+      for (int i = 0; i < widget.applications.length; i++) {
+        final app = widget.applications[i];
+        final applied = dateFormat.format(app.appliedDate);
+        final workSys = AppStrings.localizedWorkSystem(app.workSystem);
+        final portal = app.jobPortalCustom ??
+            AppStrings.localizedJobPortal(app.jobPortal);
+        final status = AppStrings.localizedStatus(app.status);
+
+        sheet.appendRow([
+          IntCellValue(i + 1),
+          TextCellValue(app.companyName),
+          TextCellValue(app.positionTitle),
+          TextCellValue(workSys),
+          TextCellValue(portal),
+          TextCellValue(status),
+          TextCellValue(applied),
+          app.salaryExpectation != null
+              ? IntCellValue(app.salaryExpectation!.toInt())
+              : TextCellValue('-'),
+          app.salaryOffered != null
+              ? IntCellValue(app.salaryOffered!.toInt())
+              : TextCellValue('-'),
+          TextCellValue(app.location ?? '-'),
+          TextCellValue(app.notes ?? '-'),
+        ]);
+      }
+
+      final fileBytes = excel.save();
+      if (fileBytes == null) {
+        throw Exception('Failed to generate Excel file');
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final filePath = '${tempDir.path}/AppliQ_Report_$timestamp.xlsx';
+      final file = File(filePath);
+      await file.writeAsBytes(fileBytes, flush: true);
+
       if (mounted) {
+        final box = context.findRenderObject() as RenderBox?;
+        final origin =
+            box != null ? box.localToGlobal(Offset.zero) & box.size : null;
         Navigator.of(context).pop();
-        UIHelper.showSuccessSnackBar(context,
-            LanguageManager.isEnglish 
-                ? 'CSV format (${widget.applications.length} applications) copied!' 
-                : 'Format CSV (${widget.applications.length} lamaran) berhasil disalin!');
+        await Share.shareXFiles(
+          [
+            XFile(
+              filePath,
+              mimeType:
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              name: 'AppliQ_Report_$timestamp.xlsx',
+            )
+          ],
+          subject: isEn
+              ? 'AppliQ Job Applications Report'
+              : 'Laporan Lamaran Kerja AppliQ',
+          text: isEn
+              ? 'AppliQ job applications report (${widget.applications.length} applications).'
+              : 'Laporan lamaran kerja AppliQ (${widget.applications.length} lamaran).',
+          sharePositionOrigin: origin,
+        );
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isCsvLoading = false);
+        setState(() => _isExcelLoading = false);
         UIHelper.handleError(context, e);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isExcelLoading = false);
       }
     }
   }
 
   Future<void> _exportPdf() async {
-    if (_isPdfLoading || _isCsvLoading) return;
+    if (_isPdfLoading || _isExcelLoading) return;
     setState(() => _isPdfLoading = true);
     HapticFeedback.lightImpact();
 
@@ -641,7 +711,7 @@ class _ExportSheetState extends State<ExportSheet> {
                     color: isDark ? Colors.white24 : Colors.black12),
                 _buildStatItem(
                     LanguageManager.isEnglish ? 'Formats' : 'Format',
-                    'PDF & CSV',
+                    'PDF & Excel',
                     isDark),
                 Container(
                     height: 28,
@@ -662,7 +732,7 @@ class _ExportSheetState extends State<ExportSheet> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: (_isPdfLoading || _isCsvLoading) ? null : _exportPdf,
+              onPressed: (_isPdfLoading || _isExcelLoading) ? null : _exportPdf,
               style: ElevatedButton.styleFrom(
                 backgroundColor: isMono
                     ? (isDark ? Colors.white : const Color(0xFF18181B))
@@ -727,12 +797,12 @@ class _ExportSheetState extends State<ExportSheet> {
 
           const SizedBox(height: 10),
 
-          // Option 2: CSV Export Button with Rotating Spinner (Strict 1 Line Text)
+          // Option 2: Excel Export Button with Rotating Spinner (Strict 1 Line Text)
           SizedBox(
             width: double.infinity,
             height: 48,
             child: OutlinedButton(
-              onPressed: (_isPdfLoading || _isCsvLoading) ? null : _copyCsv,
+              onPressed: (_isPdfLoading || _isExcelLoading) ? null : _exportExcel,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
                   color: isDark
@@ -746,7 +816,7 @@ class _ExportSheetState extends State<ExportSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (_isCsvLoading)
+                  if (_isExcelLoading)
                     Padding(
                       padding: const EdgeInsets.only(right: 10),
                       child: SizedBox(
@@ -763,15 +833,15 @@ class _ExportSheetState extends State<ExportSheet> {
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: Icon(
-                        CupertinoIcons.doc_on_clipboard,
+                        Icons.table_chart_rounded,
                         size: 17,
                         color: isDark ? Colors.white : const Color(0xFF18181B),
                       ),
                     ),
                   Text(
-                    _isCsvLoading
-                        ? (LanguageManager.isEnglish ? 'Copying CSV...' : 'Menyalin CSV...')
-                        : (LanguageManager.isEnglish ? 'Save as CSV' : 'Simpan Sebagai CSV'),
+                    _isExcelLoading
+                        ? (LanguageManager.isEnglish ? 'Generating Excel...' : 'Menyiapkan Excel...')
+                        : (LanguageManager.isEnglish ? 'Save as Excel (.xlsx)' : 'Simpan Sebagai Excel (.xlsx)'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

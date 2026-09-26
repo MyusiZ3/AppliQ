@@ -249,6 +249,113 @@ class NotificationService {
     }
   }
 
+  /// Jadwalkan Notifikasi Pengingat Follow-up Lamaran (H+7 setelah melamar)
+  Future<void> scheduleFollowUpReminder({
+    required int id,
+    required String company,
+    required String position,
+    required DateTime targetDate,
+  }) async {
+    if (!_isInitialized) return;
+    if (!await isEnabled()) return;
+    try {
+      if (targetDate.isBefore(DateTime.now())) return;
+
+      try {
+        tz.initializeTimeZones();
+      } catch (_) {}
+
+      tz.Location location;
+      try {
+        location = tz.local;
+      } catch (_) {
+        try {
+          location = tz.getLocation('Asia/Jakarta');
+        } catch (_) {
+          location = tz.UTC;
+        }
+      }
+
+      final tzTargetTime = tz.TZDateTime.from(targetDate, location);
+
+      const androidDetails = AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        channelDescription: _channelDescription,
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: '@drawable/ic_notification',
+        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: Color(0xFF18181B),
+        enableVibration: true,
+        playSound: true,
+        styleInformation: BigTextStyleInformation(''),
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final title = 'Perlu Follow-up • $company';
+      final body = 'Lamaran untuk posisi $position sudah 7 hari tanpa kabar. Yuk buka AppliQ untuk template pesan HR!';
+
+      await _notificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tzTargetTime,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (e) {
+      debugPrint('Error scheduling follow-up reminder: $e');
+    }
+  }
+
+  /// Tampilkan notifikasi berkala otomatis jika ada lamaran yang sudah butuh follow-up (> 7 hari)
+  Future<void> checkAndShowFollowUpNotification(List<dynamic> staleApps) async {
+    if (staleApps.isEmpty) return;
+    if (!_isInitialized) return;
+    if (!await isEnabled()) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final now = DateTime.now();
+      final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final lastDate = prefs.getString('last_followup_notif_date');
+
+      if (lastDate == todayStr) return; // Maksimal 1 notifikasi rangkuman per hari agar tidak mengganggu
+
+      final count = staleApps.length;
+      final dynamic firstApp = staleApps.first;
+      final company = (firstApp is Map) ? (firstApp['company'] ?? 'perusahaan') : firstApp.companyName;
+
+      final title = 'Perlu Follow-up ($count Lamaran)';
+      final body = count == 1
+          ? 'Lamaran di $company sudah > 7 hari tanpa kabar. Yuk kirim pesan follow-up ke HR!'
+          : '$count lamaran termasuk di $company sudah > 7 hari tanpa kabar. Buka AppliQ untuk template pesan!';
+
+      await showInstantNotification(
+        id: 8888,
+        title: title,
+        body: body,
+      );
+
+      await prefs.setString('last_followup_notif_date', todayStr);
+    } catch (e) {
+      debugPrint('Error triggering follow-up notification: $e');
+    }
+  }
+
   /// Batalkan notifikasi tertentu berdasarkan ID
   Future<void> cancelNotification(int id) async {
     if (!_isInitialized) return;

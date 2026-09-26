@@ -136,16 +136,40 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
+      // Jadwalkan pengingat follow-up otomatis untuk lamaran yang masih aktif
+      for (var app in apps) {
+        if (app.status == ApplicationStatus.applied) {
+          final targetFollowUp =
+              app.appliedDate.add(const Duration(days: 7, hours: 9));
+          if (targetFollowUp.isAfter(DateTime.now())) {
+            NotificationService.instance.scheduleFollowUpReminder(
+              id: ('followup_${app.id}').hashCode,
+              company: app.companyName,
+              position: app.positionTitle,
+              targetDate: targetFollowUp,
+            );
+          }
+        }
+      }
+
       // Periksa riwayat ID notifikasi yang sudah dibaca
       final prefs = await SharedPreferences.getInstance();
       final readIds =
           (prefs.getStringList('read_notification_ids') ?? []).toSet();
 
       final staleApps = apps.where((app) {
-        if (app.status != ApplicationStatus.applied) return false;
+        if (app.status != ApplicationStatus.applied &&
+            app.status != ApplicationStatus.noResponse) {
+          return false;
+        }
         final days = DateTime.now().difference(app.appliedDate).inDays;
-        return days >= 14;
+        return days >= 7;
       }).toList();
+
+      // Pemicu notifikasi otomatis harian jika ada lamaran yang sudah butuh follow-up
+      if (staleApps.isNotEmpty) {
+        NotificationService.instance.checkAndShowFollowUpNotification(staleApps);
+      }
 
       final currentAlertIds = <String>{};
       for (var item in upcoming) {

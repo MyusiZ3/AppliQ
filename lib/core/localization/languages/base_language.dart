@@ -367,6 +367,8 @@ abstract class BaseLanguage {
   String get privacyModalTitle;
   String get privacyModalSubtitle;
   List<Map<String, String>> get privacyCards;
+  String get faqSheetTitle;
+  String get faqSheetSubtitle;
   List<Map<String, String>> get faqList;
 
   // Settings & Bottom Sheets

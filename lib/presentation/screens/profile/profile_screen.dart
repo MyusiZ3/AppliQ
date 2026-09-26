@@ -409,7 +409,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Frequently Asked Questions',
+                              AppStrings.faqSheetTitle,
                               style: TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
@@ -419,7 +419,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              AppStrings.generalSettingsSubtitle,
+                              AppStrings.faqSheetSubtitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

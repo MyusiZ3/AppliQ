@@ -744,26 +744,51 @@ class EnLanguage implements BaseLanguage {
   ];
 
   @override
+  String get faqSheetTitle => 'Frequently Asked Questions (FAQ)';
+  @override
+  String get faqSheetSubtitle => 'Complete guide to AppliQ core features and usage';
+
+  @override
   List<Map<String, String>> get faqList => [
     {
       'q': 'What is AppliQ and how does it work?',
-      'a': 'AppliQ is a smart job application tracker designed to help you log applications, organize interview stages, set reminders, and analyze career conversion rates in real-time.',
+      'a': 'AppliQ is an intelligent job tracking assistant that helps you organize job applications, manage hiring pipelines (Kanban & List views), schedule interview reminders, prepare ready-to-use HR templates, and analyze conversion metrics across your entire job hunt.',
     },
     {
-      'q': 'How do I set up interview reminder notifications?',
-      'a': 'When adding or editing an interview stage in Application Details, specify the date and time. Ensure the "Notifications & Reminders" toggle in Settings is enabled so you receive timely alerts.',
+      'q': 'How does the Kanban Board (Drag & Drop) view work?',
+      'a': 'On the Applications screen, tap the layout toggle icon in the top right to switch to Kanban Board mode. You can press and drag application cards between status columns (Applied, Interview, Offering, Rejected) to update your progress instantly.',
     },
     {
-      'q': 'Are my salary figures and application records secure?',
-      'a': 'Extremely secure. AppliQ enforces Row-Level Security (RLS) on Supabase with TLS encryption. No other user or external entity can view your private application history.',
+      'q': 'When does "Needs Follow-up" appear and how do notifications work?',
+      'a': 'Applications marked as "Applied" without any status update for over 7 days automatically show a "Needs Follow-up" badge on the Home screen. AppliQ also schedules local reminder notifications exactly at Day 7 so you never lose communication momentum with recruiters.',
     },
     {
-      'q': 'How do I search and filter through my applications?',
-      'a': 'Go to the Applications or Schedule tab. Use the search bar at the top to filter by company name or role, or tap status filters (Applied, Interview, Offering, Rejected).',
+      'q': 'How do I use the HR Message Templates?',
+      'a': 'Open any application details card or tap the "HR Templates" action. You will find authentic, natural communication templates in 4 languages (English, Indonesian, Japanese, Korean) for status follow-ups, interview confirmations, test submissions, and salary negotiations that can be copied directly without closing the modal.',
     },
     {
-      'q': 'Can I export my job application records?',
-      'a': 'Yes. The Export feature lets you download your career history summaries in clean PDF reports or CSV spreadsheets anytime.',
+      'q': 'What file formats are supported for exporting applications?',
+      'a': 'The Export feature in the Analytics tab supports two primary formats: styled Excel spreadsheets (.xlsx) with auto-column width and pastel headers, as well as formal PDF summary reports ready for printing or archiving.',
+    },
+    {
+      'q': 'How do interview schedule reminders work?',
+      'a': 'When adding or editing an interview round in application details, set the date and time. Ensure the "Notifications & Reminders" toggle is enabled in Profile Settings so AppliQ alerts you before your interview begins.',
+    },
+    {
+      'q': 'How do I interpret the Career Analytics conversion funnel?',
+      'a': 'In the Analytics tab, the conversion funnel tracks your real-time success rate from Applied ➔ Interview ➔ Offering ➔ Accepted. This metric helps identify where your resume or interview performance excels.',
+    },
+    {
+      'q': 'Are my documents, salary figures, and job records safe?',
+      'a': 'Completely secure. AppliQ employs Row-Level Security (RLS) on Supabase along with TLS encryption in transit. Your resumes, portfolios, interview notes, and compensation records remain strictly private and accessible only by you.',
+    },
+    {
+      'q': 'Does AppliQ support Dark Mode and Monochrome themes?',
+      'a': 'Yes. Under Profile ➔ General Settings, you can switch seamlessly between Light Mode, Dark Mode, or enable our sleek battery-friendly Monochrome theme.',
+    },
+    {
+      'q': 'How do I switch the application language?',
+      'a': 'Navigate to Profile ➔ Language Settings. You can choose between 4 languages: English, Bahasa Indonesia, 日本語 (Japanese), or 한국어 (Korean). The entire UI, date formatting, and HR templates will adapt immediately.',
     },
   ];
 

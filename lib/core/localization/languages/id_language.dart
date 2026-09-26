@@ -744,26 +744,51 @@ class IdLanguage implements BaseLanguage {
   ];
 
   @override
+  String get faqSheetTitle => 'Pertanyaan Umum (FAQ)';
+  @override
+  String get faqSheetSubtitle => 'Panduan lengkap fitur utama dan penggunaan AppliQ';
+
+  @override
   List<Map<String, String>> get faqList => [
     {
       'q': 'Apa itu AppliQ dan bagaimana cara kerjanya?',
-      'a': 'AppliQ adalah platform pelacak lamaran kerja pintar yang membantu Anda mencatat setiap lamaran, menjadwalkan interview, memantau tahapan seleksi, dan menganalisis tingkat keberhasilan karir secara real-time.',
+      'a': 'AppliQ adalah asisten pelacak lamaran kerja cerdas yang membantu Anda mencatat setiap lamaran, mengelola tahapan seleksi (Kanban & List), menjadwalkan agenda wawancara, menyiapkan template pesan HR, hingga mengevaluasi rasio kelolosan karir secara komprehensif.',
     },
     {
-      'q': 'Bagaimana cara mengatur notifikasi pengingat interview?',
-      'a': 'Saat menambah atau mengedit tahapan interview di detail lamaran, tentukan tanggal dan jamnya. Pastikan toggle "Notifikasi Pengingat" di Pengaturan aktif agar sistem dapat mengirimkan notifikasi tepat waktu.',
+      'q': 'Bagaimana cara menggunakan tampilan Kanban Board (Drag & Drop)?',
+      'a': 'Pada tab Lamaran, tekan ikon toggle tampilan di kanan atas untuk beralih ke mode Kanban Board. Anda dapat menekan dan menggeser (drag & drop) kartu lamaran antar kolom status (Applied, Interview, Offering, Rejected) untuk memperbarui progres secara instan.',
     },
     {
-      'q': 'Apakah data riwayat gaji dan lamaran saya aman?',
-      'a': 'Sangat aman. AppliQ menerapkan Row-Level Security (RLS) di Supabase dan enkripsi TLS. Tidak ada pengguna lain yang dapat mengakses riwayat lamaran dan catatan gaji Anda.',
+      'q': 'Kapan status "Perlu Follow-up" muncul dan bagaimana notifikasinya?',
+      'a': 'Lamaran berstatus "Applied" yang belum ada pembaruan lebih dari 7 hari otomatis ditandai sebagai "Perlu Follow-up" di Home screen. Sistem juga mengirimkan notifikasi pengingat otomatis tepat di hari ke-7 agar Anda tidak melewatkan momentum menghubungi rekruter.',
     },
     {
-      'q': 'Bagaimana cara mencari dan memfilter lamaran?',
-      'a': 'Buka tab Lamaran atau Jadwal. Gunakan Search Bar di bagian atas untuk mencari nama perusahaan atau posisi, dan filter berdasarkan status (Applied, Interview, Offering, Rejected).',
+      'q': 'Bagaimana cara memanfaatkan Template Pesan HR?',
+      'a': 'Buka kartu lamaran atau tekan tombol aksi "Template Pesan HR". Tersedia pesan komunikasi profesional siap pakai dalam 4 bahasa (Indonesia, Inggris, Jepang, Korea) untuk follow-up status, konfirmasi wawancara, pengumpulan tes teknis, hingga negosiasi gaji. Teks dapat langsung disalin ke clipboard.',
     },
     {
-      'q': 'Apakah saya bisa mengekspor data riwayat lamaran?',
-      'a': 'Ya. Fitur Ekspor memungkinkan Anda mengunduh rangkuman riwayat karir dalam format laporan PDF atau spreadsheet CSV.',
+      'q': 'Format file apa saja yang didukung untuk Ekspor Data Lamaran?',
+      'a': 'Fitur Ekspor di tab Analitik mendukung dua format utama: spreadsheet Excel (.xlsx) dengan tata letak rapi, auto-width kolom, dan styling header warna pastel, serta dokumen PDF formal yang siap dicetak atau dibagikan.',
+    },
+    {
+      'q': 'Bagaimana cara kerja pengingat jadwal interview?',
+      'a': 'Saat menambahkan atau mengubah tahapan interview di detail lamaran, tentukan tanggal serta jamnya. Pastikan toggle "Notifikasi & Pengingat" di Pengaturan Profil dalam keadaan aktif agar sistem dapat memicu alarm pengingat sebelum sesi dimulai.',
+    },
+    {
+      'q': 'Bagaimana cara membaca Funnel Analitik Karir?',
+      'a': 'Di tab Analitik, grafik funnel menampilkan tingkat konversi lamaran secara real-time dari Applied ➔ Interview ➔ Offering ➔ Diterima. Metrik ini membantu Anda mengevaluasi efektivitas resume dan performa interview Anda.',
+    },
+    {
+      'q': 'Apakah data riwayat gaji, lamaran, dan dokumen saya aman?',
+      'a': 'Sangat aman. AppliQ menerapkan enkripsi TLS dan sistem keamanan Row-Level Security (RLS) di Supabase. Tidak ada pengguna lain yang dapat mengakses portofolio, CV, berkas lamaran, maupun catatan nominal gaji Anda.',
+    },
+    {
+      'q': 'Apakah AppliQ mendukung Mode Gelap (Dark Mode) dan Monokrom?',
+      'a': 'Ya. Anda dapat menyesuaikan tampilan visual di Pengaturan Profil. Tersedia pilihan Mode Terang, Mode Gelap, serta Mode Monokrom minimalis modern yang hemat baterai.',
+    },
+    {
+      'q': 'Bagaimana cara mengubah bahasa antarmuka aplikasi?',
+      'a': 'Buka Profil ➔ Pengaturan Bahasa. Anda dapat memilih dari 4 bahasa: Bahasa Indonesia, English, 日本語 (Jepang), atau 한국어 (Korea). Seluruh antarmuka, format tanggal, dan template pesan HR akan otomatis menyesuaikan.',
     },
   ];
 

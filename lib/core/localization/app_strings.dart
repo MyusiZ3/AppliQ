@@ -395,6 +395,8 @@ class AppStrings {
   static String get privacyModalTitle => current.privacyModalTitle;
   static String get privacyModalSubtitle => current.privacyModalSubtitle;
   static List<Map<String, String>> get privacyCards => current.privacyCards;
+  static String get faqSheetTitle => current.faqSheetTitle;
+  static String get faqSheetSubtitle => current.faqSheetSubtitle;
   static List<Map<String, String>> get faqList => current.faqList;
 
   // Settings & Bottom Sheets

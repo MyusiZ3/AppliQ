@@ -83,7 +83,27 @@ class _ExportSheetState extends State<ExportSheet> {
 
       sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
 
+      // Header Styling: Pastel Lavender accent with bold text
+      final headerStyle = CellStyle(
+        bold: true,
+        fontSize: 11,
+        fontColorHex: ExcelColor.fromHexString('FF18181B'),
+        backgroundColorHex: ExcelColor.fromHexString('FFE0E7FF'),
+        horizontalAlign: HorizontalAlign.Center,
+        verticalAlign: VerticalAlign.Center,
+      );
+
+      for (int c = 0; c < headers.length; c++) {
+        final cell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: 0));
+        cell.cellStyle = headerStyle;
+      }
+      sheet.setRowHeight(0, 28.0);
+
       final dateFormat = DateFormat('yyyy-MM-dd');
+      final centerStyle = CellStyle(
+        horizontalAlign: HorizontalAlign.Center,
+        verticalAlign: VerticalAlign.Center,
+      );
 
       for (int i = 0; i < widget.applications.length; i++) {
         final app = widget.applications[i];
@@ -110,6 +130,59 @@ class _ExportSheetState extends State<ExportSheet> {
           TextCellValue(app.location ?? '-'),
           TextCellValue(app.notes ?? '-'),
         ]);
+
+        final rowIndex = i + 1;
+        sheet.setRowHeight(rowIndex, 22.0);
+        // Center-align specific structured columns
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex)).cellStyle = centerStyle;
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex)).cellStyle = centerStyle;
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: rowIndex)).cellStyle = centerStyle;
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: rowIndex)).cellStyle = centerStyle;
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: 6, rowIndex: rowIndex)).cellStyle = centerStyle;
+      }
+
+      // Calculate and apply dynamic column widths (Auto-Width with padding)
+      for (int c = 0; c < headers.length; c++) {
+        int maxCharLen = headers[c].length;
+        for (final app in widget.applications) {
+          int len = 0;
+          switch (c) {
+            case 1:
+              len = app.companyName.length;
+              break;
+            case 2:
+              len = app.positionTitle.length;
+              break;
+            case 3:
+              len = AppStrings.localizedWorkSystem(app.workSystem).length;
+              break;
+            case 4:
+              len = (app.jobPortalCustom ?? AppStrings.localizedJobPortal(app.jobPortal)).length;
+              break;
+            case 5:
+              len = AppStrings.localizedStatus(app.status).length;
+              break;
+            case 6:
+              len = 10;
+              break;
+            case 7:
+              len = app.salaryExpectation != null ? app.salaryExpectation!.toStringAsFixed(0).length : 1;
+              break;
+            case 8:
+              len = app.salaryOffered != null ? app.salaryOffered!.toStringAsFixed(0).length : 1;
+              break;
+            case 9:
+              len = (app.location ?? '').length;
+              break;
+            case 10:
+              len = (app.notes ?? '').length.clamp(0, 40);
+              break;
+          }
+          if (len > maxCharLen) maxCharLen = len;
+        }
+
+        final double colWidth = c == 0 ? 6.0 : (maxCharLen + 4).toDouble().clamp(12.0, 45.0);
+        sheet.setColumnWidth(c, colWidth);
       }
 
       final fileBytes = excel.save();

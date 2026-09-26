@@ -10,14 +10,6 @@ class LegalSheets {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
-    final icons = [
-      CupertinoIcons.checkmark_shield_fill,
-      CupertinoIcons.lock_shield_fill,
-      CupertinoIcons.briefcase_fill,
-      CupertinoIcons.star_circle_fill,
-      CupertinoIcons.exclamationmark_triangle_fill,
-      CupertinoIcons.arrow_2_circlepath_circle_fill,
-    ];
 
     showModalBottomSheet(
       context: context,
@@ -114,7 +106,6 @@ class LegalSheets {
                       return _buildLegalCard(
                         title: card['title'] ?? '',
                         content: card['content'] ?? '',
-                        icon: icons[index % icons.length],
                         cardBg: cardBg,
                         borderColor: borderColor,
                         isDark: isDark,
@@ -135,13 +126,6 @@ class LegalSheets {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
     final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
-    final icons = [
-      CupertinoIcons.person_badge_plus_fill,
-      CupertinoIcons.gear_alt_fill,
-      CupertinoIcons.lock_shield_fill,
-      CupertinoIcons.hand_raised_fill,
-      CupertinoIcons.trash_circle_fill,
-    ];
 
     showModalBottomSheet(
       context: context,
@@ -238,7 +222,6 @@ class LegalSheets {
                       return _buildLegalCard(
                         title: card['title'] ?? '',
                         content: card['content'] ?? '',
-                        icon: icons[index % icons.length],
                         cardBg: cardBg,
                         borderColor: borderColor,
                         isDark: isDark,
@@ -257,7 +240,6 @@ class LegalSheets {
   static Widget _buildLegalCard({
     required String title,
     required String content,
-    required IconData icon,
     required Color cardBg,
     required Color borderColor,
     required bool isDark,
@@ -272,33 +254,21 @@ class LegalSheets {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: const Color(0xFF4285F4),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             content,
             style: TextStyle(
               fontSize: 13,
-              height: 1.5,
+              height: 1.55,
               letterSpacing: -0.1,
               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
             ),

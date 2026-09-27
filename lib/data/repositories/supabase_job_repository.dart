@@ -3,10 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/config/app_config.dart';
+import '../../core/constants/app_enums.dart';
 import '../models/application_log.dart';
 import '../models/job_application.dart';
 import '../models/user_profile.dart';
 import '../models/user_resume.dart';
+import '../../core/utils/network_helper.dart';
+import '../../services/local_cache_service.dart';
 import 'job_repository.dart';
 
 class SupabaseJobRepository implements JobRepository {
@@ -40,12 +43,22 @@ class SupabaseJobRepository implements JobRepository {
       return _cachedProfile;
     }
 
+    // Ambil dari local disk cache terlebih dahulu jika cache memori belum ada
+    if (_cachedProfile == null) {
+      final diskProfile = await LocalCacheService.getUserProfile(user.id);
+      if (diskProfile != null) {
+        _cachedProfile = diskProfile;
+      }
+    }
+
     try {
-      final data = await _supabase
-          .from('profiles')
-          .select()
-          .eq('id', user.id)
-          .maybeSingle();
+      final data = await NetworkHelper.runWithRetry(
+        () => _supabase
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .maybeSingle(),
+      );
 
       if (data != null) {
         final profile = UserProfile.fromJson(data);
@@ -53,6 +66,7 @@ class SupabaseJobRepository implements JobRepository {
         _cachedProfile = profile.copyWith(
           avatarUrl: profile.avatarUrl.isNotEmpty ? profile.avatarUrl : googleAvatar,
         );
+        await LocalCacheService.saveUserProfile(user.id, _cachedProfile!);
         return _cachedProfile;
       }
       
@@ -62,8 +76,10 @@ class SupabaseJobRepository implements JobRepository {
         fullName: user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? 'Pengguna AppliQ',
         avatarUrl: user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'] ?? '',
       );
+      await LocalCacheService.saveUserProfile(user.id, _cachedProfile!);
       return _cachedProfile;
     } catch (_) {
+      if (_cachedProfile != null) return _cachedProfile;
       _cachedProfile = UserProfile(
         id: user.id,
         email: user.email ?? '',
@@ -77,8 +93,14 @@ class SupabaseJobRepository implements JobRepository {
   @override
   Future<UserProfile> updateUserProfile(UserProfile profile) async {
     _cachedProfile = profile;
+    final user = _supabase.auth.currentUser;
+    if (user != null) {
+      await LocalCacheService.saveUserProfile(user.id, profile);
+    }
     try {
-      await _supabase.from('profiles').upsert(profile.toJson());
+      await NetworkHelper.runWithRetry(
+        () => _supabase.from('profiles').upsert(profile.toJson()),
+      );
     } catch (_) {}
     notifyDataChanged();
     return profile;
@@ -159,6 +181,10 @@ class SupabaseJobRepository implements JobRepository {
       await googleSignIn.signOut();
       await googleSignIn.disconnect();
     } catch (_) {}
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      await LocalCacheService.clearUserCache(userId);
+    }
     await _supabase.auth.signOut();
     notifyDataChanged();
   }
@@ -188,20 +214,42 @@ class SupabaseJobRepository implements JobRepository {
       return _cachedApplications!;
     }
 
-    final response = await _supabase
-        .from('job_applications')
-        .select()
-        .eq('user_id', userId)
-        .order('applied_date', ascending: false);
+    // Ambil dari disk cache lebih dulu bila memori masih kosong (Zero Blank Screen)
+    if (_cachedApplications == null) {
+      final diskApps = await LocalCacheService.getApplications(userId);
+      if (diskApps != null && diskApps.isNotEmpty) {
+        _cachedApplications = diskApps;
+      }
+    }
 
-    _cachedApplications = (response as List).map((json) => JobApplication.fromJson(json)).toList();
-    return _cachedApplications!;
+    try {
+      final response = await NetworkHelper.runWithRetry(
+        () => _supabase
+            .from('job_applications')
+            .select()
+            .eq('user_id', userId)
+            .order('applied_date', ascending: false),
+      );
+
+      _cachedApplications = (response as List).map((json) => JobApplication.fromJson(json)).toList();
+      await LocalCacheService.saveApplications(userId, _cachedApplications!);
+      return _cachedApplications!;
+    } catch (e) {
+      // Jika offline atau jaringan terputus, fallback ke data cache lokal yang sudah ada
+      if (_cachedApplications != null && _cachedApplications!.isNotEmpty) {
+        return _cachedApplications!;
+      }
+      rethrow;
+    }
   }
 
   @override
   Future<JobApplication> createApplication(JobApplication application) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Pengguna belum terautentikasi');
+
+    final cleanStatus = application.status.name.toLowerCase();
+    final initialStages = <String>{'applied', cleanStatus};
 
     final insertData = {
       'user_id': userId,
@@ -220,21 +268,27 @@ class SupabaseJobRepository implements JobRepository {
       'cv_file_url': application.cvFileUrl,
       'cv_file_name': application.cvFileName,
       'is_favorite': application.isFavorite,
+      'reached_stages': initialStages.toList(),
     };
 
-    final response = await _supabase
-        .from('job_applications')
-        .insert(insertData)
-        .select()
-        .single();
+    final response = await NetworkHelper.runWithRetry(
+      () => _supabase
+          .from('job_applications')
+          .insert(insertData)
+          .select()
+          .single(),
+    );
 
     final result = JobApplication.fromJson(response);
     
-    // Update local cache directly
+    // Update memory & disk cache directly
     if (_cachedApplications != null) {
       _cachedApplications!.removeWhere((a) => a.id == result.id);
       _cachedApplications!.insert(0, result);
+    } else {
+      _cachedApplications = [result];
     }
+    await LocalCacheService.saveApplications(userId, _cachedApplications!);
     _cachedStats = null;
     notifyDataChanged();
     return result;
@@ -242,6 +296,12 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<JobApplication> updateApplication(JobApplication application) async {
+    final currentStages = Set<String>.from(application.reachedStages);
+    currentStages.add('applied');
+    final cleanStatus = application.status.name.toLowerCase();
+    currentStages.add(cleanStatus);
+    final updatedStagesList = currentStages.toList();
+
     final updateData = <String, dynamic>{
       'company_name': application.companyName,
       'position_title': application.positionTitle,
@@ -258,28 +318,34 @@ class SupabaseJobRepository implements JobRepository {
       'cv_file_url': application.cvFileUrl,
       'cv_file_name': application.cvFileName,
       'is_favorite': application.isFavorite,
+      'reached_stages': updatedStagesList,
       'updated_at': DateTime.now().toIso8601String(),
     };
 
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Pengguna belum terautentikasi');
 
-    final response = await _supabase
-        .from('job_applications')
-        .update(updateData)
-        .eq('id', application.id)
-        .eq('user_id', userId)
-        .select()
-        .maybeSingle();
+    final response = await NetworkHelper.runWithRetry(
+      () => _supabase
+          .from('job_applications')
+          .update(updateData)
+          .eq('id', application.id)
+          .eq('user_id', userId)
+          .select()
+          .maybeSingle(),
+    );
 
     final result = response != null ? JobApplication.fromJson(response) : application;
     
-    // Update local cache directly
+    // Update local & disk cache directly
     if (_cachedApplications != null) {
       final index = _cachedApplications!.indexWhere((a) => a.id == result.id);
       if (index != -1) {
         _cachedApplications![index] = result;
+      } else {
+        _cachedApplications!.insert(0, result);
       }
+      await LocalCacheService.saveApplications(userId, _cachedApplications!);
     }
     _cachedStats = null;
     notifyDataChanged();
@@ -291,13 +357,18 @@ class SupabaseJobRepository implements JobRepository {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
 
-    await _supabase
-        .from('job_applications')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', userId);
+    await NetworkHelper.runWithRetry(
+      () => _supabase
+          .from('job_applications')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userId),
+    );
 
     _cachedApplications?.removeWhere((a) => a.id == id);
+    if (_cachedApplications != null) {
+      await LocalCacheService.saveApplications(userId, _cachedApplications!);
+    }
     _cachedLogs.remove(id);
     _cachedStats = null;
     notifyDataChanged();
@@ -342,6 +413,10 @@ class SupabaseJobRepository implements JobRepository {
             updatedAt: DateTime.now(),
           );
         }
+        final userId = _supabase.auth.currentUser?.id;
+        if (userId != null) {
+          await LocalCacheService.saveApplications(userId, _cachedApplications!);
+        }
       }
       notifyDataChanged();
     } catch (e) {
@@ -358,15 +433,24 @@ class SupabaseJobRepository implements JobRepository {
       return _cachedLogs[applicationId]!;
     }
 
-    final response = await _supabase
-        .from('application_logs')
-        .select()
-        .eq('application_id', applicationId)
-        .order('created_at', ascending: true);
+    try {
+      final response = await NetworkHelper.runWithRetry(
+        () => _supabase
+            .from('application_logs')
+            .select()
+            .eq('application_id', applicationId)
+            .order('created_at', ascending: true),
+      );
 
-    final list = (response as List).map((json) => ApplicationLog.fromJson(json)).toList();
-    _cachedLogs[applicationId] = list;
-    return list;
+      final list = (response as List).map((json) => ApplicationLog.fromJson(json)).toList();
+      _cachedLogs[applicationId] = list;
+      return list;
+    } catch (e) {
+      if (_cachedLogs.containsKey(applicationId)) {
+        return _cachedLogs[applicationId]!;
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -378,15 +462,29 @@ class SupabaseJobRepository implements JobRepository {
       return _cachedAllLogs!;
     }
 
+    // Ambil dari disk cache bila memori kosong
+    if (_cachedAllLogs == null) {
+      final diskLogs = await LocalCacheService.getLogs(userId);
+      if (diskLogs != null && diskLogs.isNotEmpty) {
+        _cachedAllLogs = diskLogs;
+        for (var log in diskLogs) {
+          _cachedLogs.putIfAbsent(log.applicationId, () => []).add(log);
+        }
+      }
+    }
+
     try {
-      final response = await _supabase
-          .from('application_logs')
-          .select()
-          .eq('user_id', userId)
-          .order('created_at', ascending: true);
+      final response = await NetworkHelper.runWithRetry(
+        () => _supabase
+            .from('application_logs')
+            .select()
+            .eq('user_id', userId)
+            .order('created_at', ascending: true),
+      );
 
       final list = (response as List).map((json) => ApplicationLog.fromJson(json)).toList();
       _cachedAllLogs = list;
+      await LocalCacheService.saveLogs(userId, list);
 
       // Populate individual application logs cache for instantaneous subsequent lookups
       _cachedLogs.clear();
@@ -416,6 +514,7 @@ class SupabaseJobRepository implements JobRepository {
     final result = response != null ? ApplicationLog.fromJson(response) : log;
     _cachedLogs.putIfAbsent(log.applicationId, () => []).add(result);
     _cachedAllLogs?.add(result);
+    _cachedStats = null;
     notifyDataChanged();
     return result;
   }
@@ -483,22 +582,30 @@ class SupabaseJobRepository implements JobRepository {
     if (userId == null) return {};
 
     final apps = await getApplications(forceRefresh: forceRefresh);
-    final total = apps.length;
-    final applied = apps.where((a) => a.status.name == 'applied').length;
-    final interview = apps.where((a) => a.status.name == 'interview').length;
-    final offering = apps.where((a) => a.status.name == 'offering').length;
-    final accepted = apps.where((a) => a.status.name == 'accepted').length;
-    final rejected = apps.where((a) => a.status.name == 'rejected').length;
-    final noResponse = apps.where((a) => a.status.name == 'noResponse').length;
 
-    // Funnel counts (cumulative achievements in the hiring journey)
-    final interviewFunnel = apps.where((a) =>
-        a.status.name == 'interview' ||
-        a.status.name == 'offering' ||
-        a.status.name == 'accepted').length;
-    final offeringFunnel = apps.where((a) =>
-        a.status.name == 'offering' ||
-        a.status.name == 'accepted').length;
+    final total = apps.length;
+    final applied = apps.where((a) => a.status == ApplicationStatus.applied).length;
+    final interview = apps.where((a) => a.status == ApplicationStatus.interview).length;
+    final offering = apps.where((a) => a.status == ApplicationStatus.offering).length;
+    final accepted = apps.where((a) => a.status == ApplicationStatus.accepted).length;
+    final rejected = apps.where((a) => a.status == ApplicationStatus.rejected).length;
+    final noResponse = apps.where((a) => a.status == ApplicationStatus.noResponse).length;
+
+    // Histori tahap yang pernah dicapai (Disimpan online di Supabase reached_stages)
+    final totalInterview = apps.where((a) =>
+        a.status == ApplicationStatus.interview ||
+        a.status == ApplicationStatus.offering ||
+        a.status == ApplicationStatus.accepted ||
+        a.reachedStages.contains('interview')).length;
+
+    final totalOffering = apps.where((a) =>
+        a.status == ApplicationStatus.offering ||
+        a.status == ApplicationStatus.accepted ||
+        a.reachedStages.contains('offering')).length;
+
+    final totalAccepted = apps.where((a) =>
+        a.status == ApplicationStatus.accepted ||
+        a.reachedStages.contains('accepted')).length;
 
     final byWorkSystem = <String, int>{};
     for (var app in apps) {
@@ -521,8 +628,11 @@ class SupabaseJobRepository implements JobRepository {
       'accepted_count': accepted,
       'rejected_count': rejected,
       'no_response_count': noResponse,
-      'interview_funnel_count': interviewFunnel,
-      'offering_funnel_count': offeringFunnel,
+      'total_interview_count': totalInterview,
+      'total_offering_count': totalOffering,
+      'total_accepted_count': totalAccepted,
+      'interview_funnel_count': totalInterview,
+      'offering_funnel_count': totalOffering,
       'by_work_system': byWorkSystem,
       'by_portal': byPortal,
     };

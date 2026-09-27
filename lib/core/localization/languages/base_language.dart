@@ -32,6 +32,10 @@ abstract class BaseLanguage {
   String get viewAll;
   String get openInDrive;
   String get scheduleDateLabel;
+  String get connectionIssueTitle;
+  String get connectionIssueDesc;
+  String get offlineModeBanner;
+  String get syncingData;
 
   // Home Screen
   String get greetingMorning;
@@ -203,6 +207,11 @@ abstract class BaseLanguage {
   String get offeringMetric;
   String get hiredMetric;
   String get statusDistribution;
+  String get stageMilestones;
+  String get currentStatusTab;
+  String get milestonesReached;
+  String get everInterviewed;
+  String get everOffered;
   String get workSystemDistribution;
   String get noWorkSystemData;
   String get portalSources;

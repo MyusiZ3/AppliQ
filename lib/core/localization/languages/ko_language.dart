@@ -58,6 +58,14 @@ class KoLanguage implements BaseLanguage {
   String get openInDrive => 'Google 드라이브에서 열기';
   @override
   String get scheduleDateLabel => '일정';
+  @override
+  String get connectionIssueTitle => '연결 문제';
+  @override
+  String get connectionIssueDesc => '서버에 연결할 수 없습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해 주세요.';
+  @override
+  String get offlineModeBanner => '오프라인 모드 • 캐시된 데이터 표시 중';
+  @override
+  String get syncingData => '데이터 동기화 중...';
 
   // Home Screen
   @override
@@ -383,13 +391,23 @@ class KoLanguage implements BaseLanguage {
   @override
   String get totalApplicationsMetric => '총 지원 건수';
   @override
-  String get interviewStageMetric => '면접 전형 단계';
+  String get interviewStageMetric => '총 면접 전형';
   @override
-  String get offeringMetric => '최종 오퍼';
+  String get offeringMetric => '총 최종 오퍼';
   @override
   String get hiredMetric => '최종 입사';
   @override
   String get statusDistribution => '지원 상태별 분포';
+  @override
+  String get stageMilestones => '전형 퍼널 (히스토리)';
+  @override
+  String get currentStatusTab => '현재 상태';
+  @override
+  String get milestonesReached => '도달 전형:';
+  @override
+  String get everInterviewed => '면접 도달';
+  @override
+  String get everOffered => '오퍼 획득';
   @override
   String get workSystemDistribution => '근무 형태 분포';
   @override

@@ -19,6 +19,7 @@ class JobApplication {
   final String? cvFileUrl;
   final String? cvFileName;
   final bool isFavorite;
+  final List<String> reachedStages;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -41,6 +42,7 @@ class JobApplication {
     this.cvFileUrl,
     this.cvFileName,
     this.isFavorite = false,
+    this.reachedStages = const ['applied'],
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -74,6 +76,14 @@ class JobApplication {
       isFavorite: json['is_favorite'] == true ||
           json['is_favorite'] == 'true' ||
           json['is_favorite'] == 1,
+      reachedStages: json['reached_stages'] != null && json['reached_stages'] is List
+          ? (json['reached_stages'] as List)
+              .map((e) => e.toString().toLowerCase())
+              .toList()
+          : [
+              'applied',
+              if (json['status'] != null) json['status'].toString().toLowerCase(),
+            ],
       createdAt: json['created_at'] != null
           ? (DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
@@ -103,6 +113,7 @@ class JobApplication {
       'cv_file_url': cvFileUrl,
       'cv_file_name': cvFileName,
       'is_favorite': isFavorite,
+      'reached_stages': reachedStages,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -128,6 +139,7 @@ class JobApplication {
     String? cvFileName,
     bool clearCvFile = false,
     bool? isFavorite,
+    List<String>? reachedStages,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -150,6 +162,7 @@ class JobApplication {
       cvFileUrl: clearCvFile ? null : (cvFileUrl ?? this.cvFileUrl),
       cvFileName: clearCvFile ? null : (cvFileName ?? this.cvFileName),
       isFavorite: isFavorite ?? this.isFavorite,
+      reachedStages: reachedStages ?? this.reachedStages,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

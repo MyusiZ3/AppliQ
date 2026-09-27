@@ -57,6 +57,14 @@ class EnLanguage implements BaseLanguage {
   String get openInDrive => 'Open in Google Drive';
   @override
   String get scheduleDateLabel => 'Schedule';
+  @override
+  String get connectionIssueTitle => 'Connection Issue';
+  @override
+  String get connectionIssueDesc => 'Unable to connect to server. Please check your internet connection or try again shortly.';
+  @override
+  String get offlineModeBanner => 'Offline Mode • Showing cached data';
+  @override
+  String get syncingData => 'Syncing data...';
 
   // Home Screen
   @override
@@ -382,13 +390,23 @@ class EnLanguage implements BaseLanguage {
   @override
   String get totalApplicationsMetric => 'Total Apply';
   @override
-  String get interviewStageMetric => 'Interview Stage';
+  String get interviewStageMetric => 'Total Interview';
   @override
-  String get offeringMetric => 'Offering';
+  String get offeringMetric => 'Total Offering';
   @override
   String get hiredMetric => 'Hired';
   @override
   String get statusDistribution => 'Application Status Distribution';
+  @override
+  String get stageMilestones => 'Stage Funnel (History)';
+  @override
+  String get currentStatusTab => 'Current Status';
+  @override
+  String get milestonesReached => 'Milestones Reached:';
+  @override
+  String get everInterviewed => 'Reached Interview';
+  @override
+  String get everOffered => 'Received Offer';
   @override
   String get workSystemDistribution => 'Work System Distribution';
   @override

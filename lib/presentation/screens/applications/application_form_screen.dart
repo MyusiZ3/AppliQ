@@ -9,6 +9,7 @@ import '../../../data/models/job_application.dart';
 import '../../../data/models/user_resume.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../services/google_drive_service.dart';
+import '../../../services/local_cache_service.dart';
 import '../../../utils/language_manager.dart';
 import '../../../utils/theme_manager.dart';
 import '../../../utils/ui_helper.dart';
@@ -191,6 +192,50 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     }
 
     _loadHistoricalSuggestions();
+    if (widget.applicationToEdit == null) {
+      _checkAndRestoreDraft();
+    }
+  }
+
+  Future<void> _checkAndRestoreDraft() async {
+    final draft = await LocalCacheService.getFormDraft();
+    if (draft == null || !mounted) return;
+
+    final company = draft['company'] as String? ?? '';
+    final position = draft['position'] as String? ?? '';
+
+    if (company.isNotEmpty || position.isNotEmpty) {
+      setState(() {
+        if (_companyController.text.isEmpty) _companyController.text = company;
+        if (_positionController.text.isEmpty) _positionController.text = position;
+        if (_locationController.text.isEmpty) _locationController.text = draft['location'] as String? ?? '';
+        if (_urlController.text.isEmpty) _urlController.text = draft['url'] as String? ?? '';
+        if (_portalCustomController.text.isEmpty) _portalCustomController.text = draft['portalCustom'] as String? ?? '';
+        if (_salaryExpectationController.text.isEmpty) _salaryExpectationController.text = draft['salaryExpectation'] as String? ?? '';
+        if (_salaryOfferedController.text.isEmpty) _salaryOfferedController.text = draft['salaryOffered'] as String? ?? '';
+        if (_notesController.text.isEmpty) _notesController.text = draft['notes'] as String? ?? '';
+        _cvFileName ??= draft['cvFileName'] as String?;
+        _cvFileUrl ??= draft['cvFileUrl'] as String?;
+
+        final portalIdx = draft['portal'] as int?;
+        if (portalIdx != null && portalIdx >= 0 && portalIdx < JobPortal.values.length) {
+          _jobPortal = JobPortal.values[portalIdx];
+        }
+        final statusIdx = draft['status'] as int?;
+        if (statusIdx != null && statusIdx >= 0 && statusIdx < ApplicationStatus.values.length) {
+          _status = ApplicationStatus.values[statusIdx];
+        }
+      });
+
+      if (mounted) {
+        UIHelper.showInfoSnackBar(
+          context,
+          LanguageManager.isEnglish
+              ? 'Unsaved draft restored.'
+              : 'Draft formulir sebelumnya berhasil dipulihkan.',
+        );
+      }
+    }
   }
 
   Future<void> _loadHistoricalSuggestions() async {
@@ -216,6 +261,24 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
   @override
   void dispose() {
+    if (widget.applicationToEdit == null &&
+        (_companyController.text.trim().isNotEmpty ||
+            _positionController.text.trim().isNotEmpty)) {
+      LocalCacheService.saveFormDraft({
+        'company': _companyController.text,
+        'position': _positionController.text,
+        'location': _locationController.text,
+        'portal': _jobPortal.index,
+        'portalCustom': _portalCustomController.text,
+        'url': _urlController.text,
+        'status': _status.index,
+        'salaryExpectation': _salaryExpectationController.text,
+        'salaryOffered': _salaryOfferedController.text,
+        'notes': _notesController.text,
+        'cvFileName': _cvFileName,
+        'cvFileUrl': _cvFileUrl,
+      });
+    }
     _companyController.dispose();
     _positionController.dispose();
     _locationController.dispose();
@@ -445,6 +508,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         cvFileName: _cvFileName,
         cvFileUrl: _cvFileUrl,
         isFavorite: widget.applicationToEdit?.isFavorite ?? false,
+        reachedStages: widget.applicationToEdit?.reachedStages ?? const ['applied'],
       );
 
       if (isEditing) {
@@ -454,6 +518,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
         }
       } else {
         await widget.repository.createApplication(application);
+        await LocalCacheService.clearFormDraft();
         if (mounted) {
           UIHelper.showSuccessSnackBar(context, AppStrings.successSaved);
         }
@@ -506,7 +571,27 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
 
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) UIHelper.handleError(context, e);
+      if (mounted) {
+        if (widget.applicationToEdit == null) {
+          await LocalCacheService.saveFormDraft({
+            'company': _companyController.text,
+            'position': _positionController.text,
+            'location': _locationController.text,
+            'portal': _jobPortal.index,
+            'portalCustom': _portalCustomController.text,
+            'url': _urlController.text,
+            'status': _status.index,
+            'salaryExpectation': _salaryExpectationController.text,
+            'salaryOffered': _salaryOfferedController.text,
+            'notes': _notesController.text,
+            'cvFileName': _cvFileName,
+            'cvFileUrl': _cvFileUrl,
+          });
+        }
+        if (mounted) {
+          UIHelper.handleError(context, e);
+        }
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

@@ -17,7 +17,9 @@ import '../../../utils/ui_helper.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../widgets/app_error_state_widget.dart';
 import '../../../core/utils/calendar_helper.dart';
+import '../../../core/utils/network_helper.dart';
 import '../profile/document_preview_screen.dart';
 import 'application_form_screen.dart';
 
@@ -39,6 +41,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   JobApplication? _application;
   List<ApplicationLog> _logs = [];
   bool _isLoading = true;
+  dynamic _loadError;
 
   @override
   void initState() {
@@ -52,33 +55,480 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       final apps = await widget.repository.getApplications();
       final app = apps.firstWhere((a) => a.id == widget.applicationId);
       final logs = await widget.repository.getApplicationLogs(widget.applicationId);
-      setState(() {
-        _application = app;
-        _logs = logs;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _application = app;
+          _logs = logs;
+          _isLoading = false;
+          _loadError = null;
+        });
+      }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
-        UIHelper.handleError(context, e);
-        Navigator.of(context).pop();
+        setState(() {
+          _isLoading = false;
+          _loadError = e;
+        });
+        if (_application == null) {
+          UIHelper.handleError(context, e);
+        }
       }
     }
   }
 
+
+  Future<bool?> _promptInterviewConfirmationOnOffering() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
+    final isEn = LanguageManager.isEnglish;
+
+    return await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+        final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+        final primaryColor = isMono
+            ? (isDark ? Colors.white : const Color(0xFF18181B))
+            : AppColors.pastelLime;
+        final primaryFg = isMono
+            ? (isDark ? const Color(0xFF18181B) : Colors.white)
+            : AppColors.textOnPastel;
+
+        return Container(
+          padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + MediaQuery.of(ctx).padding.bottom),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+            border: Border.all(color: borderColor, width: 0.8),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isMono
+                        ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
+                        : AppColors.pastelLavender.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.mic_fill,
+                      size: 24,
+                      color: isMono
+                          ? (isDark ? Colors.white : const Color(0xFF18181B))
+                          : AppColors.pastelLavender,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                isEn ? 'Passed Interview Stage?' : 'Melewati Tahap Interview?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isEn
+                    ? 'Did you go through an interview before receiving this offering? This ensures your Career Analytics stays accurate.'
+                    : 'Apakah kamu melewati tahap interview terlebih dahulu sebelum penawaran ini? Ini agar statistik Analitik Karir kamu tetap akurat.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                icon: const Icon(CupertinoIcons.checkmark, size: 16),
+                label: Text(
+                  isEn ? 'Yes, Through Interview' : 'Ya, Lewat Interview',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: primaryFg,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                icon: const Icon(CupertinoIcons.gift_fill, size: 16),
+                label: Text(
+                  isEn ? 'No, Direct Offering' : 'Tidak, Langsung Offering',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: borderColor, width: 0.8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(null),
+                child: Text(
+                  isEn ? 'Cancel' : 'Batal',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditReachedStagesSheet() async {
+    if (_application == null) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
+    final isEn = LanguageManager.isEnglish;
+
+    final selected = Set<String>.from(_application!.reachedStages);
+    selected.add('applied');
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+            final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+            final primaryColor = isMono
+                ? (isDark ? Colors.white : const Color(0xFF18181B))
+                : AppColors.pastelLime;
+            final primaryFg = isMono
+                ? (isDark ? const Color(0xFF18181B) : Colors.white)
+                : AppColors.textOnPastel;
+
+            Widget buildStageToggle({
+              required String key,
+              required String title,
+              required String subtitle,
+              required IconData icon,
+              required Color accentColor,
+              bool isLocked = false,
+            }) {
+              final isChecked = selected.contains(key);
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                      : (isMono ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isChecked
+                        ? (isMono ? Colors.transparent : accentColor.withValues(alpha: 0.5))
+                        : borderColor,
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: isMono
+                            ? (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7))
+                            : accentColor.withValues(alpha: 0.25),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          icon,
+                          size: 18,
+                          color: isMono
+                              ? (isDark ? Colors.white : const Color(0xFF18181B))
+                              : accentColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isLocked)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Icon(
+                          CupertinoIcons.lock_fill,
+                          size: 16,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                        ),
+                      )
+                    else
+                      CupertinoSwitch(
+                        value: isChecked,
+                        activeTrackColor: isMono ? (isDark ? Colors.white : const Color(0xFF18181B)) : accentColor,
+                        onChanged: (val) {
+                          HapticFeedback.selectionClick();
+                          setModalState(() {
+                            if (val) {
+                              selected.add(key);
+                            } else {
+                              selected.remove(key);
+                            }
+                          });
+                        },
+                      ),
+                  ],
+                ),
+              );
+            }
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + MediaQuery.of(ctx).padding.bottom),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+                border: Border.all(color: borderColor, width: 0.8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.slider_horizontal_3,
+                        size: 20,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isEn ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    isEn
+                        ? 'Adjust which stages this job has reached. This directly updates your Career Analytics.'
+                        : 'Atur tahapan mana saja yang pernah dicapai lamaran ini. Pengaturan ini langsung menyinkronkan data Analitik Karir kamu.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.4,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  buildStageToggle(
+                    key: 'applied',
+                    title: isEn ? 'Applied' : 'Dilamar (Applied)',
+                    subtitle: isEn ? 'Initial application submitted' : 'Lamaran resmi diajukan',
+                    icon: CupertinoIcons.doc_text_fill,
+                    accentColor: AppColors.pastelLime,
+                    isLocked: true,
+                  ),
+                  buildStageToggle(
+                    key: 'interview',
+                    title: isEn ? 'Interview Stage' : 'Interview',
+                    subtitle: isEn ? 'HR, User, or Technical Interview' : 'Pernah mengikuti wawancara / tes',
+                    icon: CupertinoIcons.mic_fill,
+                    accentColor: AppColors.pastelLavender,
+                  ),
+                  buildStageToggle(
+                    key: 'offering',
+                    title: isEn ? 'Offering' : 'Offering',
+                    subtitle: isEn ? 'Received job / salary offer' : 'Menerima surat penawaran kerja',
+                    icon: CupertinoIcons.gift_fill,
+                    accentColor: AppColors.pastelSky,
+                  ),
+                  buildStageToggle(
+                    key: 'accepted',
+                    title: isEn ? 'Hired / Accepted' : 'Diterima Kerja',
+                    subtitle: isEn ? 'Accepted offer and officially hired' : 'Resmi diterima dan bekerja',
+                    icon: CupertinoIcons.checkmark_seal_fill,
+                    accentColor: AppColors.pastelMint,
+                  ),
+
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      HapticFeedback.mediumImpact();
+                      Navigator.of(ctx).pop();
+
+                      var currentStatus = _application!.status;
+                      if (currentStatus == ApplicationStatus.accepted && !selected.contains('accepted')) {
+                        if (selected.contains('offering')) {
+                          currentStatus = ApplicationStatus.offering;
+                        } else if (selected.contains('interview')) {
+                          currentStatus = ApplicationStatus.interview;
+                        } else {
+                          currentStatus = ApplicationStatus.applied;
+                        }
+                      } else if (currentStatus == ApplicationStatus.offering && !selected.contains('offering')) {
+                        if (selected.contains('interview')) {
+                          currentStatus = ApplicationStatus.interview;
+                        } else {
+                          currentStatus = ApplicationStatus.applied;
+                        }
+                      } else if (currentStatus == ApplicationStatus.interview && !selected.contains('interview')) {
+                        currentStatus = ApplicationStatus.applied;
+                      }
+
+                      final updated = _application!.copyWith(
+                        reachedStages: selected.toList(),
+                        status: currentStatus,
+                      );
+                      setState(() => _application = updated);
+
+                      try {
+                        final saved = await widget.repository.updateApplication(updated);
+                        if (mounted) {
+                          setState(() => _application = saved);
+                          UIHelper.showSuccessSnackBar(
+                            context,
+                            isEn ? 'Stage history updated' : 'Riwayat tahap berhasil diperbarui',
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) UIHelper.handleError(context, e);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: primaryFg,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      isEn ? 'Save History' : 'Simpan Riwayat',
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _updateStatus(ApplicationStatus newStatus) async {
     if (_application == null || _application!.status == newStatus) return;
+
+    // Dialog pintar jika melompat langsung ke Offering tanpa pernah tercatat interview
+    bool? includeInterview;
+    if (newStatus == ApplicationStatus.offering &&
+        !_application!.reachedStages.contains('interview') &&
+        _application!.status != ApplicationStatus.interview) {
+      includeInterview = await _promptInterviewConfirmationOnOffering();
+      if (includeInterview == null) {
+        // Pengguna membatalkan
+        return;
+      }
+    }
+
     HapticFeedback.selectionClick();
     final prevApp = _application!;
+    final stages = Set<String>.from(prevApp.reachedStages);
+    stages.add('applied');
+    if (includeInterview == true) {
+      stages.add('interview');
+    }
+    stages.add(newStatus.name.toLowerCase());
+
+    final updated = prevApp.copyWith(
+      status: newStatus,
+      reachedStages: stages.toList(),
+    );
+
     setState(() {
-      _application = _application!.copyWith(status: newStatus);
+      _application = updated;
     });
 
     try {
-      final updated = prevApp.copyWith(status: newStatus);
       final saved = await widget.repository.updateApplication(updated);
       if (mounted) {
-        setState(() => _application = saved);
+        setState(() {
+          _application = saved;
+        });
         UIHelper.showSuccessSnackBar(
           context,
           LanguageManager.isEnglish
@@ -1489,7 +1939,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    if (_isLoading || _application == null) {
+    if (_isLoading) {
       return Scaffold(
         backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
         body: const Center(
@@ -1497,6 +1947,31 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             padding: EdgeInsets.only(bottom: 60),
             child: AppliqLoading(),
           ),
+        ),
+      );
+    }
+
+    if (_application == null) {
+      return Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        appBar: AppBar(
+          backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(CupertinoIcons.back),
+            color: isDark ? Colors.white : const Color(0xFF18181B),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: AppErrorStateWidget(
+          title: NetworkHelper.isNetworkError(_loadError)
+              ? AppStrings.connectionIssueTitle
+              : null,
+          message: NetworkHelper.isNetworkError(_loadError)
+              ? AppStrings.connectionIssueDesc
+              : UIHelper.parseErrorMessage(_loadError),
+          onRetry: _loadData,
         ),
       );
     }
@@ -1565,6 +2040,8 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                       ),
                     );
                     if (updated == true) _loadData();
+                  } else if (value == 'stages') {
+                    _showEditReachedStagesSheet();
                   } else if (value == 'delete') {
                     _deleteApplication();
                   }
@@ -1605,6 +2082,29 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         const SizedBox(width: 12),
                         Text(
                           AppStrings.edit,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'stages',
+                    child: Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.slider_horizontal_3,
+                          size: 18,
+                          color: isMono
+                              ? (isDark ? Colors.white : const Color(0xFF18181B))
+                              : AppColors.pastelSky,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          LanguageManager.isEnglish ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,

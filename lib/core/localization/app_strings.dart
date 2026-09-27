@@ -60,6 +60,10 @@ class AppStrings {
   static String get viewAll => current.viewAll;
   static String get openInDrive => current.openInDrive;
   static String get scheduleDateLabel => current.scheduleDateLabel;
+  static String get connectionIssueTitle => current.connectionIssueTitle;
+  static String get connectionIssueDesc => current.connectionIssueDesc;
+  static String get offlineModeBanner => current.offlineModeBanner;
+  static String get syncingData => current.syncingData;
 
   // Home Screen
   static String get greetingMorning => current.greetingMorning;
@@ -231,6 +235,11 @@ class AppStrings {
   static String get offeringMetric => current.offeringMetric;
   static String get hiredMetric => current.hiredMetric;
   static String get statusDistribution => current.statusDistribution;
+  static String get stageMilestones => current.stageMilestones;
+  static String get currentStatusTab => current.currentStatusTab;
+  static String get milestonesReached => current.milestonesReached;
+  static String get everInterviewed => current.everInterviewed;
+  static String get everOffered => current.everOffered;
   static String get workSystemDistribution => current.workSystemDistribution;
   static String get noWorkSystemData => current.noWorkSystemData;
   static String get portalSources => current.portalSources;

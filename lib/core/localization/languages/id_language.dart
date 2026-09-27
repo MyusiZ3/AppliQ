@@ -57,6 +57,14 @@ class IdLanguage implements BaseLanguage {
   String get openInDrive => 'Buka di Google Drive';
   @override
   String get scheduleDateLabel => 'Jadwal';
+  @override
+  String get connectionIssueTitle => 'Koneksi Sedang Terkendala';
+  @override
+  String get connectionIssueDesc => 'Tidak dapat terhubung ke server. Periksa jaringan internet Anda atau coba sesaat lagi.';
+  @override
+  String get offlineModeBanner => 'Mode Offline • Menampilkan data tersimpan';
+  @override
+  String get syncingData => 'Menyinkronkan data...';
 
   // Home Screen
   @override
@@ -382,13 +390,23 @@ class IdLanguage implements BaseLanguage {
   @override
   String get totalApplicationsMetric => 'Total Lamaran';
   @override
-  String get interviewStageMetric => 'Tahap Interview';
+  String get interviewStageMetric => 'Total Interview';
   @override
-  String get offeringMetric => 'Offering';
+  String get offeringMetric => 'Total Offering';
   @override
   String get hiredMetric => 'Diterima Kerja';
   @override
   String get statusDistribution => 'Distribusi Status Lamaran';
+  @override
+  String get stageMilestones => 'Pencapaian Tahap (Funnel)';
+  @override
+  String get currentStatusTab => 'Status Terkini';
+  @override
+  String get milestonesReached => 'Pencapaian Tahap:';
+  @override
+  String get everInterviewed => 'Pernah Interview';
+  @override
+  String get everOffered => 'Pernah Offering';
   @override
   String get workSystemDistribution => 'Distribusi Sistem Kerja';
   @override

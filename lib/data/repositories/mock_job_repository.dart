@@ -298,9 +298,13 @@ class MockJobRepository implements JobRepository {
 
   @override
   Future<JobApplication> createApplication(JobApplication application) async {
+    final cleanStatus = application.status.name.toLowerCase();
+    final initialStages = <String>{'applied', cleanStatus};
+
     final newApp = application.copyWith(
       id: application.id.isEmpty ? _uuid.v4() : application.id,
       userId: _currentUser?.id ?? 'mock-user-1',
+      reachedStages: initialStages.toList(),
     );
     _applications.insert(0, newApp);
     notifyDataChanged();
@@ -311,7 +315,14 @@ class MockJobRepository implements JobRepository {
   Future<JobApplication> updateApplication(JobApplication application) async {
     final index = _applications.indexWhere((a) => a.id == application.id);
     if (index != -1) {
-      _applications[index] = application.copyWith(updatedAt: DateTime.now());
+      final currentStages = Set<String>.from(application.reachedStages);
+      currentStages.add('applied');
+      final cleanStatus = application.status.name.toLowerCase();
+      currentStages.add(cleanStatus);
+      _applications[index] = application.copyWith(
+        reachedStages: currentStages.toList(),
+        updatedAt: DateTime.now(),
+      );
       notifyDataChanged();
       return _applications[index];
     }
@@ -390,14 +401,21 @@ class MockJobRepository implements JobRepository {
     final rejected = _applications.where((a) => a.status == ApplicationStatus.rejected).length;
     final noResponse = _applications.where((a) => a.status == ApplicationStatus.noResponse).length;
 
-    // Funnel counts (cumulative achievements in the hiring journey)
-    final interviewFunnel = _applications.where((a) =>
+    // Histori tahap yang pernah dicapai
+    final totalInterview = _applications.where((a) =>
         a.status == ApplicationStatus.interview ||
         a.status == ApplicationStatus.offering ||
-        a.status == ApplicationStatus.accepted).length;
-    final offeringFunnel = _applications.where((a) =>
+        a.status == ApplicationStatus.accepted ||
+        a.reachedStages.contains('interview')).length;
+
+    final totalOffering = _applications.where((a) =>
         a.status == ApplicationStatus.offering ||
-        a.status == ApplicationStatus.accepted).length;
+        a.status == ApplicationStatus.accepted ||
+        a.reachedStages.contains('offering')).length;
+
+    final totalAccepted = _applications.where((a) =>
+        a.status == ApplicationStatus.accepted ||
+        a.reachedStages.contains('accepted')).length;
 
     final byWorkSystem = <String, int>{};
     for (var app in _applications) {
@@ -420,8 +438,11 @@ class MockJobRepository implements JobRepository {
       'accepted_count': accepted,
       'rejected_count': rejected,
       'no_response_count': noResponse,
-      'interview_funnel_count': interviewFunnel,
-      'offering_funnel_count': offeringFunnel,
+      'total_interview_count': totalInterview,
+      'total_offering_count': totalOffering,
+      'total_accepted_count': totalAccepted,
+      'interview_funnel_count': totalInterview,
+      'offering_funnel_count': totalOffering,
       'by_work_system': byWorkSystem,
       'by_portal': byPortal,
     };

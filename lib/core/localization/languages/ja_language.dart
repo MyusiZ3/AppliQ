@@ -58,6 +58,14 @@ class JaLanguage implements BaseLanguage {
   String get openInDrive => 'Google ドライブで開く';
   @override
   String get scheduleDateLabel => '日程';
+  @override
+  String get connectionIssueTitle => '接続エラー';
+  @override
+  String get connectionIssueDesc => 'サーバーに接続できません。通信環境を確認するか、しばらくしてから再試行してください。';
+  @override
+  String get offlineModeBanner => 'オフラインモード • 保存済みデータを表示中';
+  @override
+  String get syncingData => 'データを同期中...';
 
   // Home Screen
   @override
@@ -383,13 +391,23 @@ class JaLanguage implements BaseLanguage {
   @override
   String get totalApplicationsMetric => '総応募件数';
   @override
-  String get interviewStageMetric => '面接ステップ';
+  String get interviewStageMetric => '面接回数 (Total)';
   @override
-  String get offeringMetric => '内定オファー';
+  String get offeringMetric => '内定獲得数 (Total)';
   @override
   String get hiredMetric => '承諾・就職';
   @override
   String get statusDistribution => '選考状況の内訳';
+  @override
+  String get stageMilestones => '選考ファネル（履歴）';
+  @override
+  String get currentStatusTab => '現在のステータス';
+  @override
+  String get milestonesReached => '到達フェーズ:';
+  @override
+  String get everInterviewed => '面接到達';
+  @override
+  String get everOffered => '内定・オファー獲得';
   @override
   String get workSystemDistribution => '勤務形態の内訳';
   @override

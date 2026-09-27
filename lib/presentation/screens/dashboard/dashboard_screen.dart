@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_enums.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../data/repositories/job_repository.dart';
 import '../../../utils/theme_manager.dart';
@@ -88,10 +89,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final rejected = _stats['rejected_count'] as int? ?? 0;
     final noResponse = _stats['no_response_count'] as int? ?? 0;
 
-    final interviewFunnel =
-        _stats['interview_funnel_count'] as int? ?? interview;
-    final offeringFunnel =
-        _stats['offering_funnel_count'] as int? ?? offering;
+
+    final totalInterview =
+        _stats['total_interview_count'] as int? ?? interview;
+    final totalOffering = _stats['total_offering_count'] as int? ?? offering;
+    final totalAccepted = _stats['total_accepted_count'] as int? ?? accepted;
 
     final byWorkSystem =
         Map<String, dynamic>.from(_stats['by_work_system'] as Map? ?? {});
@@ -99,10 +101,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Map<String, dynamic>.from(_stats['by_portal'] as Map? ?? {});
 
     final interviewRate = total > 0
-        ? (interviewFunnel / total * 100).toStringAsFixed(1)
+        ? (totalInterview / total * 100).toStringAsFixed(1)
         : '0';
     final successRate =
-        total > 0 ? (accepted / total * 100).toStringAsFixed(1) : '0';
+        total > 0 ? (totalAccepted / total * 100).toStringAsFixed(1) : '0';
 
     return ValueListenableBuilder<AccentThemeMode>(
       valueListenable: ThemeManager.accentNotifier,
@@ -439,7 +441,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               child: MetricCard(
                                                 label: AppStrings
                                                     .interviewStageMetric,
-                                                value: '$interviewFunnel',
+                                                value: '$totalInterview',
                                                 icon: CupertinoIcons.mic_fill,
                                                 accentColor:
                                                     AppColors.pastelLavender,
@@ -465,7 +467,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               child: MetricCard(
                                                 label:
                                                     AppStrings.offeringMetric,
-                                                value: '$offeringFunnel',
+                                                value: '$totalOffering',
                                                 icon: CupertinoIcons.gift_fill,
                                                 accentColor: AppColors.pastelSky,
                                                 backgroundColor: isMono
@@ -485,7 +487,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             Expanded(
                                               child: MetricCard(
                                                 label: AppStrings.hiredMetric,
-                                                value: '$accepted',
+                                                value: '$totalAccepted',
                                                 icon: CupertinoIcons
                                                     .checkmark_seal_fill,
                                                 accentColor: AppColors.pastelMint,
@@ -529,7 +531,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           ),
                                           const SizedBox(height: 16),
                                           _buildProgressBarRow(
-                                              'Applied',
+                                              AppStrings.localizedStatus(ApplicationStatus.applied),
                                               applied,
                                               total,
                                               isMono
@@ -538,7 +540,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               isDark),
                                           const SizedBox(height: 12),
                                           _buildProgressBarRow(
-                                              'Interview',
+                                              AppStrings.localizedStatus(ApplicationStatus.interview),
                                               interview,
                                               total,
                                               isMono
@@ -547,7 +549,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               isDark),
                                           const SizedBox(height: 12),
                                           _buildProgressBarRow(
-                                              'Offering',
+                                              AppStrings.localizedStatus(ApplicationStatus.offering),
                                               offering,
                                               total,
                                               isMono
@@ -556,7 +558,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               isDark),
                                           const SizedBox(height: 12),
                                           _buildProgressBarRow(
-                                              'Accepted',
+                                              AppStrings.localizedStatus(ApplicationStatus.accepted),
                                               accepted,
                                               total,
                                               isMono
@@ -567,7 +569,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               isDark),
                                           const SizedBox(height: 12),
                                           _buildProgressBarRow(
-                                              'Rejected',
+                                              AppStrings.localizedStatus(ApplicationStatus.rejected),
                                               rejected,
                                               total,
                                               isMono
@@ -576,7 +578,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               isDark),
                                           const SizedBox(height: 12),
                                           _buildProgressBarRow(
-                                              'No Response',
+                                              AppStrings.localizedStatus(ApplicationStatus.noResponse),
                                               noResponse,
                                               total,
                                               isMono

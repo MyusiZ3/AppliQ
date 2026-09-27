@@ -19,11 +19,13 @@ import '../../widgets/job_description_parser_sheet.dart';
 class ApplicationFormScreen extends StatefulWidget {
   final JobRepository repository;
   final JobApplication? applicationToEdit;
+  final String? prefilledCompany;
 
   const ApplicationFormScreen({
     super.key,
     required this.repository,
     this.applicationToEdit,
+    this.prefilledCompany,
   });
 
   @override
@@ -153,7 +155,7 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
     super.initState();
     final app = widget.applicationToEdit;
     final idFormat = NumberFormat.decimalPattern('id');
-    _companyController = TextEditingController(text: app?.companyName ?? '');
+    _companyController = TextEditingController(text: app?.companyName ?? widget.prefilledCompany ?? '');
     _positionController = TextEditingController(text: app?.positionTitle ?? '');
     _locationController = TextEditingController(text: app?.location ?? '');
     _portalCustomController =

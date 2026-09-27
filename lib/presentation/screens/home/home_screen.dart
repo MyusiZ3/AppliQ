@@ -1579,7 +1579,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => widget.onNavigateToTab?.call(1),
+        onTap: () => _showCompanyJobsSheet(companyName, apps),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1679,6 +1679,359 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showCompanyJobsSheet(String companyName, List<JobApplication> apps) {
+    HapticFeedback.lightImpact();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMono = ThemeManager.isMonochrome;
+    final isEn = LanguageManager.isEnglish;
+    final companyInitial =
+        companyName.isNotEmpty ? companyName[0].toUpperCase() : 'C';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final cardBg =
+            AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+        final borderColor =
+            AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.85,
+          ),
+          padding: EdgeInsets.fromLTRB(
+              20, 16, 20, 20 + MediaQuery.of(ctx).padding.bottom),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(color: borderColor, width: 0.8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF3F3F46)
+                        : const Color(0xFFD4D4D8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Company Header
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF27272A)
+                          : const Color(0xFFF4F4F5),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0x26FFFFFF)
+                            : const Color(0x14000000),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        companyInitial,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF18181B),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          companyName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          isEn
+                              ? '${apps.length} ${apps.length == 1 ? 'position applied' : 'positions applied'}'
+                              : '${apps.length} posisi / jobdesk dilamar',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(ctx).pop(),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF27272A)
+                            : const Color(0xFFF4F4F5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          CupertinoIcons.xmark,
+                          size: 14,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+              const SizedBox(height: 12),
+
+              // Sub-header
+              Text(
+                isEn
+                    ? 'Applied Jobdesk & Roles'
+                    : 'Daftar Jobdesk / Posisi yang Dilamar',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Scrollable List of Jobs
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: apps.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (itemCtx, index) {
+                    final app = apps[index];
+                    final dateFormatted =
+                        DateFormat('dd MMM yyyy').format(app.appliedDate);
+
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (_) => ApplicationDetailScreen(
+                                    applicationId: app.id,
+                                    repository: widget.repository,
+                                  ),
+                                ),
+                              )
+                              .then((_) => _loadDashboardData(isSilent: true));
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? (isMono
+                                    ? const Color(0xFF27272A)
+                                    : AppColors.darkSurfaceVariantPastel)
+                                : (isMono
+                                    ? const Color(0xFFF4F4F5)
+                                    : AppColors.lightSurfaceVariantPastel),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isDark
+                                  ? (isMono
+                                      ? const Color(0xFF3F3F46)
+                                      : AppColors.darkBorderPastel)
+                                  : (isMono
+                                      ? const Color(0xFFE4E4E7)
+                                      : AppColors.lightBorderPastel),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            app.positionTitle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 14.5,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: -0.2,
+                                              color: isDark
+                                                  ? AppColors.textPrimaryDark
+                                                  : AppColors.textPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        StatusBadge(status: app.status),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.calendar,
+                                          size: 12,
+                                          color: isDark
+                                              ? AppColors.textHintDark
+                                              : AppColors.textHint,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          dateFormatted,
+                                          style: TextStyle(
+                                            fontSize: 11.5,
+                                            color: isDark
+                                                ? AppColors.textSecondaryDark
+                                                : AppColors.textSecondary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '•',
+                                          style: TextStyle(
+                                            color: isDark
+                                                ? AppColors.textHintDark
+                                                : AppColors.textHint,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            '${app.workSystem.label}${app.location != null && app.location!.isNotEmpty ? ' (${app.location})' : ''}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 11.5,
+                                              color: isDark
+                                                ? AppColors.textSecondaryDark
+                                                : AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                CupertinoIcons.chevron_right,
+                                size: 14,
+                                color: isDark
+                                    ? AppColors.textHintDark
+                                    : AppColors.textHint,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // Button to add another role at this company
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  Navigator.of(context)
+                      .push(
+                        MaterialPageRoute(
+                          builder: (_) => ApplicationFormScreen(
+                            repository: widget.repository,
+                            prefilledCompany: companyName,
+                          ),
+                        ),
+                      )
+                      .then((_) => _loadDashboardData());
+                },
+                icon: const Icon(CupertinoIcons.plus, size: 15),
+                label: Text(
+                  isEn
+                      ? 'Add Another Role at $companyName'
+                      : 'Tambah Posisi Lain di $companyName',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: borderColor, width: 0.8),
+                  foregroundColor:
+                      isDark ? Colors.white : const Color(0xFF18181B),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

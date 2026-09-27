@@ -506,68 +506,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
             : (lang == AppLanguage.ko ? 'AppliQ 정보' : 'Tentang AppliQ'));
 
     final sheetSubtitle = lang == AppLanguage.en
-        ? 'A calm space designed for modern job seekers'
+        ? 'Track and manage your job applications'
         : (lang == AppLanguage.ja
-            ? '転職・就職活動を支えるパートナー'
+            ? '就活・転職活動の進捗管理'
             : (lang == AppLanguage.ko
-                ? '구직자의 마음으로 만든 커리어 플랫폼'
-                : 'Ruang tenang untuk menemani perjalanan karirmu'));
+                ? '구직 활동 및 채용 프로세스 관리'
+                : 'Kelola dan pantau seluruh proses lamaran kerjamu'));
 
     final tagLine = lang == AppLanguage.en
-        ? 'A calm, thoughtful space for your career journey'
+        ? 'Job Application Tracker & Career Companion'
         : (lang == AppLanguage.ja
-            ? 'あなたのキャリアに寄り添う、スマートな就活パートナー'
+            ? '就活・転職活動を一括管理するアプリ'
             : (lang == AppLanguage.ko
-                ? '당신의 소중한 도전을 응원하는 스마트 구직 파트너'
-                : 'Teman setia yang tenang dan teratur untuk perjalanan karirmu'));
+                ? '구직 활동을 체계적으로 관리하는 앱'
+                : 'Aplikasi pelacak dan pengelola lamaran kerja'));
 
     final storyTitle = lang == AppLanguage.en
-        ? 'The Story Behind AppliQ'
+        ? 'About AppliQ'
         : (lang == AppLanguage.ja
-            ? '開発の背景'
-            : (lang == AppLanguage.ko ? '만들게 된 이야기' : 'Cerita di Balik AppliQ'));
+            ? 'AppliQについて'
+            : (lang == AppLanguage.ko ? 'AppliQ 소개' : 'Tentang AppliQ'));
 
     final storySubtitle = lang == AppLanguage.en
-        ? 'Born from real job hunting journeys'
+        ? 'Overview & Core Purpose'
         : (lang == AppLanguage.ja
-            ? '就活生のリアルな課題から'
-            : (lang == AppLanguage.ko ? '구직 과정의 생생한 경험에서 출발' : 'Dari pengalaman nyata mencari kerja'));
+            ? 'アプリの概要と主な機能'
+            : (lang == AppLanguage.ko ? '주요 기능 및 개요' : 'Fungsi & Gambaran Aplikasi'));
 
     final storyBody = lang == AppLanguage.en
-        ? "Job searching can be deeply exhausting — dozens of applications sent, overlapping interviews, and the quiet anxiety of waiting for updates.\n\nAppliQ was created to offer a calm, grounded, and dignified space for your journey. We believe keeping your opportunities organized shouldn't feel like a chore, but an empowering step forward."
+        ? "AppliQ is a job application tracker designed to help you organize and monitor your job hunt in one place.\n\nEasily log your application stages (applied, interview, offering, etc.), keep track of recruitment schedules, store your career documents, and view analytics of your job search progress."
         : (lang == AppLanguage.ja
-            ? "就職活動や転職活動は、時に不安とプレッシャーの連続です。何十通もの応募、重なる面接日程、そして結果を待つ日々の焦り。\n\nAppliQは、そんな活動期間を少しでも前向きに、整理された気持ちで進められるように生まれました。あなたの努力が実を結ぶその日まで、静かに力強く寄り添う存在でありたいと願っています。"
+            ? "AppliQは、応募から面接、内定までの就職・転職活動の進捗を一元管理できるトラッカーアプリです。\n\n選考状況の記録、面接日程の管理、応募書類の整理、選考プロセスの統計確認をシンプルに行えます。"
             : (lang == AppLanguage.ko
-                ? "구직과 이직은 수많은 지원서 작성, 겹치는 면접 일정, 기약 없는 기다림으로 지치기 쉬운 여정입니다.\n\nAppliQ는 이러한 구직자의 마음에 깊이 공감하며, 차분하고 체계적으로 커리어를 관리할 수 있는 공간을 제공하고자 탄생했습니다. 당신의 소중한 도전이 결실을 맺을 때까지 든든한 동반자가 되어 드립니다."
-                : "Mencari kerja seringkali melelahkan: puluhan formulir terkirim, jadwal interview yang berbenturan, hingga rasa cemas menunggu kabar tanpa kepastian.\n\nAppliQ diciptakan sebagai ruang yang tenang dan rapi untuk menemani perjalananmu. Kami ingin setiap pencari kerja merasa lebih percaya diri, terorganisir, dan dihargai di setiap langkah proses seleksi."));
+                ? "AppliQ는 입사 지원부터 면접, 최종 오퍼까지 구직 활동 전반을 한곳에서 체계적으로 관리할 수 있는 앱입니다.\n\n지원 상태 기록, 일정 관리, 서류 보관, 통계 요약을 직관적으로 확인하고 정리할 수 있습니다."
+                : "AppliQ adalah aplikasi pelacak lamaran kerja yang dirancang untuk mempermudah kamu mencatat, memantau, dan mengorganisir seluruh tahapan rekrutmen di satu tempat.\n\nDengan AppliQ, kamu dapat mendata status lamaran (administrasi, interview, offering, dsb), menjadwalkan agenda seleksi, menyimpan dokumen karir, serta melihat ringkasan statistik proses lamaranmu secara praktis."));
 
     final devTitle = lang == AppLanguage.en
-        ? 'Creator & Independent Craft'
+        ? 'Developer'
         : (lang == AppLanguage.ja
-            ? 'クリエイター & 開発'
-            : (lang == AppLanguage.ko ? '제작 및 개발' : 'Kreator & Pengembang'));
+            ? '開発者'
+            : (lang == AppLanguage.ko ? '개발자' : 'Pengembang'));
 
     final devBody = lang == AppLanguage.en
-        ? "Crafted, designed, and independently engineered with heart by Muhamad Sidik at Arch. Every detail, pastel accent, and interaction was designed to make job seeking feel a little lighter, calmer, and more human."
+        ? "Developed independently by Muhamad Sidik (@Imyusi_) at Arch to help job seekers manage their application journey neatly, efficiently, and effectively."
         : (lang == AppLanguage.ja
-            ? "ArchのMuhamad Sidikによって、心を込めて企画・デザイン・開発された個人開発プロジェクトです。柔らかなパステルカラーや直感的な操作感を通じて、日々の就職活動が少しでも心地よくなるよう細部までこだわっています。"
+            ? "ArchのMuhamad Sidik (@Imyusi_) により、就職活動をより効率的かつシンプルに整理できるよう開発された個人開発アプリです。"
             : (lang == AppLanguage.ko
-                ? "Arch의 Muhamad Sidik이 진심을 담아 기획, 디자인, 개발한 독립 프로젝트입니다. 부드러운 파스텔 톤과 직관적인 사용성을 통해 구직 과정의 스트레스를 덜고 따뜻한 힘을 전하고자 합니다."
-                : "Dikonsep, didesain, dan dibangun dengan sepenuh hati oleh Muhamad Sidik di bawah bendera Arch. Setiap fitur, sentuhan warna pastel, hingga interaksi dirancang khusus agar proses mencari kerja terasa lebih ringan, tenang, dan bersahabat."));
+                ? "Arch의 Muhamad Sidik(@Imyusi_)이 구직자가 채용 과정을 더욱 깔끔하고 효율적으로 관리할 수 있도록 개발한 독립 앱입니다."
+                : "Aplikasi ini dikembangkan oleh Muhamad Sidik (@Imyusi_) di Arch sebagai project independen untuk membantu pencari kerja mengelola proses rekrutmen dengan lebih rapi, terstruktur, dan efisien."));
 
     final privacyTitle = lang == AppLanguage.en
-        ? 'Privacy First & Respect'
+        ? 'Privacy & Data'
         : (lang == AppLanguage.ja
-            ? 'プライバシーと権利'
-            : (lang == AppLanguage.ko ? '개인정보 원칙 및 저작권' : 'Komitmen Privasi & Hak Cipta'));
+            ? 'プライバシーとデータ'
+            : (lang == AppLanguage.ko ? '개인정보 및 데이터' : 'Privasi & Data'));
 
     final privacyBody = lang == AppLanguage.en
-        ? "Your job search records, resumes, interview notes, and salary figures belong entirely to you. AppliQ does not sell your personal data or embed third-party ad trackers.\n\nAll visual design, branding, and codebase are protected intellectual property of Muhamad Sidik / Arch."
+        ? "Your job search data, application history, and documents are kept secure for your personal use. AppliQ does not sell personal data or embed third-party ad trackers.\n\nAll UI designs and source code are protected intellectual property of Muhamad Sidik / Arch."
         : (lang == AppLanguage.ja
-            ? "応募履歴や職務経歴、希望給与などの情報は完全にあなただけのものです。AppliQが個人情報を販売したり、不要なトラッカーを埋め込むことは一切ありません。\n\nアプリのビジュアルデザイン、ブランド、コードはMuhamad Sidik / Archの著作権により保護されています。"
+            ? "応募情報や履歴、書類はお客様個人の利用のために安全に保持されます。AppliQが個人データを販売したり、外部の広告追跡ツールを使用することはありません。\n\n本アプリのデザインおよびソースコードの著作権は Muhamad Sidik / Arch に帰属します。"
             : (lang == AppLanguage.ko
-                ? "지원 이력, 이력서, 면접 메모, 연봉 정보는 오직 사용자 본인의 소중한 데이터입니다. AppliQ는 어떠한 경우에도 개인 데이터를 판매하거나 상업적 추적기를 사용하지 않습니다.\n\n앱의 모든 시각 디자인, 브랜드 및 소스 코드는 Muhamad Sidik / Arch의 고유한 저작권으로 보호됩니다."
-                : "Data karir, dokumen resume, catatan lamaran, dan target gajimu sepenuhnya adalah milikmu pribadi. AppliQ tidak pernah menjual data pengguna atau menyisipkan pelacak pihak ketiga.\n\nSeluruh desain antarmuka, identitas merek, dan kode sumber dilindungi hak cipta independen milik Muhamad Sidik / Arch."));
+                ? "지원 이력과 서류는 사용자의 개인적 이용을 위해 안전하게 보관됩니다. AppliQ는 사용자 데이터를 판매하거나 외부 광고 트래커를 사용하지 않습니다.\n\n본 앱의 UI 디자인 및 소스 코드에 대한 저작권은 Muhamad Sidik / Arch에 있습니다."
+                : "Data lamaran, catatan riwayat, dan dokumenmu tersimpan aman untuk kebutuhan pribadimu. AppliQ tidak menjual data pengguna ataupun menyematkan pelacak iklan pihak ketiga.\n\nDesain antarmuka dan kode aplikasi ini merupakan hak cipta milik Muhamad Sidik / Arch."));
 
     showModalBottomSheet(
       context: context,

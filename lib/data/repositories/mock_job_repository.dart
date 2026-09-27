@@ -403,19 +403,16 @@ class MockJobRepository implements JobRepository {
 
     // Histori tahap yang pernah dicapai
     final totalInterview = _applications.where((a) =>
-        a.status == ApplicationStatus.interview ||
-        a.status == ApplicationStatus.offering ||
-        a.status == ApplicationStatus.accepted ||
-        a.reachedStages.contains('interview')).length;
+        a.reachedStages.contains('interview') ||
+        a.status == ApplicationStatus.interview).length;
 
     final totalOffering = _applications.where((a) =>
-        a.status == ApplicationStatus.offering ||
-        a.status == ApplicationStatus.accepted ||
-        a.reachedStages.contains('offering')).length;
+        a.reachedStages.contains('offering') ||
+        a.status == ApplicationStatus.offering).length;
 
     final totalAccepted = _applications.where((a) =>
-        a.status == ApplicationStatus.accepted ||
-        a.reachedStages.contains('accepted')).length;
+        a.reachedStages.contains('accepted') ||
+        a.status == ApplicationStatus.accepted).length;
 
     final byWorkSystem = <String, int>{};
     for (var app in _applications) {

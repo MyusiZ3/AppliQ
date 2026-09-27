@@ -59,8 +59,39 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadDashboardData();
+    _checkInitialNotificationPermission();
     _dataSub = widget.repository.dataChanges.listen((_) {
       if (mounted) _loadDashboardData(isSilent: true);
+    });
+  }
+
+  void _checkInitialNotificationPermission() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      final hasAsked =
+          prefs.getBool('has_requested_notification_permission') ?? false;
+
+      if (!hasAsked) {
+        await prefs.setBool('has_requested_notification_permission', true);
+        final hasPerm = await NotificationService.instance.hasPermission();
+        if (!hasPerm) {
+          final granted =
+              await NotificationService.instance.requestPermissions();
+          if (granted) {
+            await prefs.setBool('pause_notifications', false);
+            NotificationService.instance.invalidateEnabledCache();
+          } else {
+            await prefs.setBool('pause_notifications', true);
+            NotificationService.instance.invalidateEnabledCache();
+          }
+        }
+      } else {
+        final hasPerm = await NotificationService.instance.hasPermission();
+        if (!hasPerm) {
+          await prefs.setBool('pause_notifications', true);
+          NotificationService.instance.invalidateEnabledCache();
+        }
+      }
     });
   }
 

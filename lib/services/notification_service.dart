@@ -139,6 +139,32 @@ class NotificationService {
     return false;
   }
 
+  /// Cek apakah izin notifikasi saat ini aktif di tingkat sistem operasi (OS level)
+  Future<bool> hasPermission() async {
+    try {
+      if (Platform.isAndroid) {
+        final androidImplementation = _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        if (androidImplementation != null) {
+          final granted = await androidImplementation.areNotificationsEnabled();
+          return granted ?? false;
+        }
+      } else if (Platform.isIOS) {
+        final iosImplementation = _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+        if (iosImplementation != null) {
+          final settings = await iosImplementation.checkPermissions();
+          return settings?.isEnabled ?? false;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking notification permission: $e');
+    }
+    return false;
+  }
+
   /// Tampilkan notifikasi instan / uji coba popup
   Future<void> showInstantNotification({
     int id = 1001,

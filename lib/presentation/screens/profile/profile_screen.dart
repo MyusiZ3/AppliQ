@@ -43,9 +43,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final isPaused = prefs.getBool('pause_notifications') ?? false;
+    final hasPerm = await NotificationService.instance.hasPermission();
+
+    // Jika izin notifikasi di sistem HP tidak aktif, otomatis set toggle ke OFF
+    final effectiveEnabled = !isPaused && hasPerm;
+    if (!hasPerm && !isPaused) {
+      await prefs.setBool('pause_notifications', true);
+      NotificationService.instance.invalidateEnabledCache();
+    }
+
     if (mounted) {
       setState(() {
-        _notificationsEnabled = !isPaused;
+        _notificationsEnabled = effectiveEnabled;
         _selectedLanguage =
             prefs.getString('app_language') ?? 'Bahasa Indonesia';
         _hapticFeedbackEnabled = prefs.getBool('general_haptic') ?? true;
@@ -56,36 +65,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _toggleNotifications(bool value) async {
     _triggerHaptic();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('pause_notifications', !value);
-    if (mounted) {
-      setState(() => _notificationsEnabled = value);
-    }
 
     if (value) {
-      final granted = await NotificationService.instance.requestPermissions();
-      if (mounted) {
-        if (granted) {
-          UIHelper.showSuccessSnackBar(
+      // User mencoba mengaktifkan notifikasi
+      final hasPerm = await NotificationService.instance.hasPermission();
+
+      if (!hasPerm) {
+        // Tampilkan dialog izin default bawaan HP
+        final granted = await NotificationService.instance.requestPermissions();
+        if (!granted) {
+          // Jika pengguna menolak (Don't allow), toggle TETAP OFF
+          await prefs.setBool('pause_notifications', true);
+          NotificationService.instance.invalidateEnabledCache();
+          if (mounted) {
+            setState(() => _notificationsEnabled = false);
+            UIHelper.showInfoSnackBar(
               context,
               LanguageManager.isEnglish
-                  ? 'Agenda reminder notifications enabled.'
-                  : 'Notifikasi pengingat agenda diaktifkan.');
-        } else {
-          UIHelper.showInfoSnackBar(
-              context,
-              LanguageManager.isEnglish
-                  ? 'Notifications enabled.'
-                  : 'Notifikasi diaktifkan.');
+                  ? 'Notification permission is required to enable reminders.'
+                  : 'Izin notifikasi dibutuhkan untuk mengaktifkan pengingat.',
+            );
+          }
+          return;
         }
       }
+
+      await prefs.setBool('pause_notifications', false);
+      NotificationService.instance.invalidateEnabledCache();
+      if (mounted) {
+        setState(() => _notificationsEnabled = true);
+        UIHelper.showSuccessSnackBar(
+          context,
+          LanguageManager.isEnglish
+              ? 'Agenda reminder notifications enabled.'
+              : 'Notifikasi pengingat agenda diaktifkan.',
+        );
+      }
     } else {
+      await prefs.setBool('pause_notifications', true);
+      NotificationService.instance.invalidateEnabledCache();
       await NotificationService.instance.cancelAll();
       if (mounted) {
+        setState(() => _notificationsEnabled = false);
         UIHelper.showInfoSnackBar(
-            context,
-            LanguageManager.isEnglish
-                ? 'Reminder notifications disabled.'
-                : 'Notifikasi pengingat dinonaktifkan.');
+          context,
+          LanguageManager.isEnglish
+              ? 'Reminder notifications disabled.'
+              : 'Notifikasi pengingat dinonaktifkan.',
+        );
       }
     }
   }

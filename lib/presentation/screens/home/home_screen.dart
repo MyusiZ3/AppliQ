@@ -25,8 +25,10 @@ import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
 import '../../widgets/app_avatar.dart';
 import '../../../core/utils/calendar_helper.dart';
+import '../../../core/utils/network_helper.dart';
 import '../../../services/notification_service.dart';
 import '../../../utils/theme_manager.dart';
+import '../../widgets/app_error_state_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final JobRepository repository;
@@ -49,6 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   bool _isFollowUpDismissed = false;
   bool _hasReadNotifications = false;
+  dynamic _loadError;
+  bool _isOfflineOrCached = false;
   StreamSubscription? _dataSub;
 
   @override
@@ -191,12 +195,20 @@ class _HomeScreenState extends State<HomeScreen> {
           _upcomingSchedules = upcoming;
           _hasReadNotifications = !hasUnreadAlert;
           _isLoading = false;
+          _loadError = null;
+          _isOfflineOrCached = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
-        if (!isSilent) UIHelper.handleError(context, e);
+        setState(() {
+          _isLoading = false;
+          _loadError = e;
+          _isOfflineOrCached = _applications.isNotEmpty;
+        });
+        if (!isSilent && _applications.isEmpty) {
+          UIHelper.handleError(context, e);
+        }
       }
     }
   }
@@ -299,16 +311,36 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: _buildHeader(isDark, staleApplications),
                       ),
 
-                      // Scrollable Content
-                      Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () =>
-                              _loadDashboardData(forceRefresh: true),
-                          child: ListView(
-                            physics: const AlwaysScrollableScrollPhysics(
-                                parent: BouncingScrollPhysics()),
-                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
-                            children: [
+                      if (_applications.isEmpty && _loadError != null)
+                        Expanded(
+                          child: AppErrorStateWidget(
+                            title: NetworkHelper.isNetworkError(_loadError)
+                                ? AppStrings.connectionIssueTitle
+                                : null,
+                            message: NetworkHelper.isNetworkError(_loadError)
+                                ? AppStrings.connectionIssueDesc
+                                : UIHelper.parseErrorMessage(_loadError),
+                            onRetry: () =>
+                                _loadDashboardData(forceRefresh: true),
+                          ),
+                        )
+                      else ...[
+                        if (_isOfflineOrCached)
+                          OfflinePillIndicator(
+                            onSync: () =>
+                                _loadDashboardData(forceRefresh: true),
+                          ),
+
+                        // Scrollable Content
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () =>
+                                _loadDashboardData(forceRefresh: true),
+                            child: ListView(
+                              physics: const AlwaysScrollableScrollPhysics(
+                                  parent: BouncingScrollPhysics()),
+                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+                              children: [
                               // Hero Analytics Card (MyDuit Signature Style)
                               _buildHeroBanner(
                                   total, interview, offering, isDark, isMono),
@@ -364,7 +396,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ],
-                  );
+                  ],
+                );
                 },
               ),
       ),

@@ -251,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                'Dev by Muhamad Sidik.',
+                ' Dev by Muhamad Sidik.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 10.5,

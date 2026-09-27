@@ -15,7 +15,9 @@ import '../applications/application_form_screen.dart';
 import '../../widgets/empty_state_view.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../widgets/app_error_state_widget.dart';
 import '../../../core/utils/calendar_helper.dart';
+import '../../../core/utils/network_helper.dart';
 
 class ScheduleScreen extends StatefulWidget {
   final JobRepository repository;
@@ -30,6 +32,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   List<Map<String, dynamic>> _scheduleItems = [];
   bool _isLoading = true;
   bool _upcomingOnly = true;
+  dynamic _loadError;
+  bool _isOfflineOrCached = false;
   StreamSubscription? _dataSub;
 
   String _searchQuery = '';
@@ -100,12 +104,18 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         setState(() {
           _scheduleItems = items;
           _isLoading = false;
+          _loadError = null;
+          _isOfflineOrCached = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
-        if (!isSilent) UIHelper.handleError(context, e);
+        setState(() {
+          _isLoading = false;
+          _loadError = e;
+          _isOfflineOrCached = _scheduleItems.isNotEmpty;
+        });
+        if (!isSilent && _scheduleItems.isEmpty) UIHelper.handleError(context, e);
       }
     }
   }
@@ -240,6 +250,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ],
                   ),
                 ),
+                if (_isOfflineOrCached)
+                  OfflinePillIndicator(
+                    onSync: () => _loadSchedules(forceRefresh: true),
+                  ),
                 // Collapsible Search Bar (Only appears when search icon is clicked)
                 if (_isSearchOpen)
                   Padding(
@@ -318,7 +332,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             child: AppliqLoading(),
                           ),
                         )
-                      : _scheduleItems.isEmpty
+                      : (_scheduleItems.isEmpty && _loadError != null)
+                          ? AppErrorStateWidget(
+                              title: NetworkHelper.isNetworkError(_loadError)
+                                  ? AppStrings.connectionIssueTitle
+                                  : null,
+                              message: NetworkHelper.isNetworkError(_loadError)
+                                  ? AppStrings.connectionIssueDesc
+                                  : UIHelper.parseErrorMessage(_loadError),
+                              onRetry: () => _loadSchedules(forceRefresh: true),
+                            )
+                          : _scheduleItems.isEmpty
                           ? RefreshIndicator(
                               onRefresh: () =>
                                   _loadSchedules(forceRefresh: true),

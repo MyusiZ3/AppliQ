@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/constants/app_colors.dart';
+import '../core/utils/network_helper.dart';
 import 'navigator_key.dart';
 
 class UIHelper {
@@ -279,12 +280,14 @@ class UIHelper {
     } else if (error is SocketException) {
       return 'Koneksi internet terputus. Periksa jaringan Anda.';
     } else if (error is TimeoutException) {
-      return 'Waktu koneksi habis. Silakan coba kembali.';
+      return 'Waktu koneksi habis. Silakan periksa jaringan dan coba lagi.';
     } else if (error is PlatformException) {
       if (error.code == 'sign_in_failed' || error.code == '10' || error.code == '12500') {
         return 'Gagal masuk dengan Google. Silakan periksa koneksi dan coba lagi.';
       }
       return error.message ?? 'Terjadi kendala pada sistem. Silakan coba lagi.';
+    } else if (NetworkHelper.isNetworkError(error)) {
+      return 'Koneksi internet terputus atau tidak stabil. Periksa jaringan Anda.';
     }
 
     final str = error.toString().replaceFirst('Exception: ', '').trim();

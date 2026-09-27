@@ -15,7 +15,9 @@ import '../../widgets/empty_state_view.dart';
 import '../../widgets/notched_pill_card.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/appliq_loading.dart';
+import '../../../core/utils/network_helper.dart';
 import '../../../core/utils/status_helper.dart';
+import '../../widgets/app_error_state_widget.dart';
 import 'application_detail_screen.dart';
 import 'application_form_screen.dart';
 
@@ -38,6 +40,8 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
   bool _onlyFavorites = false;
   bool _isKanbanView = false;
   String _sortBy = 'newest';
+  dynamic _loadError;
+  bool _isOfflineOrCached = false;
   StreamSubscription? _dataSub;
 
   @override
@@ -66,12 +70,18 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
         setState(() {
           _applications = data;
           _isLoading = false;
+          _loadError = null;
+          _isOfflineOrCached = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
-        if (!isSilent) UIHelper.handleError(context, e);
+        setState(() {
+          _isLoading = false;
+          _loadError = e;
+          _isOfflineOrCached = _applications.isNotEmpty;
+        });
+        if (!isSilent && _applications.isEmpty) UIHelper.handleError(context, e);
       }
     }
   }
@@ -237,6 +247,10 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                     ],
                   ),
                 ),
+                if (_isOfflineOrCached)
+                  OfflinePillIndicator(
+                    onSync: () => _loadApplications(forceRefresh: true),
+                  ),
                 // Collapsible Search Bar (Only appears when search icon is clicked)
                 if (_isSearchOpen)
                   Padding(
@@ -420,11 +434,21 @@ class _ApplicationsListScreenState extends State<ApplicationsListScreen> {
                         child: AppliqLoading(),
                       ),
                     )
-                  : filtered.isEmpty
-                      ? _buildEmptyState(isDark)
-                      : _isKanbanView
-                          ? _buildKanbanView(isDark)
-                          : RefreshIndicator(
+                  : (_applications.isEmpty && _loadError != null)
+                      ? AppErrorStateWidget(
+                          title: NetworkHelper.isNetworkError(_loadError)
+                              ? AppStrings.connectionIssueTitle
+                              : null,
+                          message: NetworkHelper.isNetworkError(_loadError)
+                              ? AppStrings.connectionIssueDesc
+                              : UIHelper.parseErrorMessage(_loadError),
+                          onRetry: () => _loadApplications(forceRefresh: true),
+                        )
+                      : filtered.isEmpty
+                          ? _buildEmptyState(isDark)
+                          : _isKanbanView
+                              ? _buildKanbanView(isDark)
+                              : RefreshIndicator(
                               onRefresh: () =>
                                   _loadApplications(forceRefresh: true),
                               child: ListView.builder(

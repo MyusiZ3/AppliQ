@@ -46,7 +46,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       setState(() {
         _notificationsEnabled = !isPaused;
-        _selectedLanguage = prefs.getString('app_language') ?? 'Bahasa Indonesia';
+        _selectedLanguage =
+            prefs.getString('app_language') ?? 'Bahasa Indonesia';
         _hapticFeedbackEnabled = prefs.getBool('general_haptic') ?? true;
       });
     }
@@ -64,21 +65,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final granted = await NotificationService.instance.requestPermissions();
       if (mounted) {
         if (granted) {
-          UIHelper.showSuccessSnackBar(context, 
-              LanguageManager.isEnglish 
-                  ? 'Agenda reminder notifications enabled.' 
+          UIHelper.showSuccessSnackBar(
+              context,
+              LanguageManager.isEnglish
+                  ? 'Agenda reminder notifications enabled.'
                   : 'Notifikasi pengingat agenda diaktifkan.');
         } else {
-          UIHelper.showInfoSnackBar(context, 
-              LanguageManager.isEnglish ? 'Notifications enabled.' : 'Notifikasi diaktifkan.');
+          UIHelper.showInfoSnackBar(
+              context,
+              LanguageManager.isEnglish
+                  ? 'Notifications enabled.'
+                  : 'Notifikasi diaktifkan.');
         }
       }
     } else {
       await NotificationService.instance.cancelAll();
       if (mounted) {
-        UIHelper.showInfoSnackBar(context, 
-            LanguageManager.isEnglish 
-                ? 'Reminder notifications disabled.' 
+        UIHelper.showInfoSnackBar(
+            context,
+            LanguageManager.isEnglish
+                ? 'Reminder notifications disabled.'
                 : 'Notifikasi pengingat dinonaktifkan.');
       }
     }
@@ -111,7 +117,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showLanguageSelector() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final borderColor =
+        isDark ? const Color(0xFF27272A) : AppColors.borderLight;
 
     final languages = [
       {
@@ -171,7 +178,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -181,7 +190,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 12.5,
-                          color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                          color: isDark
+                              ? AppColors.textHintDark
+                              : AppColors.textHint,
                         ),
                       ),
                     ],
@@ -205,7 +216,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () async {
                     _triggerHaptic();
                     if (isLocked) {
-                      UIHelper.showInfoSnackBar(context, AppStrings.languageComingSoonToast);
+                      UIHelper.showInfoSnackBar(
+                          context, AppStrings.languageComingSoonToast);
                       return;
                     }
 
@@ -220,11 +232,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? (isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7))
-                          : (isLocked ? (isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA)) : cardBg),
+                          ? (isDark
+                              ? const Color(0xFF27272A)
+                              : const Color(0xFFE4E4E7))
+                          : (isLocked
+                              ? (isDark
+                                  ? const Color(0xFF18181B)
+                                  : const Color(0xFFFAFAFA))
+                              : cardBg),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected
@@ -239,7 +258,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           lang['icon'] as String,
                           style: TextStyle(
                             fontSize: 22,
-                            color: isLocked ? Colors.grey.withValues(alpha: 0.6) : null,
+                            color: isLocked
+                                ? Colors.grey.withValues(alpha: 0.6)
+                                : null,
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -256,20 +277,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 15,
-                                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w800
+                                            : FontWeight.w600,
                                         color: isLocked
-                                            ? (isDark ? AppColors.textHintDark : AppColors.textHint)
-                                            : (isDark ? Colors.white : const Color(0xFF18181B)),
+                                            ? (isDark
+                                                ? AppColors.textHintDark
+                                                : AppColors.textHint)
+                                            : (isDark
+                                                ? Colors.white
+                                                : const Color(0xFF18181B)),
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: isLocked
-                                          ? (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5))
-                                          : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7)),
+                                          ? (isDark
+                                              ? const Color(0xFF27272A)
+                                              : const Color(0xFFF4F4F5))
+                                          : (isDark
+                                              ? const Color(0xFF3F3F46)
+                                              : const Color(0xFFE4E4E7)),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Row(
@@ -279,7 +311,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           Icon(
                                             CupertinoIcons.lock_fill,
                                             size: 9,
-                                            color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                            color: isDark
+                                                ? AppColors.textHintDark
+                                                : AppColors.textHint,
                                           ),
                                           const SizedBox(width: 3),
                                         ],
@@ -289,8 +323,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             fontSize: 10,
                                             fontWeight: FontWeight.w700,
                                             color: isLocked
-                                                ? (isDark ? AppColors.textHintDark : AppColors.textHint)
-                                                : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
+                                                ? (isDark
+                                                    ? AppColors.textHintDark
+                                                    : AppColors.textHint)
+                                                : (isDark
+                                                    ? AppColors
+                                                        .textSecondaryDark
+                                                    : AppColors.textSecondary),
                                           ),
                                         ),
                                       ],
@@ -305,7 +344,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHint,
                                 ),
                               ),
                             ],
@@ -316,7 +357,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icon(
                             CupertinoIcons.lock,
                             size: 16,
-                            color: isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
+                            color: isDark
+                                ? const Color(0xFF52525B)
+                                : const Color(0xFFA1A1AA),
                           )
                         else
                           Container(
@@ -325,12 +368,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isSelected
-                                  ? (isDark ? Colors.white : const Color(0xFF18181B))
+                                  ? (isDark
+                                      ? Colors.white
+                                      : const Color(0xFF18181B))
                                   : Colors.transparent,
                               border: Border.all(
                                 color: isSelected
                                     ? Colors.transparent
-                                    : (isDark ? AppColors.textHintDark : AppColors.textHint),
+                                    : (isDark
+                                        ? AppColors.textHintDark
+                                        : AppColors.textHint),
                                 width: 1.5,
                               ),
                             ),
@@ -338,7 +385,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? Icon(
                                     CupertinoIcons.checkmark_alt,
                                     size: 14,
-                                    color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                    color: isDark
+                                        ? const Color(0xFF18181B)
+                                        : Colors.white,
                                   )
                                 : null,
                           ),
@@ -366,7 +415,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showFaqSheet() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final borderColor =
+        isDark ? const Color(0xFF27272A) : AppColors.borderLight;
     final faqs = AppStrings.faqList;
 
     showModalBottomSheet(
@@ -394,13 +444,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                      color: isDark
+                          ? const Color(0xFF3F3F46)
+                          : const Color(0xFFD4D4D8),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -414,7 +467,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.4,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                color: isDark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -424,15 +479,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 12.5,
-                                color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                color: isDark
+                                    ? AppColors.textHintDark
+                                    : AppColors.textHint,
                               ),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
-                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        icon: const Icon(CupertinoIcons.xmark_circle_fill,
+                            size: 22),
+                        color: isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHint,
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -452,29 +512,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           border: Border.all(color: borderColor, width: 0.8),
                         ),
                         child: Theme(
-                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                          data: Theme.of(context)
+                              .copyWith(dividerColor: Colors.transparent),
                           child: ExpansionTile(
-                            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            iconColor: isDark ? Colors.white : const Color(0xFF18181B),
-                            collapsedIconColor: isDark ? AppColors.textHintDark : AppColors.textHint,
+                            tilePadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 4),
+                            iconColor:
+                                isDark ? Colors.white : const Color(0xFF18181B),
+                            collapsedIconColor: isDark
+                                ? AppColors.textHintDark
+                                : AppColors.textHint,
                             title: Text(
                               item['q']!,
                               style: TextStyle(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: -0.2,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                color: isDark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimary,
                               ),
                             ),
                             children: [
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 0, 16, 16),
                                 child: Text(
                                   item['a']!,
                                   style: TextStyle(
                                     fontSize: 13.5,
                                     height: 1.5,
-                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                    color: isDark
+                                        ? AppColors.textSecondaryDark
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -496,7 +566,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showAboutAppSheet() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF202024) : const Color(0xFFF4F4F5);
-    final borderColor = isDark ? const Color(0xFF27272A) : AppColors.borderLight;
+    final borderColor =
+        isDark ? const Color(0xFF27272A) : AppColors.borderLight;
     final lang = LanguageManager.current;
 
     final sheetTitle = lang == AppLanguage.en
@@ -531,7 +602,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ? 'Overview & Core Purpose'
         : (lang == AppLanguage.ja
             ? 'アプリの概要と主な機能'
-            : (lang == AppLanguage.ko ? '주요 기능 및 개요' : 'Fungsi & Gambaran Aplikasi'));
+            : (lang == AppLanguage.ko
+                ? '주요 기능 및 개요'
+                : 'Fungsi & Gambaran Aplikasi'));
 
     final storyBody = lang == AppLanguage.en
         ? "AppliQ is a job application tracker designed to help you organize and monitor your job hunt in one place.\n\nEasily log your application stages (applied, interview, offering, etc.), keep track of recruitment schedules, store your career documents, and view analytics of your job search progress."
@@ -594,13 +667,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                      color: isDark
+                          ? const Color(0xFF3F3F46)
+                          : const Color(0xFFD4D4D8),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -614,7 +690,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.4,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                color: isDark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -622,15 +700,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               sheetSubtitle,
                               style: TextStyle(
                                 fontSize: 11.5,
-                                color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                color: isDark
+                                    ? AppColors.textHintDark
+                                    : AppColors.textHint,
                               ),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(CupertinoIcons.xmark_circle_fill, size: 22),
-                        color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                        icon: const Icon(CupertinoIcons.xmark_circle_fill,
+                            size: 22),
+                        color: isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHint,
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -665,7 +748,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fontSize: 22,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.5,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                color: isDark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -675,22 +760,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w500,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 10),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 5),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                                color: isDark
+                                    ? const Color(0xFF27272A)
+                                    : const Color(0xFFE4E4E7),
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: Text(
-                                'v1.0.6 (Build 1) • com.arch.appliq',
+                                'v1.0.6 • com.arch.appliq',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark ? Colors.white70 : const Color(0xFF3F3F46),
+                                  color: isDark
+                                      ? Colors.white70
+                                      : const Color(0xFF3F3F46),
                                 ),
                               ),
                             ),
@@ -718,7 +810,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: TextStyle(
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                    color: isDark
+                                        ? AppColors.textPrimaryDark
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -727,7 +821,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w500,
-                                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                    color: isDark
+                                        ? AppColors.textHintDark
+                                        : AppColors.textHint,
                                   ),
                                 ),
                               ],
@@ -738,7 +834,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(
                                 fontSize: 12.5,
                                 height: 1.55,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -765,7 +863,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: TextStyle(
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                    color: isDark
+                                        ? AppColors.textPrimaryDark
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -774,7 +874,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: isDark ? AppColors.pastelLavender : const Color(0xFF7C3AED),
+                                    color: isDark
+                                        ? AppColors.pastelLavender
+                                        : const Color(0xFF7C3AED),
                                   ),
                                 ),
                               ],
@@ -785,7 +887,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(
                                 fontSize: 12.5,
                                 height: 1.55,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -812,7 +916,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: TextStyle(
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                    color: isDark
+                                        ? AppColors.textPrimaryDark
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -821,7 +927,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
-                                    color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                    color: isDark
+                                        ? AppColors.textHintDark
+                                        : AppColors.textHint,
                                   ),
                                 ),
                               ],
@@ -832,7 +940,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(
                                 fontSize: 12.5,
                                 height: 1.55,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -848,8 +958,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
   }
-
-
 
   Future<void> _handleSignOut() async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -885,7 +993,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (mounted) {
           UIHelper.showSuccessSnackBar(
             context,
-            LanguageManager.isEnglish ? 'Signed out successfully' : 'Berhasil keluar',
+            LanguageManager.isEnglish
+                ? 'Signed out successfully'
+                : 'Berhasil keluar',
           );
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
@@ -908,8 +1018,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       valueListenable: ThemeManager.accentNotifier,
       builder: (context, accentMode, _) {
         final isMono = accentMode == AccentThemeMode.monochrome;
-        final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
-        final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+        final cardBg =
+            AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
+        final borderColor =
+            AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -927,14 +1039,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           height: 38,
                           decoration: BoxDecoration(
                             color: isDark
-                                ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                                ? (isMono
+                                    ? const Color(0xFF27272A)
+                                    : AppColors.darkSurfaceVariantPastel)
                                 : const Color(0xFFF4F4F5),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             CupertinoIcons.arrow_left,
                             size: 18,
-                            color: isDark ? Colors.white : const Color(0xFF18181B),
+                            color:
+                                isDark ? Colors.white : const Color(0xFF18181B),
                           ),
                         ),
                       ),
@@ -948,7 +1063,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.4,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                color:
+                    isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
               ),
             ),
           ),
@@ -985,11 +1101,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             }
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
                               color: cardBg,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: borderColor, width: 0.8),
+                              border:
+                                  Border.all(color: borderColor, width: 0.8),
                             ),
                             child: Row(
                               children: [
@@ -997,27 +1115,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        _profile?.fullName.isNotEmpty == true ? _profile!.fullName : 'Your Name',
+                                        _profile?.fullName.isNotEmpty == true
+                                            ? _profile!.fullName
+                                            : 'Your Name',
                                         style: TextStyle(
                                           fontSize: 15.5,
                                           fontWeight: FontWeight.w700,
                                           letterSpacing: -0.3,
-                                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                          color: isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimary,
                                         ),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        _profile?.username != null && _profile!.username!.isNotEmpty
+                                        _profile?.username != null &&
+                                                _profile!.username!.isNotEmpty
                                             ? _profile!.username!
-                                            : (_profile?.email.contains('@') == true
+                                            : (_profile?.email.contains('@') ==
+                                                    true
                                                 ? '@${_profile!.email.split('@')[0]}'
                                                 : '@yourname'),
                                         style: TextStyle(
                                           fontSize: 12.5,
-                                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                          color: isDark
+                                              ? AppColors.textSecondaryDark
+                                              : AppColors.textSecondary,
                                         ),
                                       ),
                                     ],
@@ -1026,7 +1153,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Icon(
                                   CupertinoIcons.chevron_right,
                                   size: 15,
-                                  color: isDark ? AppColors.textHintDark : AppColors.textHint,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHint,
                                 ),
                               ],
                             ),
@@ -1084,7 +1213,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ValueListenableBuilder<ThemeMode>(
                                 valueListenable: ThemeManager.notifier,
                                 builder: (context, themeMode, _) {
-                                  final isDarkModeActive = themeMode == ThemeMode.dark ||
+                                  final isDarkModeActive = themeMode ==
+                                          ThemeMode.dark ||
                                       (themeMode == ThemeMode.system && isDark);
 
                                   return _buildTile(
@@ -1099,7 +1229,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       onChanged: (val) async {
                                         _triggerHaptic();
                                         await ThemeManager.setThemeMode(
-                                          val ? ThemeMode.dark : ThemeMode.light,
+                                          val
+                                              ? ThemeMode.dark
+                                              : ThemeMode.light,
                                         );
                                       },
                                     ),
@@ -1121,7 +1253,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   onChanged: (val) async {
                                     _triggerHaptic();
                                     await ThemeManager.setAccentThemeMode(
-                                      val ? AccentThemeMode.monochrome : AccentThemeMode.color,
+                                      val
+                                          ? AccentThemeMode.monochrome
+                                          : AccentThemeMode.color,
                                     );
                                   },
                                 ),
@@ -1199,7 +1333,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ? 'About AppliQ'
                                     : (LanguageManager.isJapanese
                                         ? 'AppliQについて'
-                                        : (LanguageManager.isKorean ? 'AppliQ 정보' : 'Tentang AppliQ')),
+                                        : (LanguageManager.isKorean
+                                            ? 'AppliQ 정보'
+                                            : 'Tentang AppliQ')),
                                 isDark: isDark,
                                 showChevron: true,
                                 onTap: () {
@@ -1223,18 +1359,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                                  ? (isMono
+                                      ? const Color(0xFF27272A)
+                                      : AppColors.darkSurfaceVariantPastel)
                                   : const Color(0xFF18181B),
                               borderRadius: BorderRadius.circular(100),
                               border: Border.all(
                                 color: isDark
-                                    ? (isMono ? const Color(0xFF3F3F46) : AppColors.darkBorderPastel)
+                                    ? (isMono
+                                        ? const Color(0xFF3F3F46)
+                                        : AppColors.darkBorderPastel)
                                     : Colors.transparent,
                                 width: 0.8,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.08),
+                                  color: Colors.black
+                                      .withValues(alpha: isDark ? 0.2 : 0.08),
                                   blurRadius: 16,
                                   offset: const Offset(0, 4),
                                 ),
@@ -1284,8 +1425,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     VoidCallback? onTap,
   }) {
     final isMono = ThemeManager.isMonochrome;
-    final defaultMuted = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final effectiveIconColor = isMono ? defaultMuted : (iconColor ?? defaultMuted);
+    final defaultMuted =
+        isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final effectiveIconColor =
+        isMono ? defaultMuted : (iconColor ?? defaultMuted);
 
     return InkWell(
       onTap: onTap,
@@ -1307,7 +1450,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontSize: 14.5,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.2,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimary,
                 ),
               ),
             ),
@@ -1326,7 +1471,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Icon(
                 CupertinoIcons.chevron_right,
                 size: 16,
-                color: isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
+                color:
+                    isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
               ),
           ],
         ),
@@ -1348,13 +1494,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? (isDark ? Colors.white : const Color(0xFF18181B))
             : AppColors.pastelLime,
         inactiveTrackColor: isDark
-            ? (isMonochrome ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+            ? (isMonochrome
+                ? const Color(0xFF27272A)
+                : AppColors.darkSurfaceVariantPastel)
             : const Color(0xFFE4E4E7),
         thumbColor: isMonochrome
             ? (isDark
                 ? (value ? const Color(0xFF18181B) : Colors.white)
                 : (value ? Colors.white : const Color(0xFF71717A)))
-            : (value ? AppColors.textOnPastel : (isDark ? Colors.white70 : const Color(0xFF71717A))),
+            : (value
+                ? AppColors.textOnPastel
+                : (isDark ? Colors.white70 : const Color(0xFF71717A))),
         onChanged: onChanged,
       ),
     );

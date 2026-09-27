@@ -18,13 +18,36 @@ class NotificationService {
       'Notifikasi pengingat jadwal wawancara, tes kerja, dan follow-up lamaran.';
 
   bool _isInitialized = false;
+  bool? _cachedIsEnabled;
+  tz.Location? _cachedLocation;
+
+  tz.Location _getLocation() {
+    if (_cachedLocation != null) return _cachedLocation!;
+    try {
+      _cachedLocation = tz.local;
+    } catch (_) {
+      try {
+        _cachedLocation = tz.getLocation('Asia/Jakarta');
+      } catch (_) {
+        _cachedLocation = tz.UTC;
+      }
+    }
+    return _cachedLocation!;
+  }
+
+  /// Invalidate cache status pengingat saat user mengubah di profil
+  void invalidateEnabledCache() {
+    _cachedIsEnabled = null;
+  }
 
   /// Cek apakah notifikasi diizinkan oleh user di pengaturan profil
   Future<bool> isEnabled() async {
+    if (_cachedIsEnabled != null) return _cachedIsEnabled!;
     try {
       final prefs = await SharedPreferences.getInstance();
       final isPaused = prefs.getBool('pause_notifications') ?? false;
-      return !isPaused;
+      _cachedIsEnabled = !isPaused;
+      return _cachedIsEnabled!;
     } catch (_) {
       return true;
     }
@@ -181,21 +204,7 @@ class NotificationService {
       // Jika waktu reminder sudah lewat, tidak perlu dijadwalkan
       if (reminderTime.isBefore(DateTime.now())) return;
 
-      try {
-        tz.initializeTimeZones();
-      } catch (_) {}
-
-      tz.Location location;
-      try {
-        location = tz.local;
-      } catch (_) {
-        try {
-          location = tz.getLocation('Asia/Jakarta');
-        } catch (_) {
-          location = tz.UTC;
-        }
-      }
-
+      final location = _getLocation();
       final tzReminderTime = tz.TZDateTime.from(reminderTime, location);
 
       const androidDetails = AndroidNotificationDetails(
@@ -261,21 +270,7 @@ class NotificationService {
     try {
       if (targetDate.isBefore(DateTime.now())) return;
 
-      try {
-        tz.initializeTimeZones();
-      } catch (_) {}
-
-      tz.Location location;
-      try {
-        location = tz.local;
-      } catch (_) {
-        try {
-          location = tz.getLocation('Asia/Jakarta');
-        } catch (_) {
-          location = tz.UTC;
-        }
-      }
-
+      final location = _getLocation();
       final tzTargetTime = tz.TZDateTime.from(targetDate, location);
 
       const androidDetails = AndroidNotificationDetails(

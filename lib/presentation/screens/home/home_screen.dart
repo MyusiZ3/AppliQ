@@ -88,16 +88,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadDashboardData(
       {bool isSilent = false, bool forceRefresh = false}) async {
-    if (!isSilent) setState(() => _isLoading = true);
+    final hasData = _applications.isNotEmpty || _userProfile != null;
+    if (!isSilent && !hasData) setState(() => _isLoading = true);
+
     try {
       final results = await Future.wait([
         widget.repository.getCurrentUserProfile(forceRefresh: forceRefresh),
         widget.repository.getApplications(forceRefresh: forceRefresh),
         widget.repository.getAllApplicationLogs(forceRefresh: forceRefresh),
+        SharedPreferences.getInstance(),
       ]);
 
       final apps = (results[1] as List<JobApplication>?) ?? [];
       final allLogs = (results[2] as List<ApplicationLog>?) ?? [];
+      final prefs = results[3] as SharedPreferences;
+
       final upcoming = <Map<String, dynamic>>[];
       final now = DateTime.now();
       final appMap = {for (var a in apps) a.id: a};
@@ -123,44 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
         return dateA.compareTo(dateB);
       });
 
-      // Jadwalkan pengingat push notification otomatis untuk agenda mendatang
-      for (var item in upcoming) {
-        final app = item['app'] as JobApplication;
-        final log = item['log'] as ApplicationLog;
-        if (log.scheduledAt != null &&
-            log.scheduledAt!.isAfter(DateTime.now())) {
-          NotificationService.instance.scheduleInterviewReminder(
-            id: log.id.hashCode,
-            company: app.companyName,
-            position: app.positionTitle,
-            stageName: log.stageName,
-            scheduledAt: log.scheduledAt!,
-            remindMinutesBefore: 60,
-          );
-        }
-      }
-
-      // Jadwalkan pengingat follow-up otomatis untuk lamaran yang masih aktif
-      for (var app in apps) {
-        if (app.status == ApplicationStatus.applied) {
-          final targetFollowUp =
-              app.appliedDate.add(const Duration(days: 7, hours: 9));
-          if (targetFollowUp.isAfter(DateTime.now())) {
-            NotificationService.instance.scheduleFollowUpReminder(
-              id: ('followup_${app.id}').hashCode,
-              company: app.companyName,
-              position: app.positionTitle,
-              targetDate: targetFollowUp,
-            );
-          }
-        }
-      }
-
-      // Periksa riwayat ID notifikasi yang sudah dibaca
-      final prefs = await SharedPreferences.getInstance();
-      final readIds =
-          (prefs.getStringList('read_notification_ids') ?? []).toSet();
-
       final staleApps = apps.where((app) {
         if (app.status != ApplicationStatus.applied &&
             app.status != ApplicationStatus.noResponse) {
@@ -170,23 +137,17 @@ class _HomeScreenState extends State<HomeScreen> {
         return days >= 7;
       }).toList();
 
-      // Pemicu notifikasi otomatis harian jika ada lamaran yang sudah butuh follow-up
-      if (staleApps.isNotEmpty) {
-        NotificationService.instance.checkAndShowFollowUpNotification(staleApps);
-      }
-
+      final readIds = (prefs.getStringList('read_notification_ids') ?? []).toSet();
       final currentAlertIds = <String>{};
       for (var item in upcoming) {
         final log = item['log'] as ApplicationLog;
-        currentAlertIds.add(
-            'schedule_${log.id}_${log.scheduledAt?.millisecondsSinceEpoch}');
+        currentAlertIds.add('schedule_${log.id}_${log.scheduledAt?.millisecondsSinceEpoch}');
       }
       for (var app in staleApps) {
         currentAlertIds.add('stale_${app.id}');
       }
 
-      final hasUnreadAlert =
-          currentAlertIds.any((id) => !readIds.contains(id));
+      final hasUnreadAlert = currentAlertIds.any((id) => !readIds.contains(id));
 
       if (mounted) {
         setState(() {
@@ -198,6 +159,9 @@ class _HomeScreenState extends State<HomeScreen> {
           _loadError = null;
           _isOfflineOrCached = false;
         });
+
+        // Jalankan penjadwalan alarm notifikasi di background agar UI langsung tampil instan
+        _scheduleBackgroundReminders(apps, upcoming, staleApps);
       }
     } catch (e) {
       if (mounted) {
@@ -211,6 +175,54 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     }
+  }
+
+  void _scheduleBackgroundReminders(
+    List<JobApplication> apps,
+    List<Map<String, dynamic>> upcoming,
+    List<JobApplication> staleApps,
+  ) {
+    Future.microtask(() async {
+      try {
+        if (!await NotificationService.instance.isEnabled()) return;
+
+        // 1. Jadwalkan pengingat push notification agenda mendatang
+        for (var item in upcoming) {
+          final app = item['app'] as JobApplication;
+          final log = item['log'] as ApplicationLog;
+          if (log.scheduledAt != null && log.scheduledAt!.isAfter(DateTime.now())) {
+            NotificationService.instance.scheduleInterviewReminder(
+              id: log.id.hashCode,
+              company: app.companyName,
+              position: app.positionTitle,
+              stageName: log.stageName,
+              scheduledAt: log.scheduledAt!,
+              remindMinutesBefore: 60,
+            );
+          }
+        }
+
+        // 2. Jadwalkan pengingat follow-up untuk lamaran yang masih aktif
+        for (var app in apps) {
+          if (app.status == ApplicationStatus.applied) {
+            final targetFollowUp = app.appliedDate.add(const Duration(days: 7, hours: 9));
+            if (targetFollowUp.isAfter(DateTime.now())) {
+              NotificationService.instance.scheduleFollowUpReminder(
+                id: ('followup_${app.id}').hashCode,
+                company: app.companyName,
+                position: app.positionTitle,
+                targetDate: targetFollowUp,
+              );
+            }
+          }
+        }
+
+        // 3. Notifikasi berkala harian jika ada lamaran butuh follow-up
+        if (staleApps.isNotEmpty) {
+          NotificationService.instance.checkAndShowFollowUpNotification(staleApps);
+        }
+      } catch (_) {}
+    });
   }
 
   void _openProfile() {

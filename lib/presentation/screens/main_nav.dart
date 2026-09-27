@@ -22,6 +22,7 @@ class MainNav extends StatefulWidget {
 
 class _MainNavState extends State<MainNav> {
   int _currentIndex = 0;
+  final Set<int> _loadedTabs = {0}; // Tab 0 (Home) aktif secara default
 
   final GlobalKey<State<ApplicationsListScreen>> _listKey = GlobalKey();
 
@@ -31,6 +32,8 @@ class _MainNavState extends State<MainNav> {
     (ctx) => ScheduleScreen(repository: widget.repository),
     (ctx) => DashboardScreen(repository: widget.repository),
   ];
+
+  late final List<Widget?> _cachedScreens = List.filled(_screenBuilders.length, null);
 
   String _getNavLabel(int index) {
     switch (index) {
@@ -74,6 +77,7 @@ class _MainNavState extends State<MainNav> {
         (_listKey.currentState as dynamic)?.closeSearch();
       } catch (_) {}
     }
+    _loadedTabs.add(index);
     setState(() => _currentIndex = index);
   }
 
@@ -93,7 +97,13 @@ class _MainNavState extends State<MainNav> {
                 index: _currentIndex,
                 children: List.generate(
                   _screenBuilders.length,
-                  (index) => _screenBuilders[index](context),
+                  (index) {
+                    if (!_loadedTabs.contains(index)) {
+                      return const SizedBox.shrink();
+                    }
+                    _cachedScreens[index] ??= _screenBuilders[index](context);
+                    return _cachedScreens[index]!;
+                  },
                 ),
               ),
 

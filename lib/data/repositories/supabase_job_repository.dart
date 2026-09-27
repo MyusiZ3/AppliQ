@@ -24,6 +24,11 @@ class SupabaseJobRepository implements JobRepository {
   List<ApplicationLog>? _cachedAllLogs;
   Map<String, dynamic>? _cachedStats;
 
+  // In-Flight Request Deduplication (mencegah request HTTP ganda saat startup)
+  Future<List<JobApplication>>? _inFlightApplications;
+  Future<List<ApplicationLog>>? _inFlightAllLogs;
+  Future<UserProfile?>? _inFlightProfile;
+
   @override
   Stream<void> get dataChanges => _dataChangeController.stream;
 
@@ -43,14 +48,30 @@ class SupabaseJobRepository implements JobRepository {
       return _cachedProfile;
     }
 
-    // Ambil dari local disk cache terlebih dahulu jika cache memori belum ada
-    if (_cachedProfile == null) {
+    // Ambil dari local disk cache terlebih dahulu jika cache memori belum ada (Instant 0ms)
+    if (!forceRefresh && _cachedProfile == null) {
       final diskProfile = await LocalCacheService.getUserProfile(user.id);
       if (diskProfile != null) {
         _cachedProfile = diskProfile;
+        _syncProfileSilently(user);
+        return _cachedProfile;
       }
     }
 
+    if (_inFlightProfile != null) {
+      return _inFlightProfile!;
+    }
+
+    _inFlightProfile = _fetchProfileOnline(user);
+    try {
+      final profile = await _inFlightProfile!;
+      return profile;
+    } finally {
+      _inFlightProfile = null;
+    }
+  }
+
+  Future<UserProfile?> _fetchProfileOnline(User user) async {
     try {
       final data = await NetworkHelper.runWithRetry(
         () => _supabase
@@ -69,7 +90,7 @@ class SupabaseJobRepository implements JobRepository {
         await LocalCacheService.saveUserProfile(user.id, _cachedProfile!);
         return _cachedProfile;
       }
-      
+
       _cachedProfile = UserProfile(
         id: user.id,
         email: user.email ?? '',
@@ -88,6 +109,17 @@ class SupabaseJobRepository implements JobRepository {
       );
       return _cachedProfile;
     }
+  }
+
+  void _syncProfileSilently(User user) {
+    if (_inFlightProfile != null) return;
+    _inFlightProfile = _fetchProfileOnline(user);
+    _inFlightProfile!.then((_) {
+      _inFlightProfile = null;
+      notifyDataChanged();
+    }).catchError((_) {
+      _inFlightProfile = null;
+    });
   }
 
   @override
@@ -124,6 +156,9 @@ class SupabaseJobRepository implements JobRepository {
     _cachedLogs.clear();
     _cachedAllLogs = null;
     _cachedStats = null;
+    _inFlightApplications = null;
+    _inFlightAllLogs = null;
+    _inFlightProfile = null;
     await signOut();
   }
 
@@ -199,6 +234,9 @@ class SupabaseJobRepository implements JobRepository {
         _cachedStats = null;
         _cachedLogs.clear();
         _cachedAllLogs = null;
+        _inFlightApplications = null;
+        _inFlightAllLogs = null;
+        _inFlightProfile = null;
         return null;
       }
       return getCurrentUserProfile(forceRefresh: true);
@@ -214,14 +252,31 @@ class SupabaseJobRepository implements JobRepository {
       return _cachedApplications!;
     }
 
-    // Ambil dari disk cache lebih dulu bila memori masih kosong (Zero Blank Screen)
-    if (_cachedApplications == null) {
+    // Ambil dari disk cache lebih dulu bila memori masih kosong (Instant Display 0ms)
+    if (!forceRefresh && _cachedApplications == null) {
       final diskApps = await LocalCacheService.getApplications(userId);
       if (diskApps != null && diskApps.isNotEmpty) {
         _cachedApplications = diskApps;
+        // Lakukan sinkronisasi online di latar belakang agar data tetap mutakhir tanpa menunggu
+        _syncApplicationsSilently(userId);
+        return _cachedApplications!;
       }
     }
 
+    if (_inFlightApplications != null) {
+      return _inFlightApplications!;
+    }
+
+    _inFlightApplications = _fetchApplicationsOnline(userId);
+    try {
+      final apps = await _inFlightApplications!;
+      return apps;
+    } finally {
+      _inFlightApplications = null;
+    }
+  }
+
+  Future<List<JobApplication>> _fetchApplicationsOnline(String userId) async {
     try {
       final response = await NetworkHelper.runWithRetry(
         () => _supabase
@@ -241,6 +296,17 @@ class SupabaseJobRepository implements JobRepository {
       }
       rethrow;
     }
+  }
+
+  void _syncApplicationsSilently(String userId) {
+    if (_inFlightApplications != null) return;
+    _inFlightApplications = _fetchApplicationsOnline(userId);
+    _inFlightApplications!.then((_) {
+      _inFlightApplications = null;
+      notifyDataChanged();
+    }).catchError((_) {
+      _inFlightApplications = null;
+    });
   }
 
   @override
@@ -462,17 +528,33 @@ class SupabaseJobRepository implements JobRepository {
       return _cachedAllLogs!;
     }
 
-    // Ambil dari disk cache bila memori kosong
-    if (_cachedAllLogs == null) {
+    // Ambil dari disk cache bila memori kosong (Instant Display 0ms)
+    if (!forceRefresh && _cachedAllLogs == null) {
       final diskLogs = await LocalCacheService.getLogs(userId);
       if (diskLogs != null && diskLogs.isNotEmpty) {
         _cachedAllLogs = diskLogs;
         for (var log in diskLogs) {
           _cachedLogs.putIfAbsent(log.applicationId, () => []).add(log);
         }
+        _syncLogsSilently(userId);
+        return _cachedAllLogs!;
       }
     }
 
+    if (_inFlightAllLogs != null) {
+      return _inFlightAllLogs!;
+    }
+
+    _inFlightAllLogs = _fetchAllLogsOnline(userId);
+    try {
+      final logs = await _inFlightAllLogs!;
+      return logs;
+    } finally {
+      _inFlightAllLogs = null;
+    }
+  }
+
+  Future<List<ApplicationLog>> _fetchAllLogsOnline(String userId) async {
     try {
       final response = await NetworkHelper.runWithRetry(
         () => _supabase
@@ -495,6 +577,17 @@ class SupabaseJobRepository implements JobRepository {
     } catch (_) {
       return _cachedAllLogs ?? [];
     }
+  }
+
+  void _syncLogsSilently(String userId) {
+    if (_inFlightAllLogs != null) return;
+    _inFlightAllLogs = _fetchAllLogsOnline(userId);
+    _inFlightAllLogs!.then((_) {
+      _inFlightAllLogs = null;
+      notifyDataChanged();
+    }).catchError((_) {
+      _inFlightAllLogs = null;
+    });
   }
 
   @override

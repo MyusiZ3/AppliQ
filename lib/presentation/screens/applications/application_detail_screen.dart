@@ -231,8 +231,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (modalCtx, setModalState) {
+            final useDarkSheet = isDark || (!isDark && !isMono);
             final cardBg = AppColors.getSurface(isDark: isDark, isMonochrome: isMono);
             final borderColor = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
+            final sheetBg = useDarkSheet ? const Color(0xFF18181B) : cardBg;
+            final sheetBorder = useDarkSheet ? const Color(0xFF27272A) : borderColor;
+            final handleColor = useDarkSheet ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8);
+            final titleColor = useDarkSheet ? AppColors.textPrimaryDark : AppColors.textPrimary;
             final primaryColor = isMono
                 ? (isDark ? Colors.white : const Color(0xFF18181B))
                 : AppColors.pastelLime;
@@ -253,14 +258,14 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? (isMono ? const Color(0xFF27272A) : AppColors.darkSurfaceVariantPastel)
+                  color: useDarkSheet
+                      ? (isMono ? const Color(0xFF27272A) : const Color(0xFF202024))
                       : (isMono ? const Color(0xFFF4F4F5) : AppColors.lightSurfaceVariantPastel),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isChecked
                         ? (isMono ? Colors.transparent : accentColor.withValues(alpha: 0.5))
-                        : borderColor,
+                        : (useDarkSheet ? const Color(0xFF2E2E33) : borderColor),
                     width: 0.8,
                   ),
                 ),
@@ -271,7 +276,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                       height: 36,
                       decoration: BoxDecoration(
                         color: isMono
-                            ? (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7))
+                            ? (useDarkSheet ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7))
                             : accentColor.withValues(alpha: 0.25),
                         shape: BoxShape.circle,
                       ),
@@ -280,7 +285,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           icon,
                           size: 18,
                           color: isMono
-                              ? (isDark ? Colors.white : const Color(0xFF18181B))
+                              ? (useDarkSheet ? Colors.white : const Color(0xFF18181B))
                               : accentColor,
                         ),
                       ),
@@ -296,7 +301,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -0.2,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              color: useDarkSheet ? AppColors.textPrimaryDark : AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -304,7 +309,7 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                             subtitle,
                             style: TextStyle(
                               fontSize: 11.5,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              color: useDarkSheet ? AppColors.textSecondaryDark : AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -316,13 +321,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                         child: Icon(
                           CupertinoIcons.lock_fill,
                           size: 16,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          color: useDarkSheet ? AppColors.textSecondaryDark : AppColors.textSecondary,
                         ),
                       )
                     else
                       CupertinoSwitch(
                         value: isChecked,
-                        activeTrackColor: isMono ? (isDark ? Colors.white : const Color(0xFF18181B)) : accentColor,
+                        activeTrackColor: isMono ? (useDarkSheet ? Colors.white : const Color(0xFF18181B)) : accentColor,
                         onChanged: (val) {
                           HapticFeedback.selectionClick();
                           setModalState(() {
@@ -342,9 +347,9 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
             return Container(
               padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + MediaQuery.of(ctx).padding.bottom),
               decoration: BoxDecoration(
-                color: cardBg,
+                color: sheetBg,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
-                border: Border.all(color: borderColor, width: 0.8),
+                border: Border.all(color: sheetBorder, width: 0.8),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -355,42 +360,19 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
+                        color: handleColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.slider_horizontal_3,
-                        size: 20,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          isEn ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
                   Text(
-                    isEn
-                        ? 'Adjust which stages this job has reached. This directly updates your Career Analytics.'
-                        : 'Atur tahapan mana saja yang pernah dicapai lamaran ini. Pengaturan ini langsung menyinkronkan data Analitik Karir kamu.',
+                    isEn ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
                     style: TextStyle(
-                      fontSize: 12.5,
-                      height: 1.4,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                      color: titleColor,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -1987,6 +1969,13 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
         final cardBorder = AppColors.getBorder(isDark: isDark, isMonochrome: isMono);
         final scaffoldBg = AppColors.getBackground(isDark: isDark, isMonochrome: isMono);
 
+        // Saat berada di light mode dan non-monochrome, background menu hitam AppliQ (0xFF18181B) agar icon pastel tetap terlihat jelas
+        final useDarkMenu = isDark || (!isDark && !isMono);
+        final menuBg = (!isDark && !isMono) ? const Color(0xFF18181B) : cardBg;
+        final menuBorder = (!isDark && !isMono) ? const Color(0xFF27272A) : cardBorder;
+        final menuTextColor = useDarkMenu ? AppColors.textPrimaryDark : AppColors.textPrimary;
+        final menuIconColor = useDarkMenu ? Colors.white : const Color(0xFF18181B);
+
         return Scaffold(
           backgroundColor: scaffoldBg,
           appBar: AppBar(
@@ -2010,149 +1999,154 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
               ),
             ),
             actions: [
-              PopupMenuButton<String>(
-                icon: Icon(
-                  CupertinoIcons.ellipsis_vertical,
-                  size: 20,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+              Theme(
+                data: Theme.of(context).copyWith(
+                  dividerColor: useDarkMenu ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
                 ),
-                position: PopupMenuPosition.under,
-                offset: const Offset(0, 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(
-                    color: cardBorder,
-                    width: 0.8,
+                child: PopupMenuButton<String>(
+                  icon: Icon(
+                    CupertinoIcons.ellipsis_vertical,
+                    size: 20,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                   ),
-                ),
-                color: cardBg,
-                elevation: 4,
-                onSelected: (value) async {
-                  if (value == 'cover_letter') {
-                    _openCoverLetterGenerator();
-                  } else if (value == 'edit') {
-                    final updated = await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ApplicationFormScreen(
-                          repository: widget.repository,
-                          applicationToEdit: app,
+                  position: PopupMenuPosition.under,
+                  offset: const Offset(0, 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(
+                      color: menuBorder,
+                      width: 0.8,
+                    ),
+                  ),
+                  color: menuBg,
+                  elevation: 4,
+                  onSelected: (value) async {
+                    if (value == 'cover_letter') {
+                      _openCoverLetterGenerator();
+                    } else if (value == 'edit') {
+                      final updated = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ApplicationFormScreen(
+                            repository: widget.repository,
+                            applicationToEdit: app,
+                          ),
                         ),
+                      );
+                      if (updated == true) _loadData();
+                    } else if (value == 'stages') {
+                      _showEditReachedStagesSheet();
+                    } else if (value == 'delete') {
+                      _deleteApplication();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<String>(
+                      value: 'cover_letter',
+                      child: Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.doc_plaintext,
+                            size: 18,
+                            color: isMono
+                                ? menuIconColor
+                                : AppColors.pastelLavender,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: menuTextColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                    if (updated == true) _loadData();
-                  } else if (value == 'stages') {
-                    _showEditReachedStagesSheet();
-                  } else if (value == 'delete') {
-                    _deleteApplication();
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<String>(
-                    value: 'cover_letter',
-                    child: Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.doc_plaintext,
-                          size: 18,
-                          color: isMono
-                              ? (isDark ? Colors.white : const Color(0xFF18181B))
-                              : AppColors.pastelLavender,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.pencil,
+                            size: 18,
+                            color: menuIconColor,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              AppStrings.edit,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: menuTextColor,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.pencil,
-                          size: 18,
-                          color: isDark ? Colors.white : const Color(0xFF18181B),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            AppStrings.edit,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    PopupMenuItem<String>(
+                      value: 'stages',
+                      child: Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.slider_horizontal_3,
+                            size: 18,
+                            color: isMono
+                                ? menuIconColor
+                                : AppColors.pastelSky,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              LanguageManager.isEnglish ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: menuTextColor,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'stages',
-                    child: Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.slider_horizontal_3,
-                          size: 18,
-                          color: isMono
-                              ? (isDark ? Colors.white : const Color(0xFF18181B))
-                              : AppColors.pastelSky,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            LanguageManager.isEnglish ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    const PopupMenuDivider(height: 1),
+                    PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            CupertinoIcons.trash,
+                            size: 18,
+                            color: AppColors.expense,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              AppStrings.delete,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.expense,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const PopupMenuDivider(height: 1),
-                  PopupMenuItem<String>(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          CupertinoIcons.trash,
-                          size: 18,
-                          color: AppColors.expense,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            AppStrings.delete,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.expense,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

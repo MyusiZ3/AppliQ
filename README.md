@@ -114,7 +114,7 @@ flutter build apk --release --obfuscate --split-debug-info=build/app/outputs/sym
 ```
 
 The compiled binary will be located at:
-`build/app/outputs/flutter-apk/app-release.apk`
+`build/app/outputs/flutter-apk/app-release.apk` (packaged as `AppliQ-v<version>-release.apk` for release)
 
 ---
 

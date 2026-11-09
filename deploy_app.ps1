@@ -128,6 +128,13 @@ if (Test-Path "public") {
 }
 
 $apkSource = "build\app\outputs\flutter-apk\app-release.apk"
+$namedApkName = "AppliQ-v$versionName-release.apk"
+$namedApkPath = "build\app\outputs\flutter-apk\$namedApkName"
+
+if (Test-Path $apkSource) {
+    Copy-Item -Path $apkSource -Destination $namedApkPath -Force
+    Write-Host "[OK] Menyiapkan paket rilis bernama: $namedApkName" -ForegroundColor Green
+}
 
 # 4. Sinkronisasi Versi di Landing Page (public\index.html)
 Write-Host "--- Sinkronisasi Versi di Landing Page ---" -ForegroundColor Yellow
@@ -139,8 +146,8 @@ if (Test-Path $indexPath) {
     # Ganti {{VERSION}} jika ada
     $newContent = $newContent -replace '\{\{VERSION\}\}', $versionName
     
-    # Ganti link download rilis APK ke vX.X.X
-    $newContent = $newContent -replace 'releases/download/v[^/]+/app-release\.apk', "releases/download/v$versionName/app-release.apk"
+    # Ganti link download rilis APK ke AppliQ-vX.X.X-release.apk
+    $newContent = $newContent -replace 'releases/download/v[^/]+/[^"''\s`]+\.apk', "releases/download/v$versionName/$namedApkName"
     
     # Ganti teks versi di button badge, button text, dan QR card footer
     $newContent = $newContent -replace '<span>v[0-9]+\.[0-9]+\.[0-9]+</span>', "<span>v$versionName</span>"
@@ -194,8 +201,8 @@ if ($ghPath -and (Test-Path $ghPath)) {
     Write-Host "Menghapus tag lama (jika ada) via GitHub CLI..." -ForegroundColor Gray
     & $ghPath release delete "v$versionName" --cleanup-tag --yes 2>$null
 
-    Write-Host "Mengunggah APK dan BIN ke repositori GitHub Releases..." -ForegroundColor Cyan
-    & $ghPath release create "v$versionName" $apkSource $binSource --title "AppliQ v$versionName" --notes $notes
+    Write-Host "Mengunggah paket APK ($namedApkName) ke repositori GitHub Releases..." -ForegroundColor Cyan
+    & $ghPath release create "v$versionName" $namedApkPath $binSource --title "AppliQ v$versionName" --notes $notes
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[ERROR] Membuat GitHub Release Gagal!" -ForegroundColor Red
@@ -208,4 +215,4 @@ if ($ghPath -and (Test-Path $ghPath)) {
 
 Write-Host "`n[OK] Selesai! Versi AppliQ v$versionName siap." -ForegroundColor DarkGreen
 Write-Host "Link Web Landing Page  : https://myusiz3.github.io/AppliQ/" -ForegroundColor Cyan
-Write-Host "Link Download APK Rilis: https://github.com/MyusiZ3/AppliQ/releases/download/v$versionName/app-release.apk" -ForegroundColor Cyan
+Write-Host "Link Download APK Rilis: https://github.com/MyusiZ3/AppliQ/releases/download/v$versionName/$namedApkName" -ForegroundColor Cyan

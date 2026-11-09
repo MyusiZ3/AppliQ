@@ -29,6 +29,8 @@ Aplikasi menggunakan pendekatan **Clean Layered Architecture** dengan pemisahan 
 AppliQ/
 ├── .env / .env.example         # Konfigurasi Supabase & Google Web Client ID
 ├── pubspec.yaml                # Dependensi dan aset aplikasi
+├── deploy_app.ps1              # Script otomatisasi build, version bump, APK rename, & Firebase deploy
+├── public/                     # Static site & OTA server (index.html, version.json, APK download)
 ├── docs/                       # Dokumentasi spesifikasi, database, & design
 │   ├── PROJECT_CONTEXT.md      # [DOKUMEN INI] Ringkasan komprehensif proyek
 │   ├── PRD.md                  # Product Requirements Document
@@ -105,6 +107,7 @@ AppliQ/
 │   │       ├── notification_sheet.dart      # Riwayat dan pengaturan notifikasi lokal
 │   │       └── status_badge.dart            # Pill badge warna status (Applied, Interview, dll)
 │   ├── services/
+│   │   ├── app_update_service.dart          # Pemeriksa pembaruan in-app OTA, threshold force update, & direct APK download
 │   │   ├── google_drive_service.dart        # Upload / Download / Backup file ke Google Drive App Folder
 │   │   ├── local_cache_service.dart         # SharedPreferences snapshot cache (Offline-first)
 │   │   └── notification_service.dart        # Local push notifications & scheduled reminders
@@ -233,6 +236,12 @@ Aplikasi memiliki dua mode tema utama:
 7. **Multi-Bahasa (Localization)**:
    - Didukung secara penuh: Indonesian (`id`), English (`en`), Japanese (`ja`), Korean (`ko`).
    - Aksesibel melalui `LanguageManager` dan `AppStrings`.
+
+8. **In-App OTA Updates & Automated Release Delivery**:
+   - `AppUpdateService`: Memeriksa ketersediaan versi rilis terbaru dari server via endpoint `version.json`. Dialog pembaruan enterprise memberikan petunjuk lokasi menu About untuk update manual sewaktu-waktu.
+   - Kebijakan Pembaruan: Maksimal toleransi lag 3 versi sebelum memicu mode *force update* (wajib perbarui). Untuk lag < 3 versi, pengguna dapat memilih tunda (*snooze* per versi).
+   - Unduhan Berkas APK Langsung: Download berkas APK langsung di aplikasi dengan dialog status, serta fallback otomatis membuka browser unduh eksternal.
+   - Otomatisasi Rilis & Packaging: Skrip `deploy_app.ps1` (`-Bump patch|minor|major`) menaikkan versi di `pubspec.yaml`, menyelaraskan `version.json` & `public/index.html`, mengompilasi APK rilis dengan obfuscation, mengemas nama file menjadi `AppliQ-vX.X.X-release.apk`, dan mendeploy ke Firebase Hosting.
 
 ---
 

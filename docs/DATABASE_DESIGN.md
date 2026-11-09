@@ -27,6 +27,8 @@
 | full_name              : TEXT                                        |
 | avatar_url             : TEXT                                        |
 | target_role            : TEXT                                        |
+| username               : TEXT                                        |
+| phone_number           : TEXT                                        |
 | created_at             : TIMESTAMPTZ                                 |
 | updated_at             : TIMESTAMPTZ                                 |
 +----------------------------------+-----------------------------------+
@@ -40,6 +42,7 @@
 | company_name           : TEXT                                        |
 | position_title         : TEXT                                        |
 | location               : TEXT                                        |
+| employment_type        : VARCHAR(50) (DEFAULT 'Full Time')           |
 | work_system            : work_system_type (ENUM)                     |
 | job_portal             : job_portal_type (ENUM)                      |
 | job_portal_custom      : TEXT                                        |
@@ -49,7 +52,10 @@
 | salary_expectation     : NUMERIC(15, 2)                              |
 | salary_offered         : NUMERIC(15, 2)                              |
 | notes                  : TEXT                                        |
+| cv_file_url            : TEXT                                        |
+| cv_file_name           : TEXT                                        |
 | is_favorite            : BOOLEAN                                     |
+| reached_stages         : JSONB (Milestone list, e.g. ['applied'])    |
 | created_at             : TIMESTAMPTZ                                 |
 | updated_at             : TIMESTAMPTZ                                 |
 +----------------------------------+-----------------------------------+
@@ -157,6 +163,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   full_name TEXT,
   avatar_url TEXT,
   target_role TEXT,
+  username TEXT,
+  phone_number TEXT,
   created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -168,6 +176,7 @@ CREATE TABLE IF NOT EXISTS public.job_applications (
   company_name TEXT NOT NULL,
   position_title TEXT NOT NULL,
   location TEXT,
+  employment_type VARCHAR(50) NOT NULL DEFAULT 'Full Time',
   work_system work_system_type NOT NULL DEFAULT 'On-site',
   job_portal job_portal_type NOT NULL DEFAULT 'Linked In',
   job_portal_custom TEXT,
@@ -177,7 +186,10 @@ CREATE TABLE IF NOT EXISTS public.job_applications (
   salary_expectation NUMERIC(15, 2),
   salary_offered NUMERIC(15, 2),
   notes TEXT,
+  cv_file_url TEXT,
+  cv_file_name TEXT,
   is_favorite BOOLEAN DEFAULT FALSE NOT NULL,
+  reached_stages JSONB NOT NULL DEFAULT '["applied"]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -222,6 +234,20 @@ CREATE TABLE IF NOT EXISTS public.user_resumes (
   created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+
+-- 2.5 Migration Script (Eksekusi jika database Anda sudah berjalan dan perlu sinkronisasi kolom baru)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS username TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_number TEXT;
+
+ALTER TABLE public.job_applications ADD COLUMN IF NOT EXISTS employment_type VARCHAR(50) NOT NULL DEFAULT 'Full Time';
+ALTER TABLE public.job_applications ADD COLUMN IF NOT EXISTS cv_file_url TEXT;
+ALTER TABLE public.job_applications ADD COLUMN IF NOT EXISTS cv_file_name TEXT;
+ALTER TABLE public.job_applications ADD COLUMN IF NOT EXISTS reached_stages JSONB NOT NULL DEFAULT '["applied"]'::jsonb;
+
+-- Inisialisasi data lama untuk reached_stages jika masih null
+UPDATE public.job_applications
+SET reached_stages = jsonb_build_array('applied', lower(status::text))
+WHERE reached_stages IS NULL OR reached_stages = '[]'::jsonb;
 
 -- ====================================================================
 -- 3. INDEXING FOR PERFORMANCE
@@ -465,9 +491,11 @@ GRANT EXECUTE ON FUNCTION public.delete_current_user() TO authenticated;
 |---|---|---|---|---|
 | `id` | UUID | NO | - | Primary Key, merujuk ke `auth.users(id)`. |
 | `email` | TEXT | NO | - | Alamat email terdaftar. |
-| `full_name` | TEXT | YES | - | Nama lengkap dari akun Google. |
-| `avatar_url` | TEXT | YES | - | URL foto profil dari Google. |
+| `full_name` | TEXT | YES | - | Nama lengkap dari akun Google / profil. |
+| `avatar_url` | TEXT | YES | - | URL foto profil dari Google / custom. |
 | `target_role` | TEXT | YES | - | Preferensi posisi target yang dicari pengguna. |
+| `username` | TEXT | YES | - | Nama pengguna / username kustom. |
+| `phone_number` | TEXT | YES | - | Nomor kontak telepon / WhatsApp. |
 | `created_at` | TIMESTAMPTZ | NO | NOW() | Timestamp pembuatan record. |
 | `updated_at` | TIMESTAMPTZ | NO | NOW() | Timestamp pembaruan data terakhir. |
 
@@ -479,6 +507,7 @@ GRANT EXECUTE ON FUNCTION public.delete_current_user() TO authenticated;
 | `company_name` | TEXT | NO | - | Nama perusahaan. |
 | `position_title` | TEXT | NO | - | Posisi pekerjaan. |
 | `location` | TEXT | YES | - | Kota / wilayah kerja. |
+| `employment_type` | VARCHAR(50) | NO | 'Full Time' | Jenis kontrak kerja: Full Time, Contract, Internship, Part Time, Freelance. |
 | `work_system` | work_system_type | NO | 'On-site' | Enum: `On-site`, `Hybrid`, `WFH`. |
 | `job_portal` | job_portal_type | NO | 'Linked In' | Enum sumber lowongan kerja. |
 | `job_portal_custom` | TEXT | YES | - | Nama portal kustom jika memilih `Lainnya`. |
@@ -488,7 +517,10 @@ GRANT EXECUTE ON FUNCTION public.delete_current_user() TO authenticated;
 | `salary_expectation` | NUMERIC(15, 2) | YES | - | Ekspektasi gaji pengguna. |
 | `salary_offered` | NUMERIC(15, 2) | YES | - | Penawaran gaji dari perusahaan. |
 | `notes` | TEXT | YES | - | Catatan personal pengguna. |
+| `cv_file_url` | TEXT | YES | - | URL / path berkas CV yang dilampirkan untuk lamaran ini. |
+| `cv_file_name` | TEXT | YES | - | Nama berkas CV yang dilampirkan. |
 | `is_favorite` | BOOLEAN | NO | FALSE | Penanda lamaran prioritas tinggi. |
+| `reached_stages` | JSONB | NO | '["applied"]'::jsonb | Array JSON tahapan yang pernah dilalui lamaran (`reachedStages`). |
 | `created_at` | TIMESTAMPTZ | NO | NOW() | Timestamp pembuatan record. |
 | `updated_at` | TIMESTAMPTZ | NO | NOW() | Timestamp update terakhir. |
 

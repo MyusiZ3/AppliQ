@@ -353,8 +353,8 @@ class AppUpdateService {
       }
 
       if (downloadUrl.isEmpty) {
-        // Fallback standar ke format GitHub Releases
-        downloadUrl = 'https://github.com/$_repoOwner/$_repoName/releases/download/$rawTag/app-release.apk';
+        // Fallback standar ke format GitHub Releases (AppliQ-vX.X.X-release.apk)
+        downloadUrl = 'https://github.com/$_repoOwner/$_repoName/releases/download/$rawTag/AppliQ-$rawTag-release.apk';
       }
 
       final releaseUrl = latest['html_url']?.toString() ??

@@ -70,9 +70,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(CupertinoIcons.pencil), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.ellipsis_vertical), findsOneWidget);
 
-    await tester.tap(find.byIcon(CupertinoIcons.pencil));
+    await tester.tap(find.byIcon(CupertinoIcons.ellipsis_vertical));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.edit), findsOneWidget);
+    await tester.tap(find.text(AppStrings.edit));
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.editApplicationTitle), findsOneWidget);

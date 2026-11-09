@@ -54,6 +54,8 @@ class AppColors {
   static const Color textPrimaryDark = Color(0xFFFAFAFA);  // Pure Crisp White
   static const Color textSecondaryDark = Color(0xFFA1A1AA);// Neutral Zinc 400 (Pure clean grey)
   static const Color textHintDark = Color(0xFF71717A);     // Neutral Zinc 500 (Subtle clean grey)
+  static const Color textMuted = textHint;
+  static const Color textMutedDark = textHintDark;
 
   // Semantic Status & Action Palette
   static const Color statusApplied = Color(0xFFA1A1AA);    // Neutral Zinc 400

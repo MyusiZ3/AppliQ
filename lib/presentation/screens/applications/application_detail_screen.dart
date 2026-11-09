@@ -2059,12 +2059,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                               : AppColors.pastelLavender,
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                        Expanded(
+                          child: Text(
+                            LanguageManager.isEnglish ? 'Generate Cover Letter' : 'Buat Cover Letter',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
@@ -2080,12 +2084,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           color: isDark ? Colors.white : const Color(0xFF18181B),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          AppStrings.edit,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                        Expanded(
+                          child: Text(
+                            AppStrings.edit,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
@@ -2103,12 +2111,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                               : AppColors.pastelSky,
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          LanguageManager.isEnglish ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                        Expanded(
+                          child: Text(
+                            LanguageManager.isEnglish ? 'Correct Stage History' : 'Koreksi Riwayat Tahap',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
@@ -2125,12 +2137,16 @@ class _ApplicationDetailScreenState extends State<ApplicationDetailScreen> {
                           color: AppColors.expense,
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          AppStrings.delete,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.expense,
+                        Expanded(
+                          child: Text(
+                            AppStrings.delete,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.expense,
+                            ),
                           ),
                         ),
                       ],

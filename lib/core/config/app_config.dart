@@ -1,6 +1,9 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
+  static const String appVersion = '1.0.8';
+  static const int buildNumber = 2;
+
   static String supabaseUrl = '';
   static String supabaseAnonKey = '';
   static String googleWebClientId = '';

@@ -2,6 +2,10 @@
 
 AppliQ is a mobile application built with Flutter and Supabase designed to help job seekers systematically track, organize, and manage their recruitment pipelines, interview schedules, and career records.
 
+<p align="center">
+  <img src="docs/images/appliq_mobile_mockup.jpg" alt="AppliQ Mobile Overview" width="850">
+</p>
+
 ---
 
 ## Key Features
@@ -118,9 +122,11 @@ The compiled binary will be located at:
 
 Detailed design specifications, database migration scripts, and architecture requirements are available in the `docs/` folder:
 
+- [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md): Complete Architecture, Database Schema, and Context Guide
 - [docs/PRD.md](docs/PRD.md): Product Requirements Document
 - [docs/SRS.md](docs/SRS.md): Software Requirements Specification
 - [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md): PostgreSQL Schema, DDL Scripts, and RLS Policies
+- [docs/PASTEL_COLOR_SYSTEM.md](docs/PASTEL_COLOR_SYSTEM.md): Neo-Pastel Design System & Color Tokens
 - [docs/DESIGN_THINKING.md](docs/DESIGN_THINKING.md): Persona Analysis and Design Guidelines
 
 ---

@@ -1,0 +1,68 @@
+name: Supabase Keep-Alive Ping
+
+on:
+  schedule:
+    # Berjalan setiap 3 hari sekali pada jam 04:27 UTC (11:27 WIB)
+    # Menghindari jam bulat (:00) sesuai rekomendasi beban server GitHub Actions
+    - cron: '27 4 */3 * *'
+  workflow_dispatch: # Mengizinkan eksekusi manual kapan saja via GitHub Actions UI / CLI
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'supabase-keepalive'
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    name: Ping Supabase Database & Auth
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate Supabase Secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_URL or SUPABASE_ANON_KEY secret is not configured in repository settings."
+            exit 1
+          fi
+          echo "Supabase secrets verified."
+
+      - name: Send Keep-Alive Query to Supabase PostgREST & Auth
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Sending query to Supabase PostgREST database..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "$SUPABASE_URL/rest/v1/profiles?select=count" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Range-Unit: items" \
+            -H "Range: 0-0")
+          
+          echo "PostgREST Response HTTP Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
+            echo "Database query successfully registered."
+          else
+            echo "::warning::PostgREST query returned status $HTTP_STATUS"
+          fi
+
+          echo "Checking Supabase Auth service..."
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "$SUPABASE_URL/auth/v1/health" \
+            -H "apikey: $SUPABASE_ANON_KEY")
+          
+          echo "Auth Response HTTP Status: $AUTH_STATUS"
+          if [ "$AUTH_STATUS" -eq 200 ]; then
+            echo "Supabase project is active and healthy."
+          fi
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 500 ]; then
+            echo "::error::Keep-alive request failed with status $HTTP_STATUS."
+            exit 1
+          fi
+

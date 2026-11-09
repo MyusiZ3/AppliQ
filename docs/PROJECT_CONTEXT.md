@@ -30,6 +30,9 @@ AppliQ/
 ├── .env / .env.example         # Konfigurasi Supabase & Google Web Client ID
 ├── pubspec.yaml                # Dependensi dan aset aplikasi
 ├── deploy_app.ps1              # Script otomatisasi build, version bump, APK rename, & Firebase deploy
+├── .github/workflows/          # CI/CD Workflows
+│   ├── deploy-pages.yml        # Deploy otomatis landing page ke GitHub Pages
+│   └── supabase-keepalive.yml  # Keep-alive query berkala anti-pause 7 hari Supabase
 ├── public/                     # Static site & OTA server (index.html, version.json, APK download)
 ├── docs/                       # Dokumentasi spesifikasi, database, & design
 │   ├── PROJECT_CONTEXT.md      # [DOKUMEN INI] Ringkasan komprehensif proyek

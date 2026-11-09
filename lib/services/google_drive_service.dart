@@ -29,15 +29,26 @@ class GoogleDriveService {
     ],
   );
 
+  static const List<String> allowedDocumentExtensions = [
+    'pdf',
+    'doc',
+    'docx',
+    'png',
+    'jpg',
+    'jpeg',
+  ];
+
   /// Picks a document from local storage and uploads it to user's personal Google Drive
   /// in the path: `AppliQ / [companyName]_[positionTitle]`
   static Future<Map<String, String>?> pickAndUploadDocument({
     required String companyName,
     required String positionTitle,
   }) async {
+    // Mitigasi bug sistem SAF / DocumentsUI pada Android:
+    // Menggunakan FileType.any untuk mencegah freeze/blank drawer pada provider Google Drive
+    // saat memproses MIME type gabungan dokumen dan gambar di Android OS.
     final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'],
+      type: FileType.any,
       withData: kIsWeb,
     );
 
@@ -46,6 +57,19 @@ class GoogleDriveService {
     }
 
     final pickedFile = result.files.first;
+
+    // Validasi ekstensi di layer Dart agar kompatibel dan aman di semua perangkat
+    final extension = (pickedFile.extension != null && pickedFile.extension!.isNotEmpty)
+        ? pickedFile.extension!.toLowerCase()
+        : (pickedFile.name.contains('.')
+            ? pickedFile.name.split('.').last.toLowerCase()
+            : '');
+
+    if (!allowedDocumentExtensions.contains(extension)) {
+      throw Exception(
+        'Format berkas ".$extension" tidak didukung. Harap pilih berkas PDF, DOC, DOCX, PNG, atau JPG.',
+      );
+    }
 
     // Batasi ukuran file maksimal 25 MB untuk mencegah OOM / pemborosan kuota
     const maxFileSizeBytes = 25 * 1024 * 1024;

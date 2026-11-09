@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/network_helper.dart';
 import 'navigator_key.dart';
+import 'theme_manager.dart';
 
 class UIHelper {
   static Future<void> openUrl(BuildContext context, String? rawUrl) async {
@@ -81,11 +82,27 @@ class UIHelper {
       overlayEntry = OverlayEntry(
         builder: (context) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
+          final isMono = ThemeManager.isMonochrome;
           final toastBg = isDark ? const Color(0xCC1C1C1E) : const Color(0xEEFFFFFF);
           final textColor = isDark ? Colors.white : const Color(0xFF18181B);
           final borderColor = isDark
               ? Colors.white.withValues(alpha: 0.14)
               : Colors.black.withValues(alpha: 0.08);
+
+          // Di Light mode (baik monochrome aktif atau nonaktif), samakan warna icon dengan mode monochrome.
+          // Di Dark mode & non-monochrome, tetap gunakan aksen warna saat ini (color).
+          final Color effectiveIconColor;
+          final Color effectiveIconBg;
+
+          if (isMono || !isDark) {
+            effectiveIconColor = isDark ? Colors.white : const Color(0xFF18181B);
+            effectiveIconBg = isDark
+                ? Colors.white.withValues(alpha: 0.15)
+                : const Color(0xFF18181B).withValues(alpha: 0.08);
+          } else {
+            effectiveIconColor = color;
+            effectiveIconBg = color.withValues(alpha: 0.15);
+          }
 
           return Positioned(
             top: MediaQuery.of(context).padding.top + 16,
@@ -139,10 +156,10 @@ class UIHelper {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: color.withValues(alpha: 0.15),
+                                  color: effectiveIconBg,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(icon, color: color, size: 14),
+                                child: Icon(icon, color: effectiveIconColor, size: 14),
                               ),
                               const SizedBox(width: 8),
                               Flexible(

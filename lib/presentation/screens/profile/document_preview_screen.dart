@@ -99,13 +99,26 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen>
   Future<void> _pickSignatureImage() async {
     try {
       final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['png', 'jpg', 'jpeg'],
+        type: FileType.image,
         withData: true,
       );
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
+        final extension = (file.extension != null && file.extension!.isNotEmpty)
+            ? file.extension!.toLowerCase()
+            : (file.name.contains('.')
+                ? file.name.split('.').last.toLowerCase()
+                : '');
+        const allowedImageExtensions = ['png', 'jpg', 'jpeg', 'webp'];
+        if (extension.isNotEmpty && !allowedImageExtensions.contains(extension)) {
+          throw Exception(
+            _isEnglish
+                ? 'Unsupported image format. Please select PNG, JPG, or JPEG.'
+                : 'Format gambar tidak didukung. Harap pilih gambar PNG atau JPG.',
+          );
+        }
+
         Uint8List? bytes = file.bytes;
         if (bytes == null && file.path != null) {
           bytes = await File(file.path!).readAsBytes();

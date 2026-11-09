@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
 import '../../utils/language_manager.dart';
 import '../../utils/theme_manager.dart';
+import '../../utils/ui_helper.dart';
 
 class HrTemplatesSheet extends StatefulWidget {
   final String? defaultCompanyName;
@@ -631,27 +632,7 @@ class _HrTemplatesSheetState extends State<HrTemplatesSheet> {
   void _copyToClipboard(String text, String label) {
     HapticFeedback.lightImpact();
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(CupertinoIcons.checkmark_circle_fill,
-                color: AppColors.pastelMint, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                AppStrings.copiedToast(label),
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        ),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    UIHelper.showSuccessSnackBar(context, AppStrings.copiedToast(label));
   }
 
   @override

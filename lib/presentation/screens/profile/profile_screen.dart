@@ -1218,7 +1218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // Career & Currently Working Hub
                               _buildTile(
                                 icon: CupertinoIcons.briefcase_fill,
-                                iconColor: isMono ? null : AppColors.pastelLime,
+                                iconColor: AppColors.pastelLime,
                                 title: AppStrings.menuCareerTitle,
                                 isDark: isDark,
                                 showChevron: true,
@@ -1454,8 +1454,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isMono = ThemeManager.isMonochrome;
     final defaultMuted =
         isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final effectiveIconColor =
-        isMono ? defaultMuted : (iconColor ?? defaultMuted);
+    final effectiveIconColor = (!isDark || isMono)
+        ? defaultMuted
+        : (iconColor ?? defaultMuted);
 
     return InkWell(
       onTap: onTap,

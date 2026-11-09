@@ -329,21 +329,22 @@ class _ApplicationFormScreenState extends State<ApplicationFormScreen> {
   Future<void> _confirmClearDraft() async {
     HapticFeedback.mediumImpact();
     final isEn = LanguageManager.isEnglish;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showCupertinoDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => CupertinoAlertDialog(
         title: Text(isEn ? 'Discard Draft?' : 'Hapus Draft Formulir?'),
         content: Text(isEn
             ? 'Are you sure you want to clear all entered draft fields? This action cannot be undone.'
             : 'Apakah Anda yakin ingin mengosongkan semua isian formulir ini? Tindakan ini tidak dapat dibatalkan.'),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(AppStrings.cancel),
           ),
-          TextButton(
+          CupertinoDialogAction(
+            isDestructiveAction: true,
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.expense),
             child: Text(isEn ? 'Discard' : 'Hapus'),
           ),
         ],

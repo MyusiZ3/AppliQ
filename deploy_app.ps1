@@ -1,19 +1,81 @@
 # ==========================================
 # AppliQ - Auto Build & GitHub Release
 # ==========================================
+param(
+    [ValidateSet("patch", "minor", "major", "none", "")]
+    [string]$Bump = ""
+)
 
 Write-Host "--- Memulai proses Build & Release AppliQ ---" -ForegroundColor Cyan
 
-# 1. Ambil Versi dari pubspec.yaml
+# 1. Ambil & Kelola Versi (Auto-Bump Support)
 $pubspec = Get-Content "pubspec.yaml" -Raw
 if ($pubspec -match "version:\s*([^\s#]+)") {
     $fullVersion = $Matches[1].Trim()
-    $versionName = ($fullVersion -split '\+')[0]
-    Write-Host "[OK] Versi terdeteksi: $versionName (Build: $fullVersion)" -ForegroundColor Green
+    $versionParts = ($fullVersion -split '\+')
+    $versionName = $versionParts[0]
+    $buildNumber = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 1 }
 } else {
     Write-Host "[ERROR] Gagal membaca versi dari pubspec.yaml" -ForegroundColor Red
     exit
 }
+
+if (-not $Bump) {
+    if ([Environment]::UserInteractive) {
+        $vParts = $versionName.Split('.')
+        $pPatch = if ($vParts.Length -gt 2) { "$($vParts[0]).$($vParts[1]).$([int]$vParts[2] + 1)" } else { "$versionName.1" }
+        $pMinor = if ($vParts.Length -gt 1) { "$($vParts[0]).$([int]$vParts[1] + 1).0" } else { "$versionName.0" }
+        $pMajor = "$([int]$vParts[0] + 1).0.0"
+
+        Write-Host "Versi saat ini: v$versionName (Build: $buildNumber)" -ForegroundColor Cyan
+        Write-Host "Pilih Bump Versi:" -ForegroundColor Yellow
+        Write-Host "  [1] Patch ($versionName -> $pPatch)"
+        Write-Host "  [2] Minor ($versionName -> $pMinor)"
+        Write-Host "  [3] Major ($versionName -> $pMajor)"
+        Write-Host "  [Enter] Lewati / Gunakan versi saat ini"
+        $choice = Read-Host "Pilihan [1/2/3/Enter]"
+        if ($choice -eq "1") { $Bump = "patch" }
+        elseif ($choice -eq "2") { $Bump = "minor" }
+        elseif ($choice -eq "3") { $Bump = "major" }
+    }
+}
+
+if ($Bump -and $Bump -ne "none") {
+    $v = $versionName.Split('.')
+    $major = [int]$v[0]
+    $minor = if ($v.Length -gt 1) { [int]$v[1] } else { 0 }
+    $patch = if ($v.Length -gt 2) { [int]$v[2] } else { 0 }
+    $newBuild = $buildNumber + 1
+
+    switch ($Bump.ToLower()) {
+        "patch" { $patch++ }
+        "minor" { $minor++; $patch = 0 }
+        "major" { $major++; $minor = 0; $patch = 0 }
+    }
+    $newVersionName = "$major.$minor.$patch"
+    $newFullVersion = "$newVersionName+$newBuild"
+
+    Write-Host "[BUMP] Menaikkan versi: $versionName+$buildNumber -> $newFullVersion" -ForegroundColor Green
+
+    # Update pubspec.yaml
+    $pubspec = $pubspec -replace "version:\s*[^\s#]+", "version: $newFullVersion"
+    $pubspec | Set-Content "pubspec.yaml" -NoNewline
+
+    # Update lib/core/config/app_config.dart
+    $appConfigPath = "lib\core\config\app_config.dart"
+    if (Test-Path $appConfigPath) {
+        $appConfigContent = Get-Content $appConfigPath -Raw
+        $appConfigContent = $appConfigContent -replace "static const String appVersion = '[^']+';", "static const String appVersion = '$newVersionName';"
+        $appConfigContent = $appConfigContent -replace "static const int buildNumber = \d+;", "static const int buildNumber = $newBuild;"
+        $appConfigContent | Set-Content $appConfigPath -NoNewline
+        Write-Host "[OK] Versi di $appConfigPath diperbarui ke $newVersionName" -ForegroundColor Green
+    }
+
+    $versionName = $newVersionName
+    $fullVersion = $newFullVersion
+}
+
+Write-Host "[OK] Versi target release: $versionName (Build: $fullVersion)" -ForegroundColor Green
 
 # 2. Build APK (Hanya jika belum ada atau versi berubah)
 Write-Host "--- Memeriksa Build APK ---" -ForegroundColor Yellow
@@ -92,11 +154,17 @@ if (Test-Path $indexPath) {
     if ($newContent -ne $content) {
         $newContent | Set-Content $indexPath -NoNewline
         Write-Host "[OK] Versi di public\index.html berhasil diperbarui ke v$versionName" -ForegroundColor Green
-        git add public/index.html
-        git commit -m "chore(web): update landing page version to v$versionName" 2>$null
     } else {
         Write-Host "[INFO] Versi di public\index.html sudah sesuai (v$versionName)." -ForegroundColor Gray
     }
+}
+
+# Auto-commit jika ada file versi yang berubah akibat auto-bump
+$status = git status --porcelain pubspec.yaml lib/core/config/app_config.dart public/index.html
+if ($status) {
+    Write-Host "[GIT] Menyimpan perubahan versi ke git..." -ForegroundColor Cyan
+    git add pubspec.yaml lib/core/config/app_config.dart public/index.html
+    git commit -m "chore(release): bump version to v$versionName" 2>$null
 }
 
 # 5. Sinkronisasi Git Commit ke GitHub

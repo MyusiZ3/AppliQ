@@ -9,6 +9,7 @@ import 'schedule/schedule_screen.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
+import '../../services/app_update_service.dart';
 import '../../utils/theme_manager.dart';
 
 class MainNav extends StatefulWidget {
@@ -34,6 +35,16 @@ class _MainNavState extends State<MainNav> {
   ];
 
   late final List<Widget?> _cachedScreens = List.filled(_screenBuilders.length, null);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        AppUpdateService.checkForUpdate(context, isManual: false);
+      }
+    });
+  }
 
   String _getNavLabel(int index) {
     switch (index) {

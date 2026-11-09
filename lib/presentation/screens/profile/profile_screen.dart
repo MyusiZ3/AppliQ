@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/repositories/job_repository.dart';
+import '../../../services/app_update_service.dart';
 import '../../../services/notification_service.dart';
 import '../../../utils/language_manager.dart';
 import '../../../utils/theme_manager.dart';
@@ -803,7 +805,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: Text(
-                                'v1.0.6 • com.arch.appliq',
+                                'v${AppConfig.appVersion} • com.arch.appliq',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -812,6 +814,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       : const Color(0xFF3F3F46),
                                 ),
                               ),
+                            ),
+                            const SizedBox(height: 10),
+                            ValueListenableBuilder<AppUpdateInfo?>(
+                              valueListenable: AppUpdateService.updateInfoNotifier,
+                              builder: (context, updateInfo, _) {
+                                final hasUpdate = updateInfo != null && updateInfo.isUpdateAvailable;
+
+                                if (hasUpdate) {
+                                  return ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      AppUpdateService.triggerDownload(context, updateInfo);
+                                    },
+                                    icon: const Icon(CupertinoIcons.arrow_down_to_line_alt, size: 14),
+                                    label: Text(
+                                      lang == AppLanguage.en
+                                          ? 'Download Update (v${updateInfo.latestVersion})'
+                                          : (lang == AppLanguage.ja
+                                              ? 'アップデートをダウンロード (v${updateInfo.latestVersion})'
+                                              : (lang == AppLanguage.ko
+                                                  ? '업데이트 다운로드 (v${updateInfo.latestVersion})'
+                                                  : 'Unduh Pembaruan (v${updateInfo.latestVersion})')),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
+                                      foregroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                                      elevation: 0,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(100),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.pop(ctx);
+                                    AppUpdateService.checkForUpdate(context, isManual: true);
+                                  },
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: cardBg,
+                                      borderRadius: BorderRadius.circular(100),
+                                      border: Border.all(
+                                        color: borderColor,
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.arrow_2_circlepath,
+                                          size: 13,
+                                          color: isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimary,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          lang == AppLanguage.en
+                                              ? 'Check for Updates'
+                                              : (lang == AppLanguage.ja
+                                                  ? 'アップデートを確認'
+                                                  : (lang == AppLanguage.ko
+                                                      ? '업데이트 확인'
+                                                      : 'Periksa Pembaruan')),
+                                          style: TextStyle(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: isDark
+                                                ? AppColors.textPrimaryDark
+                                                : AppColors.textPrimary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -1353,21 +1443,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 },
                               ),
                               _buildDivider(borderColor),
-                              _buildTile(
-                                icon: CupertinoIcons.info_circle,
-                                iconColor: AppColors.pastelLime,
-                                title: LanguageManager.isEnglish
-                                    ? 'About AppliQ'
-                                    : (LanguageManager.isJapanese
-                                        ? 'AppliQについて'
-                                        : (LanguageManager.isKorean
-                                            ? 'AppliQ 정보'
-                                            : 'Tentang AppliQ')),
-                                isDark: isDark,
-                                showChevron: true,
-                                onTap: () {
-                                  _triggerHaptic();
-                                  _showAboutAppSheet();
+                              ValueListenableBuilder<AppUpdateInfo?>(
+                                valueListenable: AppUpdateService.updateInfoNotifier,
+                                builder: (context, updateInfo, _) {
+                                  final hasUpdate = updateInfo != null && updateInfo.isUpdateAvailable;
+                                  final updateLabel = LanguageManager.isEnglish
+                                      ? 'v${updateInfo?.latestVersion} Available'
+                                      : (LanguageManager.isJapanese
+                                          ? 'v${updateInfo?.latestVersion} 利用可能'
+                                          : (LanguageManager.isKorean
+                                              ? 'v${updateInfo?.latestVersion} 사용 가능'
+                                              : 'v${updateInfo?.latestVersion} Tersedia'));
+
+                                  return _buildTile(
+                                    icon: CupertinoIcons.info_circle,
+                                    iconColor: AppColors.pastelLime,
+                                    title: LanguageManager.isEnglish
+                                        ? 'About AppliQ'
+                                        : (LanguageManager.isJapanese
+                                            ? 'AppliQについて'
+                                            : (LanguageManager.isKorean
+                                                ? 'AppliQ 정보'
+                                                : 'Tentang AppliQ')),
+                                    isDark: isDark,
+                                    subtitle: hasUpdate ? updateLabel : null,
+                                    showChevron: true,
+                                    onTap: () {
+                                      _triggerHaptic();
+                                      _showAboutAppSheet();
+                                    },
+                                  );
                                 },
                               ),
                             ],

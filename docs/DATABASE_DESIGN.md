@@ -318,6 +318,11 @@ CREATE POLICY "Profiles: Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Profiles: Users can delete own profile" ON public.profiles;
+CREATE POLICY "Profiles: Users can delete own profile"
+  ON public.profiles FOR DELETE
+  USING (auth.uid() = id);
+
 -- 5.2 Job Applications Policies
 DROP POLICY IF EXISTS "JobApp: Users can view own applications" ON public.job_applications;
 CREATE POLICY "JobApp: Users can view own applications"
@@ -427,6 +432,28 @@ BEGIN
   RETURN result;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+-- 6.2 Stored Procedure: Atomic Account Deletion from auth.users
+CREATE OR REPLACE FUNCTION public.delete_current_user()
+RETURNS VOID AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Unauthorized: User is not authenticated';
+  END IF;
+
+  -- Hapus data turunan secara eksplisit sebelum menghapus auth.users
+  DELETE FROM public.user_resumes WHERE user_id = v_uid;
+  DELETE FROM public.application_logs WHERE user_id = v_uid;
+  DELETE FROM public.job_applications WHERE user_id = v_uid;
+  DELETE FROM public.profiles WHERE id = v_uid;
+  DELETE FROM auth.users WHERE id = v_uid;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth, pg_temp;
+
+REVOKE ALL ON FUNCTION public.delete_current_user() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.delete_current_user() TO authenticated;
 ```
 
 ---

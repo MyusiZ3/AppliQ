@@ -143,12 +143,19 @@ class SupabaseJobRepository implements JobRepository {
     final user = _supabase.auth.currentUser;
     if (user != null) {
       try {
-        await _supabase.from('user_resumes').delete().eq('user_id', user.id);
-        await _supabase.from('application_logs').delete().eq('user_id', user.id);
-        await _supabase.from('job_applications').delete().eq('user_id', user.id);
-        await _supabase.from('profiles').delete().eq('id', user.id);
+        // Coba panggil RPC SECURITY DEFINER delete_current_user untuk menghapus user dari auth.users
+        // yang secara otomatis cascade ke public.profiles dan data turunan lainnya
+        await _supabase.rpc('delete_current_user');
       } catch (e) {
-        debugPrint('Error during account deletion: $e');
+        debugPrint('delete_current_user RPC not available, using fallback deletion: $e');
+        try {
+          await _supabase.from('user_resumes').delete().eq('user_id', user.id);
+          await _supabase.from('application_logs').delete().eq('user_id', user.id);
+          await _supabase.from('job_applications').delete().eq('user_id', user.id);
+          await _supabase.from('profiles').delete().eq('id', user.id);
+        } catch (innerError) {
+          debugPrint('Error during manual account deletion fallback: $innerError');
+        }
       }
     }
     _cachedApplications = null;
@@ -448,11 +455,15 @@ class SupabaseJobRepository implements JobRepository {
     _inFlightFavoriteToggles.add(id);
 
     try {
-      // 1. Fetch current status directly from Supabase
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      // 1. Fetch current status directly from Supabase with user_id filter (defense-in-depth)
       final currentRes = await _supabase
           .from('job_applications')
           .select('is_favorite')
           .eq('id', id)
+          .eq('user_id', userId)
           .maybeSingle();
 
       final bool currentFav = currentRes?['is_favorite'] == true ||
@@ -460,14 +471,15 @@ class SupabaseJobRepository implements JobRepository {
           currentRes?['is_favorite'] == 1;
       final bool newFavorite = !currentFav;
 
-      // 2. Persist directly to Supabase
+      // 2. Persist directly to Supabase with user_id filter (defense-in-depth)
       await _supabase
           .from('job_applications')
           .update({
             'is_favorite': newFavorite,
             'updated_at': DateTime.now().toIso8601String(),
           })
-          .eq('id', id);
+          .eq('id', id)
+          .eq('user_id', userId);
 
       // 3. Update memory cache if present
       if (_cachedApplications != null) {
@@ -614,6 +626,9 @@ class SupabaseJobRepository implements JobRepository {
 
   @override
   Future<ApplicationLog> updateApplicationLog(ApplicationLog log) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('Pengguna belum terautentikasi');
+
     final updateData = <String, dynamic>{
       'stage_name': log.stageName,
       'scheduled_at': log.scheduledAt?.toIso8601String(),
@@ -627,6 +642,7 @@ class SupabaseJobRepository implements JobRepository {
         .from('application_logs')
         .update(updateData)
         .eq('id', log.id)
+        .eq('user_id', userId)
         .select()
         .maybeSingle();
 

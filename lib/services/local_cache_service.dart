@@ -126,19 +126,31 @@ class LocalCacheService {
   }
 
   // --- FORM DRAFT (Proteksi ketikan formulir) ---
-  static Future<void> saveFormDraft(Map<String, dynamic> data) async {
+  static String _draftKey([String? userId]) =>
+      (userId != null && userId.isNotEmpty) ? '${_keyDraftForm}_$userId' : _keyDraftForm;
+
+  static Future<void> saveFormDraft(Map<String, dynamic> data, {String? userId}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyDraftForm, jsonEncode(data));
+      final key = _draftKey(userId);
+      await prefs.setString(key, jsonEncode(data));
+      // Jika ada userId, hapus juga key unscoped lama agar tidak tersisa data usang
+      if (userId != null && userId.isNotEmpty) {
+        await prefs.remove(_keyDraftForm);
+      }
     } catch (e) {
       if (kDebugMode) debugPrint('LocalCacheService.saveFormDraft error: $e');
     }
   }
 
-  static Future<Map<String, dynamic>?> getFormDraft() async {
+  static Future<Map<String, dynamic>?> getFormDraft({String? userId}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_keyDraftForm);
+      final key = _draftKey(userId);
+      var raw = prefs.getString(key);
+      if ((raw == null || raw.isEmpty) && userId != null && userId.isNotEmpty) {
+        raw = prefs.getString(_keyDraftForm);
+      }
       if (raw == null || raw.isEmpty) return null;
 
       final dynamic decoded = jsonDecode(raw);
@@ -151,9 +163,12 @@ class LocalCacheService {
     return null;
   }
 
-  static Future<void> clearFormDraft() async {
+  static Future<void> clearFormDraft({String? userId}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (userId != null && userId.isNotEmpty) {
+        await prefs.remove('${_keyDraftForm}_$userId');
+      }
       await prefs.remove(_keyDraftForm);
     } catch (e) {
       if (kDebugMode) debugPrint('LocalCacheService.clearFormDraft error: $e');
@@ -169,6 +184,8 @@ class LocalCacheService {
       await prefs.remove('$_prefixLogs$userId');
       await prefs.remove('$_prefixStats$userId');
       await prefs.remove('appliq_cache_milestones_$userId');
+      await prefs.remove('${_keyDraftForm}_$userId');
+      await prefs.remove(_keyDraftForm);
     } catch (e) {
       if (kDebugMode) debugPrint('LocalCacheService.clearUserCache error: $e');
     }

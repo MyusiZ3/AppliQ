@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_strings.dart';
 import '../../data/models/job_application.dart';
 import '../../data/models/application_log.dart';
-import '../../services/notification_service.dart';
 import '../../utils/language_manager.dart';
 import '../../utils/theme_manager.dart';
-import '../../utils/ui_helper.dart';
 import '../widgets/hr_templates_sheet.dart';
 
-class NotificationSheet extends StatefulWidget {
+class NotificationSheet extends StatelessWidget {
   final List<Map<String, dynamic>> upcomingSchedules;
   final List<JobApplication> staleApplications;
 
@@ -39,47 +36,12 @@ class NotificationSheet extends StatefulWidget {
   }
 
   @override
-  State<NotificationSheet> createState() => _NotificationSheetState();
-}
-
-class _NotificationSheetState extends State<NotificationSheet> {
-  bool _isTesting = false;
-
-  Future<void> _testPushNotification() async {
-    setState(() => _isTesting = true);
-    HapticFeedback.mediumImpact();
-
-    try {
-      await NotificationService.instance.requestPermissions();
-      final isEn = LanguageManager.isEnglish;
-      await NotificationService.instance.showInstantNotification(
-        id: 9999,
-        title: isEn ? 'AppliQ • Reminder Notification' : 'AppliQ • Notifikasi Pengingat',
-        body: isEn 
-            ? 'Popup notification system active! Your interview reminders will appear automatically.' 
-            : 'Sistem notifikasi popup aktif! Pengingat jadwal wawancara kamu akan muncul otomatis.',
-      );
-
-      if (mounted) {
-        UIHelper.showSuccessSnackBar(
-          context,
-          AppStrings.testNotificationSentToast,
-        );
-      }
-    } catch (e) {
-      if (mounted) UIHelper.handleError(context, e);
-    } finally {
-      if (mounted) setState(() => _isTesting = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMono = ThemeManager.isMonochrome;
     final isEn = LanguageManager.isEnglish;
     final bottomInset = MediaQuery.of(context).padding.bottom;
-    final totalAlerts = widget.upcomingSchedules.length + widget.staleApplications.length;
+    final totalAlerts = upcomingSchedules.length + staleApplications.length;
 
     return Container(
       constraints: BoxConstraints(
@@ -178,78 +140,6 @@ class _NotificationSheetState extends State<NotificationSheet> {
 
           const SizedBox(height: 16),
 
-          // Test Notification Action Banner
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF222226) : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? const Color(0xFF333338) : const Color(0xFFE2E8F0),
-                width: 0.8,
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppStrings.pushNotificationTestTitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        AppStrings.pushNotificationTestDesc,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _isTesting ? null : _testPushNotification,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isMono
-                        ? (isDark ? Colors.white : const Color(0xFF18181B))
-                        : AppColors.pastelLime,
-                    foregroundColor: isMono
-                        ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                        : AppColors.textOnPastel,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  ),
-                  child: _isTesting
-                      ? SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: isMono
-                                ? (isDark ? const Color(0xFF18181B) : Colors.white)
-                                : AppColors.textOnPastel,
-                          ),
-                        )
-                      : Text(
-                          AppStrings.testNotificationButton,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                        ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
           // Scrollable List of Active Reminders
           Flexible(
             child: ListView(
@@ -257,7 +147,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
               physics: const BouncingScrollPhysics(),
               children: [
                 // Upcoming Interview Schedules
-                if (widget.upcomingSchedules.isNotEmpty) ...[
+                if (upcomingSchedules.isNotEmpty) ...[
                   Text(
                     AppStrings.interviewAgendaSection,
                     style: TextStyle(
@@ -268,7 +158,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...widget.upcomingSchedules.map((item) {
+                  ...upcomingSchedules.map((item) {
                     final app = item['app'] as JobApplication;
                     final log = item['log'] as ApplicationLog;
                     final date = log.scheduledAt!;
@@ -334,7 +224,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                 ],
 
                 // Follow-up Alerts (> 7 Days)
-                if (widget.staleApplications.isNotEmpty) ...[
+                if (staleApplications.isNotEmpty) ...[
                   Text(
                     AppStrings.followUpNeededSection,
                     style: TextStyle(
@@ -345,7 +235,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...widget.staleApplications.map((app) {
+                  ...staleApplications.map((app) {
                     final days = DateTime.now().difference(app.appliedDate).inDays;
 
                     return Container(

@@ -12,10 +12,17 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static const String _channelId = 'appliq_reminders';
-  static const String _channelName = 'Pengingat & Agenda AppliQ';
-  static const String _channelDescription =
-      'Notifikasi pengingat jadwal wawancara, tes kerja, dan follow-up lamaran.';
+  static const String _scheduleChannelId = 'appliq_schedules_v2';
+  static const String _scheduleChannelName = 'Pengingat Jadwal & Interview';
+  static const String _scheduleChannelDescription =
+      'Notifikasi pengingat jadwal wawancara, tes kerja, dan agenda lamaran.';
+
+  static const String _followUpChannelId = 'appliq_followup_v2';
+  static const String _followUpChannelName = 'Pengingat Follow-up Lamaran';
+  static const String _followUpChannelDescription =
+      'Notifikasi pengingat follow-up lamaran (> 7 hari) dengan nada dering khusus.';
+
+  static const String _soundResourceName = 'followup_alert';
 
   bool _isInitialized = false;
   bool? _cachedIsEnabled;
@@ -66,7 +73,7 @@ class NotificationService {
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
-        requestSoundPermission: false,
+        requestSoundPermission: true,
       );
 
       const initSettings = InitializationSettings(
@@ -81,24 +88,44 @@ class NotificationService {
         },
       );
 
-      // Buat Notifikasi Channel Khusus Android dengan Prioritas Tertinggi (Popup Heads-up)
+      // Buat Notifikasi Channel Khusus Android dengan Prioritas Tertinggi & Suara
       if (Platform.isAndroid) {
         final androidImplementation = _notificationsPlugin
             .resolvePlatformSpecificImplementation<
                 AndroidFlutterLocalNotificationsPlugin>();
 
         if (androidImplementation != null) {
-          const androidChannel = AndroidNotificationChannel(
-            _channelId,
-            _channelName,
-            description: _channelDescription,
+          // Bersihkan channel lama jika ada
+          try {
+            await androidImplementation.deleteNotificationChannel('appliq_reminders');
+          } catch (_) {}
+
+          // Channel 1: Pengingat Jadwal Wawancara & Tes Kerja
+          const scheduleChannel = AndroidNotificationChannel(
+            _scheduleChannelId,
+            _scheduleChannelName,
+            description: _scheduleChannelDescription,
             importance: Importance.max,
             playSound: true,
             enableVibration: true,
             showBadge: true,
+            audioAttributesUsage: AudioAttributesUsage.notification,
           );
+          await androidImplementation.createNotificationChannel(scheduleChannel);
 
-          await androidImplementation.createNotificationChannel(androidChannel);
+          // Channel 2: Pengingat Khusus Follow-up dengan Suara Nada Khusus
+          const followUpChannel = AndroidNotificationChannel(
+            _followUpChannelId,
+            _followUpChannelName,
+            description: _followUpChannelDescription,
+            importance: Importance.max,
+            playSound: true,
+            sound: RawResourceAndroidNotificationSound(_soundResourceName),
+            enableVibration: true,
+            showBadge: true,
+            audioAttributesUsage: AudioAttributesUsage.notification,
+          );
+          await androidImplementation.createNotificationChannel(followUpChannel);
         }
       }
 
@@ -165,6 +192,38 @@ class NotificationService {
     return false;
   }
 
+  /// Detail notifikasi khusus Follow-up dengan suara dan getaran unik
+  NotificationDetails _getFollowUpNotificationDetails() {
+    const androidDetails = AndroidNotificationDetails(
+      _followUpChannelId,
+      _followUpChannelName,
+      channelDescription: _followUpChannelDescription,
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@drawable/ic_notification',
+      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      color: Color(0xFF18181B),
+      enableVibration: true,
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound(_soundResourceName),
+      audioAttributesUsage: AudioAttributesUsage.notification,
+      category: AndroidNotificationCategory.reminder,
+      styleInformation: BigTextStyleInformation(''),
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      sound: '$_soundResourceName.wav',
+    );
+
+    return const NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+  }
+
   /// Tampilkan notifikasi instan / uji coba popup
   Future<void> showInstantNotification({
     int id = 1001,
@@ -176,9 +235,9 @@ class NotificationService {
     if (!await isEnabled()) return;
     try {
       const androidDetails = AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
+        _scheduleChannelId,
+        _scheduleChannelName,
+        channelDescription: _scheduleChannelDescription,
         importance: Importance.max,
         priority: Priority.high,
         icon: '@drawable/ic_notification',
@@ -187,6 +246,7 @@ class NotificationService {
         enableVibration: true,
         playSound: true,
         fullScreenIntent: true,
+        audioAttributesUsage: AudioAttributesUsage.notification,
         styleInformation: BigTextStyleInformation(''),
       );
 
@@ -213,6 +273,30 @@ class NotificationService {
     }
   }
 
+  /// Tampilkan notifikasi follow-up langsung dengan suara khusus
+  Future<void> showFollowUpNotification({
+    int id = 8888,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    if (!_isInitialized) return;
+    if (!await isEnabled()) return;
+    try {
+      final notificationDetails = _getFollowUpNotificationDetails();
+
+      await _notificationsPlugin.show(
+        id,
+        title,
+        body,
+        notificationDetails,
+        payload: payload,
+      );
+    } catch (e) {
+      debugPrint('Error showing follow-up notification with sound: $e');
+    }
+  }
+
   /// Jadwalkan Notifikasi Pengingat Interview / Tes Kerja
   Future<void> scheduleInterviewReminder({
     required int id,
@@ -234,9 +318,9 @@ class NotificationService {
       final tzReminderTime = tz.TZDateTime.from(reminderTime, location);
 
       const androidDetails = AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
+        _scheduleChannelId,
+        _scheduleChannelName,
+        channelDescription: _scheduleChannelDescription,
         importance: Importance.max,
         priority: Priority.high,
         icon: '@drawable/ic_notification',
@@ -244,6 +328,7 @@ class NotificationService {
         color: Color(0xFF18181B),
         enableVibration: true,
         playSound: true,
+        audioAttributesUsage: AudioAttributesUsage.notification,
         styleInformation: BigTextStyleInformation(''),
       );
 
@@ -284,7 +369,7 @@ class NotificationService {
     }
   }
 
-  /// Jadwalkan Notifikasi Pengingat Follow-up Lamaran (H+7 setelah melamar)
+  /// Jadwalkan Notifikasi Pengingat Follow-up Lamaran (H+7 setelah melamar) dengan Suara Khusus
   Future<void> scheduleFollowUpReminder({
     required int id,
     required String company,
@@ -299,30 +384,7 @@ class NotificationService {
       final location = _getLocation();
       final tzTargetTime = tz.TZDateTime.from(targetDate, location);
 
-      const androidDetails = AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
-        importance: Importance.max,
-        priority: Priority.high,
-        icon: '@drawable/ic_notification',
-        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-        color: Color(0xFF18181B),
-        enableVibration: true,
-        playSound: true,
-        styleInformation: BigTextStyleInformation(''),
-      );
-
-      const iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      );
-
-      const notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
+      final notificationDetails = _getFollowUpNotificationDetails();
 
       final title = 'Perlu Follow-up • $company';
       final body = 'Lamaran untuk posisi $position sudah 7 hari tanpa kabar. Yuk buka AppliQ untuk template pesan HR!';
@@ -338,7 +400,7 @@ class NotificationService {
             UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (e) {
-      debugPrint('Error scheduling follow-up reminder: $e');
+      debugPrint('Error scheduling follow-up reminder with sound: $e');
     }
   }
 
@@ -365,7 +427,7 @@ class NotificationService {
           ? 'Lamaran di $company sudah > 7 hari tanpa kabar. Yuk kirim pesan follow-up ke HR!'
           : '$count lamaran termasuk di $company sudah > 7 hari tanpa kabar. Buka AppliQ untuk template pesan!';
 
-      await showInstantNotification(
+      await showFollowUpNotification(
         id: 8888,
         title: title,
         body: body,
